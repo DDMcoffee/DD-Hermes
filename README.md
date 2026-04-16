@@ -24,6 +24,8 @@ DD Hermes 是一个 workspace-first 的 Hermes agent harness，用来在 Codex I
 - `.codex/skills/`: `spec-first`、`deep-research`、`coding-harness`、`auto-verify`。
 - `.codex/templates/`: Sprint、Handoff、Exploration、OpenSpec 模板。
 - `hooks/`: 安全门、质量门、类型检查、会话日志、通知适配。
+- `docs/coordination-endpoints.md`: 控制面 endpoint 语义和三层终点映射。
+- `docs/artifact-schemas.md`: contract/handoff/state/closeout 字段级 schema。
 - `docs/context-runtime-state-memory.md`: context / runtime / state / memory 的边界定义。
 - `docs/decision-discussion.md`: 3-explorer 决策讨论协议。
 - `docs/git-management.md`: baseline commit、worktree 生命周期和提交边界。
@@ -37,16 +39,18 @@ DD Hermes 是一个 workspace-first 的 Hermes agent harness，用来在 Codex I
 ## Core Workflows
 
 1. 用 `scripts/sprint-init.sh` 初始化一次 Sprint。
-2. 用 `scripts/worktree-create.sh` 为 Expert 创建隔离 worktree。
+2. 用 `scripts/state-read.sh` / `scripts/state-update.sh` 推进任务级短期状态，而不是污染长期记忆。
 3. 用 `scripts/context-build.sh` 在指挥线程生成任务 context packet，供执行线程消费。
-4. 在实现前运行 `scripts/spec-first.sh` 确认是否必须先写 spec。
-5. 用 `scripts/memory-write.sh` / `scripts/memory-manage.sh` 维护记忆卡和 journal，并用 `scripts/memory-refresh-views.sh` 刷新视图。
-6. 用 `scripts/state-read.sh` / `scripts/state-update.sh` 推进任务级短期状态，而不是污染长期记忆。
-7. 用 `scripts/verify-loop.sh` 驱动技术层与用户层验证。
-8. 用 `scripts/decision-init.sh` 建立 3-explorer 决策讨论包，再由主线程收敛。
-9. 用 `scripts/execution-thread-prompt.sh` 生成切到代码执行线程时的提示包。
-10. 用 `scripts/textbook-record.sh` 记录教材条目，用 `scripts/textbook-summary.sh` 生成日总结草稿。
-11. 用 `tests/smoke.sh` 验证 hooks、workflow、discussion、context/state、memory 和 verify gate 的闭环。
+4. 用 `scripts/dispatch-create.sh` 把 `Supervisor` / `Executor` / `Skeptic` 角色物化为实际 assignment，并为 executor 建立或确认隔离 worktree；若 `Skeptic` 不独立，输出必须显式标记降级。
+5. 用 `scripts/coordination-endpoint.sh` 统一调用 `state.read/state.update/context.build/dispatch.create/closeout.check`，避免在编排层直接分散拼接子脚本。
+6. 在实现前运行 `scripts/spec-first.sh` 确认是否必须先写 spec。
+7. 用 `scripts/memory-write.sh` / `scripts/memory-manage.sh` 维护记忆卡和 journal，并用 `scripts/memory-refresh-views.sh` 刷新视图。
+8. 用 `scripts/verify-loop.sh` 驱动技术层与用户层验证。
+9. 用 `scripts/decision-init.sh` 建立 3-explorer 决策讨论包，再由主线程收敛。
+10. 用 `scripts/execution-thread-prompt.sh` 生成切到代码执行线程时的提示包。
+11. 用 `scripts/textbook-record.sh` 记录教材条目，用 `scripts/textbook-summary.sh` 生成日总结草稿。
+12. 用 `scripts/check-artifact-schemas.sh` 校验 contract/handoff/state/closeout 必填字段。
+13. 用 `tests/smoke.sh` 验证 hooks、workflow、dispatch、endpoint、discussion、context/state、memory 和 verify gate 的闭环。
 
 ## Git Management
 
@@ -55,6 +59,7 @@ DD Hermes 是一个 workspace-first 的 Hermes agent harness，用来在 Codex I
 - 用 `scripts/git-snapshot.sh` 统一输出当前 worktree 的 branch / HEAD / upstream / remote / dirty 真相。
 - 用 `scripts/git-commit-task.sh` 把执行线程的改动收口成 execution commit，并把 commit 锚点写回 task state。
 - 用 `scripts/worktree-create.sh` / `scripts/worktree-remove.sh` 管理 Expert worktree 生命周期。
+- 用 `scripts/dispatch-create.sh` 从 `state.team` 派发多角色 assignment，并为 executor 物化 worktree；同时暴露 `independent_skeptic` / `role_conflicts` 真相，避免“名义三角色、实际同一人兼岗”。
 - 指挥线程只负责基线、分支和验收边界；执行线程只在自己的 worktree 内提交。
 
 ## Thread Model
@@ -68,6 +73,8 @@ DD Hermes 是一个 workspace-first 的 Hermes agent harness，用来在 Codex I
 ## Verification
 
 - `tests/smoke.sh`
+- `scripts/test-artifact-schemas.sh`
+- `scripts/test-coordination-endpoint.sh`
 - `scripts/test-hooks.sh`
 - `scripts/test-memory.sh`
 - `scripts/test-workflow.sh`
@@ -79,6 +86,7 @@ DD Hermes 是一个 workspace-first 的 Hermes agent harness，用来在 Codex I
 - `docs/decision-discussion.md`
 - `docs/git-management.md`
 - `docs/textbook-agent.md`
+- `docs/long-term-agent-division.md`
 - `memory 哲学二.md`
 - `openspec/README.md`
 - `.codex/skills/*/SKILL.md`

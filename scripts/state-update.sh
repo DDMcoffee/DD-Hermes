@@ -21,7 +21,7 @@ fi
 
 input_json=$(read_stdin_json)
 repo=$(shared_repo_root)
-payload=$(INPUT_JSON="$input_json" python3 - <<'PY' "$repo" "$task_id"
+payload=$(INPUT_JSON="$input_json" python3 - <<'PY' "$repo" "$task_id" "$SCRIPT_DIR"
 import json
 import os
 import sys
@@ -30,8 +30,12 @@ from pathlib import Path
 
 repo = Path(sys.argv[1]).resolve()
 task_id = sys.argv[2]
+script_dir = Path(sys.argv[3]).resolve()
+sys.path.insert(0, str(script_dir))
 state_path = repo / "workspace" / "state" / task_id / "state.json"
 events_path = repo / "workspace" / "state" / task_id / "events.jsonl"
+
+from team_governance import default_skeptics, normalize_people, scale_out_analysis
 
 if not state_path.exists():
     print(json.dumps({"error": "state not found", "task_id": task_id}, ensure_ascii=False))
@@ -81,6 +85,11 @@ allowed = {
     "memory_reads",
     "memory_writes",
     "last_selected_memory_ids",
+    "supervisors",
+    "executors",
+    "skeptics",
+    "high_risk_mode",
+    "integration_pressure",
     "note",
 }
 unknown = sorted(set(data) - allowed)
@@ -91,6 +100,24 @@ if unknown:
 timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 state = json.loads(state_path.read_text(encoding="utf-8"))
 before = json.loads(json.dumps(state, ensure_ascii=False))
+
+def load_verification_history(path: Path):
+    if not path.exists():
+        return []
+    history = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if event.get("op") != "state_update":
+            continue
+        changes = event.get("changes", {})
+        if isinstance(changes, dict) and "last_pass" in changes:
+            history.append(bool(changes["last_pass"]))
+    return history
 
 for key in ("status", "mode", "current_focus", "blocked_reason", "active_expert"):
     if key in data:
@@ -189,6 +216,65 @@ if "memory_writes" in data:
 state["memory"].setdefault("last_selected_ids", [])
 if "last_selected_memory_ids" in data:
     state["memory"]["last_selected_ids"] = data["last_selected_memory_ids"]
+
+state.setdefault("team", {})
+team = state["team"] if isinstance(state["team"], dict) else {}
+state["team"] = team
+
+try:
+    owner = state.get("owner", "lead") or "lead"
+    supervisors = normalize_people(team.get("supervisors", []), "team.supervisors", require_list=True) if "supervisors" in team else []
+    if not supervisors:
+        supervisors = [owner]
+    executors = normalize_people(team.get("executors", []), "team.executors", require_list=True) if "executors" in team else []
+    if not executors:
+        executors = normalize_people(state.get("experts", []), "state.experts", require_list=True)
+    skeptics = normalize_people(team.get("skeptics", []), "team.skeptics", require_list=True) if "skeptics" in team else []
+    if not skeptics:
+        skeptics = default_skeptics(owner, supervisors, executors)
+    high_risk_mode = bool(team.get("high_risk_mode", False))
+    integration_pressure = bool(team.get("integration_pressure", False))
+
+    if "supervisors" in data:
+        supervisors = normalize_people(data["supervisors"], "supervisors", require_list=True)
+    if "executors" in data:
+        executors = normalize_people(data["executors"], "executors", require_list=True)
+    if "skeptics" in data:
+        skeptics = normalize_people(data["skeptics"], "skeptics", require_list=True)
+    if "high_risk_mode" in data:
+        high_risk_mode = bool(data["high_risk_mode"])
+    if "integration_pressure" in data:
+        integration_pressure = bool(data["integration_pressure"])
+    if not supervisors:
+        raise ValueError("at least one supervisor is required")
+
+    verification_history = load_verification_history(events_path)
+    if "last_pass" in data:
+        verification_history.append(bool(data["last_pass"]))
+    scale_out = scale_out_analysis(
+        owner=owner,
+        supervisors=supervisors,
+        executors=executors,
+        skeptics=skeptics,
+        high_risk_mode=high_risk_mode,
+        integration_pressure=integration_pressure,
+        verification_history=verification_history,
+    )
+except ValueError as exc:
+    print(json.dumps({"error": str(exc)}, ensure_ascii=False))
+    raise SystemExit(3)
+
+team.update({
+    "supervisor_min_count": 1,
+    "supervisors": supervisors,
+    "executors": executors,
+    "skeptics": skeptics,
+    "high_risk_mode": high_risk_mode,
+    "integration_pressure": integration_pressure,
+    "scale_out_recommended": scale_out["scale_out_recommended"],
+    "scale_out_triggers": scale_out["scale_out_triggers"],
+    "role_integrity": scale_out["role_integrity"],
+})
 
 state.setdefault("notes", [])
 if data.get("note"):

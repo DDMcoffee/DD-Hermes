@@ -30,7 +30,7 @@ if [[ -z "$task_id" ]]; then
 fi
 
 repo=$(shared_repo_root)
-payload=$(python3 - <<'PY' "$repo" "$task_id" "$owner" "$experts" "$status" "$mode" "$current_focus"
+payload=$(python3 - <<'PY' "$repo" "$task_id" "$owner" "$experts" "$status" "$mode" "$current_focus" "$SCRIPT_DIR"
 import json
 import sys
 from datetime import datetime, timezone
@@ -43,7 +43,11 @@ experts_csv = sys.argv[4]
 status = sys.argv[5]
 mode = sys.argv[6]
 current_focus = sys.argv[7]
+script_dir = Path(sys.argv[8]).resolve()
+sys.path.insert(0, str(script_dir))
 timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+from team_governance import default_skeptics, normalize_people, scale_out_analysis
 
 state_dir = repo / "workspace" / "state" / task_id
 state_dir.mkdir(parents=True, exist_ok=True)
@@ -89,15 +93,14 @@ def parse_frontmatter(path: Path):
             current = key
     return data
 
-
 contract_frontmatter = parse_frontmatter(contract_path)
 memory_reads = contract_frontmatter.get("memory_reads", [])
 memory_writes = contract_frontmatter.get("memory_writes", [])
-experts = [item.strip() for item in experts_csv.split(",") if item.strip()]
+experts = normalize_people(experts_csv.split(","))
 if not experts:
-    experts = contract_frontmatter.get("experts", [])
+    experts = normalize_people(contract_frontmatter.get("experts", []))
 if not experts:
-    experts = [path.split("-to-")[-1].removesuffix(".md") for path in handoff_paths]
+    experts = normalize_people([path.split("-to-")[-1].removesuffix(".md") for path in handoff_paths])
 
 created = not state_path.exists()
 if state_path.exists():
@@ -166,12 +169,30 @@ elif openspec["task_path"]:
 elif openspec["design_path"]:
     openspec["stage"] = "design"
 
+resolved_owner = contract_frontmatter.get("owner") or state.get("owner") or owner
+existing_team = state.get("team", {}) if isinstance(state.get("team"), dict) else {}
+supervisors = normalize_people(existing_team.get("supervisors", [])) or normalize_people([resolved_owner or "lead"])
+executors = normalize_people(existing_team.get("executors", [])) or experts
+skeptics = normalize_people(existing_team.get("skeptics", []))
+if not skeptics:
+    skeptics = default_skeptics(resolved_owner, supervisors, executors)
+high_risk_mode = bool(existing_team.get("high_risk_mode", False))
+integration_pressure = bool(existing_team.get("integration_pressure", False))
+scale_out = scale_out_analysis(
+    owner=resolved_owner,
+    supervisors=supervisors,
+    executors=executors,
+    skeptics=skeptics,
+    high_risk_mode=high_risk_mode,
+    integration_pressure=integration_pressure,
+)
+
 state.update({
     "task_id": task_id,
     "status": state.get("status", status) if not created else status,
     "mode": state.get("mode", mode) if not created else mode,
     "current_focus": state.get("current_focus", current_focus) if not created else current_focus,
-    "owner": contract_frontmatter.get("owner") or state.get("owner") or owner,
+    "owner": resolved_owner,
     "experts": experts,
     "active_expert": state.get("active_expert", ""),
     "blocked_reason": state.get("blocked_reason", ""),
@@ -181,6 +202,17 @@ state.update({
     "openspec": {
         **state.get("openspec", {}),
         **openspec,
+    },
+    "team": {
+        "supervisor_min_count": 1,
+        "supervisors": supervisors,
+        "executors": executors,
+        "skeptics": skeptics,
+        "high_risk_mode": high_risk_mode,
+        "integration_pressure": integration_pressure,
+        "scale_out_recommended": scale_out["scale_out_recommended"],
+        "scale_out_triggers": scale_out["scale_out_triggers"],
+        "role_integrity": scale_out["role_integrity"],
     },
     "updated_at": timestamp,
 })

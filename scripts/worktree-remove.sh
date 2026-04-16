@@ -20,7 +20,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-repo=$(repo_root)
+repo=$(shared_repo_root)
 if [[ -z "$worktree" ]]; then
   if [[ -z "$task_id" || -z "$expert" ]]; then
     json_out '{"error":"task_id and expert are required when worktree is omitted"}'

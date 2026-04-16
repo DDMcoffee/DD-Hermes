@@ -11,6 +11,7 @@
 - `state`
   - 当前任务的短期控制面。
   - 例子：当前模式、阻塞原因、最近一次 verification、最新 context packet、最近一次 runtime snapshot。
+  - 还应包含角色治理真相，例如 `team.role_integrity`、`independent_skeptic` 是否成立、是否需要扩容。
   - 落盘位置：`workspace/state/<task_id>/state.json` 和 `events.jsonl`
   - 特征：可变、任务级、生命周期短于 memory。
 - `context`
@@ -30,6 +31,7 @@
   - runtime 可以更新 state 的观测字段，例如最近 runtime snapshot 路径。
 - `state -> context`
   - state 决定当前任务该向执行线程暴露哪些控制信息。
+  - 角色降级不能只藏在 state 内；如果 `Skeptic` 不独立，context 也必须暴露该事实。
 - `memory -> context`
   - memory 通过检索进入 context，但不会被 context 自动改写。
 - `policy != memory mutation`

@@ -24,12 +24,13 @@ if [[ -z "$task_id" || -z "$experts" ]]; then
 fi
 
 repo=$(shared_repo_root)
-mkdir -p "$repo/workspace/contracts" "$repo/workspace/handoffs" "$repo/workspace/exploration" "$repo/workspace/state" "$repo/openspec/proposals" "$repo/openspec/designs" "$repo/openspec/tasks" "$repo/openspec/archive"
+mkdir -p "$repo/workspace/contracts" "$repo/workspace/handoffs" "$repo/workspace/exploration" "$repo/workspace/closeouts" "$repo/workspace/state" "$repo/openspec/proposals" "$repo/openspec/designs" "$repo/openspec/tasks" "$repo/openspec/archive"
 contract_path="$repo/workspace/contracts/$task_id.md"
 exploration_path="$repo/workspace/exploration/exploration-lead-$task_id.md"
 proposal_path="$repo/openspec/proposals/$task_id.md"
 contract_template="$repo/.codex/templates/SPRINT-CONTRACT.md"
 handoff_template="$repo/.codex/templates/HANDOFF-LEAD.md"
+closeout_template="$repo/.codex/templates/EXECUTION-CLOSEOUT.md"
 exploration_template="$repo/.codex/templates/EXPLORATION-LOG.md"
 proposal_template="$repo/.codex/templates/OPENSPEC-PROPOSAL.md"
 
@@ -43,6 +44,7 @@ handoff_json=$(python3 - \
   "$proposal_path" \
   "$contract_template" \
   "$handoff_template" \
+  "$closeout_template" \
   "$exploration_template" \
   "$proposal_template" <<'PY'
 import json
@@ -58,8 +60,9 @@ exploration_path = Path(sys.argv[6])
 proposal_path = Path(sys.argv[7])
 contract_template = Path(sys.argv[8])
 handoff_template = Path(sys.argv[9])
-exploration_template = Path(sys.argv[10])
-proposal_template = Path(sys.argv[11])
+closeout_template = Path(sys.argv[10])
+exploration_template = Path(sys.argv[11])
+proposal_template = Path(sys.argv[12])
 
 expert_list = [item.strip() for item in experts_csv.split(",") if item.strip()]
 
@@ -147,6 +150,8 @@ contract_path.write_text(contract, encoding="utf-8")
 
 handoff_paths = []
 handoff_tpl = load_template(handoff_template)
+closeout_paths = []
+closeout_tpl = load_template(closeout_template)
 for expert in expert_list:
     handoff_path = repo / "workspace" / "handoffs" / f"{task_id}-lead-to-{expert}.md"
     handoff = render_doc(
@@ -198,6 +203,53 @@ for expert in expert_list:
     )
     handoff_path.write_text(handoff, encoding="utf-8")
     handoff_paths.append(str(handoff_path))
+
+    closeout_path = repo / "workspace" / "closeouts" / f"{task_id}-{expert}.md"
+    closeout = render_doc(
+        closeout_tpl,
+        frontmatter={
+            "task_id": task_id,
+            "from": expert,
+            "to": owner,
+            "scope": f"{task_id} execution slice closeout",
+            "execution_commit": "",
+            "state_path": f"workspace/state/{task_id}/state.json",
+            "context_path": f"workspace/state/{task_id}/context.json",
+            "runtime_path": f"workspace/state/{task_id}/runtime.json",
+            "verified_steps": [f"./scripts/test-workflow.sh --task-id {task_id}"],
+            "verified_files": [f"workspace/contracts/{task_id}.md"],
+            "open_risks": ["None at bootstrap time."],
+            "next_actions": ["Update with execution evidence before handing back to lead."],
+        },
+        sections={
+            "Context": f"Execution closeout placeholder for {expert} on task {task_id}.",
+            "Required Fields": [
+                "- `task_id`",
+                "- `from`",
+                "- `to`",
+                "- `scope`",
+                "- `execution_commit`",
+                "- `state_path`",
+                "- `context_path`",
+                "- `runtime_path`",
+                "- `verified_steps`",
+                "- `verified_files`",
+                "- `open_risks`",
+                "- `next_actions`",
+            ],
+            "Completion": [
+                "- Replace this placeholder with completed outcomes for the execution slice.",
+            ],
+            "Verification": [
+                "- Add exact commands and pass/fail evidence before handoff return.",
+            ],
+            "Open Questions": [
+                "- List unresolved integration questions for lead review.",
+            ],
+        },
+    )
+    closeout_path.write_text(closeout, encoding="utf-8")
+    closeout_paths.append(str(closeout_path))
 
 exploration = render_doc(
     load_template(exploration_template),
@@ -255,7 +307,10 @@ proposal = render_doc(
 )
 proposal_path.write_text(proposal, encoding="utf-8")
 
-print(json.dumps(handoff_paths, ensure_ascii=False))
+print(json.dumps({
+    "handoff_paths": handoff_paths,
+    "closeout_paths": closeout_paths,
+}, ensure_ascii=False))
 PY
 )
 
@@ -265,9 +320,11 @@ import json
 import sys
 
 contract_path, exploration_path, proposal_path, handoff_json, state_json = sys.argv[1:]
+handoff_data = json.loads(handoff_json)
 print(json.dumps({
     "contract_path": contract_path,
-    "handoff_paths": json.loads(handoff_json),
+    "handoff_paths": handoff_data["handoff_paths"],
+    "closeout_paths": handoff_data["closeout_paths"],
     "exploration_path": exploration_path,
     "openspec_path": proposal_path,
     "state_path": json.loads(state_json)["state_path"],

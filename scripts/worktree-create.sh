@@ -25,7 +25,7 @@ if [[ -z "$task_id" || -z "$expert" ]]; then
   exit 3
 fi
 
-repo=$(repo_root)
+repo=$(shared_repo_root)
 if ! git -C "$repo" rev-parse --verify HEAD >/dev/null 2>&1; then
   json_out '{"error":"repository needs at least one commit before git worktree can be created","blocked":true}'
   exit 2

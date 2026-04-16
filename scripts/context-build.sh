@@ -40,7 +40,7 @@ fi
 runtime_json=$("$SCRIPT_DIR/runtime-report.sh" --task-id "$task_id" --worktree "$worktree" --agent-role "$agent_role")
 state_json=$("$SCRIPT_DIR/state-read.sh" --task-id "$task_id")
 
-payload=$(RUNTIME_JSON="$runtime_json" STATE_JSON="$state_json" python3 - <<'PY' "$repo" "$task_id" "$agent_role" "$memory_limit"
+payload=$(RUNTIME_JSON="$runtime_json" STATE_JSON="$state_json" python3 - <<'PY' "$repo" "$task_id" "$agent_role" "$memory_limit" "$SCRIPT_DIR"
 import json
 import os
 import subprocess
@@ -52,6 +52,8 @@ repo = Path(sys.argv[1]).resolve()
 task_id = sys.argv[2]
 agent_role = sys.argv[3]
 memory_limit = sys.argv[4]
+script_dir = Path(sys.argv[5]).resolve()
+sys.path.insert(0, str(script_dir))
 runtime = json.loads(os.environ["RUNTIME_JSON"])
 state_wrapper = json.loads(os.environ["STATE_JSON"])
 state = state_wrapper["state"]
@@ -61,6 +63,8 @@ state_path = state_dir / "state.json"
 events_path = state_dir / "events.jsonl"
 runtime_path = state_dir / "runtime.json"
 context_path = state_dir / "context.json"
+
+from team_governance import merge_triggers, scale_out_analysis
 
 
 def read_doc(path: Path):
@@ -144,8 +148,29 @@ packet = {
         "resume_checkpoint": state.get("lease", {}).get("resume_checkpoint", ""),
         "discussion_policy": state.get("discussion", {}).get("policy", ""),
         "decision_id": state.get("discussion", {}).get("decision_id", ""),
+        "supervisor_count": len(state.get("team", {}).get("supervisors", [])) if isinstance(state.get("team"), dict) else 0,
+        "independent_skeptic": False,
+        "role_integrity_degraded": False,
+        "role_conflicts": [],
+        "scale_out_recommended": False,
+        "scale_out_triggers": [],
     },
 }
+
+team = state.get("team", {}) if isinstance(state.get("team"), dict) else {}
+role_analysis = scale_out_analysis(
+    owner=state.get("owner", "lead"),
+    supervisors=team.get("supervisors", []),
+    executors=team.get("executors", []),
+    skeptics=team.get("skeptics", []),
+    high_risk_mode=bool(team.get("high_risk_mode", False)),
+    integration_pressure=bool(team.get("integration_pressure", False)),
+)
+packet["context_summary"]["independent_skeptic"] = role_analysis["role_integrity"]["independent_skeptic"]
+packet["context_summary"]["role_integrity_degraded"] = role_analysis["role_integrity"]["degraded"]
+packet["context_summary"]["role_conflicts"] = role_analysis["role_integrity"]["role_conflicts"]
+packet["context_summary"]["scale_out_triggers"] = merge_triggers(team.get("scale_out_triggers", []), role_analysis["scale_out_triggers"])
+packet["context_summary"]["scale_out_recommended"] = bool(team.get("scale_out_recommended", False)) or bool(packet["context_summary"]["scale_out_triggers"])
 context_path.write_text(json.dumps(packet, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 state.setdefault("runtime", {})
