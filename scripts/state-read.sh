@@ -41,6 +41,11 @@ if events_path.exists():
 
 runtime = state.get("runtime", {})
 verification = state.get("verification", {})
+team = state.get("team", {}) if isinstance(state.get("team"), dict) else {}
+supervisors = [item for item in team.get("supervisors", []) if isinstance(item, str) and item.strip()]
+executors = [item for item in team.get("executors", []) if isinstance(item, str) and item.strip()]
+skeptics = [item for item in team.get("skeptics", []) if isinstance(item, str) and item.strip()]
+scale_out_triggers = [item for item in team.get("scale_out_triggers", []) if isinstance(item, str) and item.strip()]
 summary = {
     "blocked": bool(state.get("blocked_reason")) or state.get("status") == "blocked",
     "paused": state.get("lease", {}).get("status") == "paused",
@@ -55,6 +60,12 @@ summary = {
     "verification_complete": bool(verification.get("last_pass")) and bool(verification.get("verified_steps")),
     "has_context": bool(runtime.get("last_context_path")) and Path(runtime.get("last_context_path", "")).exists(),
     "has_runtime_report": bool(runtime.get("last_runtime_report_path")) and Path(runtime.get("last_runtime_report_path", "")).exists(),
+    "has_supervisor": len(supervisors) >= 1,
+    "supervisor_count": len(supervisors),
+    "executor_count": len(executors),
+    "skeptic_count": len(skeptics),
+    "scale_out_recommended": bool(team.get("scale_out_recommended")),
+    "scale_out_triggers": scale_out_triggers,
     "event_count": event_count,
 }
 

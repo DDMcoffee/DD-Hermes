@@ -90,14 +90,28 @@ def parse_frontmatter(path: Path):
     return data
 
 
+def normalize_people(items):
+    seen = set()
+    result = []
+    for item in items or []:
+        if not isinstance(item, str):
+            continue
+        value = item.strip()
+        if not value or value in seen:
+            continue
+        seen.add(value)
+        result.append(value)
+    return result
+
+
 contract_frontmatter = parse_frontmatter(contract_path)
 memory_reads = contract_frontmatter.get("memory_reads", [])
 memory_writes = contract_frontmatter.get("memory_writes", [])
-experts = [item.strip() for item in experts_csv.split(",") if item.strip()]
+experts = normalize_people(experts_csv.split(","))
 if not experts:
-    experts = contract_frontmatter.get("experts", [])
+    experts = normalize_people(contract_frontmatter.get("experts", []))
 if not experts:
-    experts = [path.split("-to-")[-1].removesuffix(".md") for path in handoff_paths]
+    experts = normalize_people([path.split("-to-")[-1].removesuffix(".md") for path in handoff_paths])
 
 created = not state_path.exists()
 if state_path.exists():
@@ -153,12 +167,32 @@ elif openspec["task_path"]:
 elif openspec["design_path"]:
     openspec["stage"] = "design"
 
+resolved_owner = contract_frontmatter.get("owner") or state.get("owner") or owner
+existing_team = state.get("team", {}) if isinstance(state.get("team"), dict) else {}
+supervisors = normalize_people(existing_team.get("supervisors", [])) or normalize_people([resolved_owner or "lead"])
+executors = normalize_people(existing_team.get("executors", [])) or experts
+skeptics = normalize_people(existing_team.get("skeptics", []))
+if not skeptics:
+    fallback_skeptics = experts[1:] if len(experts) > 1 else experts[:1]
+    skeptics = normalize_people(fallback_skeptics)
+high_risk_mode = bool(existing_team.get("high_risk_mode", False))
+integration_pressure = bool(existing_team.get("integration_pressure", False))
+scale_out_triggers = []
+if len(executors) >= 2:
+    scale_out_triggers.append("parallel_execution_slices")
+if high_risk_mode:
+    scale_out_triggers.append("high_risk_mode")
+if integration_pressure:
+    scale_out_triggers.append("integration_pressure")
+if resolved_owner and resolved_owner in executors and len(supervisors) == 1 and supervisors[0] == resolved_owner:
+    scale_out_triggers.append("lead_role_conflict")
+
 state.update({
     "task_id": task_id,
     "status": state.get("status", status) if not created else status,
     "mode": state.get("mode", mode) if not created else mode,
     "current_focus": state.get("current_focus", current_focus) if not created else current_focus,
-    "owner": contract_frontmatter.get("owner") or state.get("owner") or owner,
+    "owner": resolved_owner,
     "experts": experts,
     "active_expert": state.get("active_expert", ""),
     "blocked_reason": state.get("blocked_reason", ""),
@@ -168,6 +202,16 @@ state.update({
     "openspec": {
         **state.get("openspec", {}),
         **openspec,
+    },
+    "team": {
+        "supervisor_min_count": 1,
+        "supervisors": supervisors,
+        "executors": executors,
+        "skeptics": skeptics,
+        "high_risk_mode": high_risk_mode,
+        "integration_pressure": integration_pressure,
+        "scale_out_recommended": bool(scale_out_triggers),
+        "scale_out_triggers": scale_out_triggers,
     },
     "updated_at": timestamp,
 })

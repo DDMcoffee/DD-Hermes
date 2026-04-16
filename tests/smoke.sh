@@ -255,19 +255,27 @@ run_context_state() {
 
   local state
   state=$("$ROOT/scripts/state-read.sh" --task-id smoke-sprint)
-  assert_json_field "$state" "data['summary']['has_context'] is True and data['summary']['has_runtime_report'] is True"
+  assert_json_field "$state" "data['summary']['has_context'] is True and data['summary']['has_runtime_report'] is True and data['summary']['has_supervisor'] is True and data['summary']['supervisor_count'] >= 1"
 
   local state_from_worktree
   state_from_worktree=$(cd "$ROOT/.worktrees/smoke-sprint-expert-a" && ./scripts/state-read.sh --task-id smoke-sprint)
   assert_json_field "$state_from_worktree" "data['summary']['has_context'] is True and data['summary']['active_expert'] == ''"
 
   "$ROOT/scripts/state-update.sh" --task-id smoke-sprint <<'EOF' >/dev/null
-{"mode":"execution","current_focus":"implement hooks","active_expert":"expert-a","goal":"drive smoke sprint to verification","lease_status":"running","run_duration_hours":5,"note":"execution thread accepted handoff"}
+{"mode":"execution","current_focus":"implement hooks","active_expert":"expert-a","goal":"drive smoke sprint to verification","lease_status":"running","run_duration_hours":5,"supervisors":["lead"],"executors":["expert-a","expert-b"],"skeptics":["expert-c"],"integration_pressure":true,"note":"execution thread accepted handoff"}
 EOF
 
   local updated
   updated=$("$ROOT/scripts/state-read.sh" --task-id smoke-sprint)
-  assert_json_field "$updated" "data['state']['mode'] == 'execution' and data['state']['active_expert'] == 'expert-a' and data['state']['lease']['status'] == 'running'"
+  assert_json_field "$updated" "data['state']['mode'] == 'execution' and data['state']['active_expert'] == 'expert-a' and data['state']['lease']['status'] == 'running' and data['summary']['scale_out_recommended'] is True and 'parallel_execution_slices' in data['summary']['scale_out_triggers'] and 'integration_pressure' in data['summary']['scale_out_triggers']"
+
+  set +e
+  "$ROOT/scripts/state-update.sh" --task-id smoke-sprint <<'EOF' >/dev/null
+{"supervisors":[]}
+EOF
+  local invalid_role_status=$?
+  set -e
+  [[ $invalid_role_status -eq 3 ]]
 
   (
     cd "$ROOT/.worktrees/smoke-sprint-expert-a" && ./scripts/state-update.sh --task-id smoke-sprint <<'EOF' >/dev/null
@@ -301,6 +309,7 @@ print(json.dumps(json.loads(Path(sys.argv[1]).read_text(encoding='utf-8')), ensu
 PY
 )
   assert_json_field "$paused_packet" "data['continuation']['lease']['status'] == 'paused' and data['continuation']['lease']['resume_checkpoint'] == 'expert-a:after-hooks'"
+  assert_json_field "$paused_packet" "data['context_summary']['supervisor_count'] >= 1 and data['context_summary']['scale_out_recommended'] is True and 'parallel_execution_slices' in data['context_summary']['scale_out_triggers']"
 
   "$ROOT/scripts/state-update.sh" --task-id smoke-sprint <<'EOF' >/dev/null
 {"lease_status":"running","pause_reason":"","resume_after":"","current_focus":"resume from checkpoint","note":"resume execution"}
@@ -387,7 +396,7 @@ for key in ("event_id", "memory_id", "op", "actor", "timestamp", "reason", "sour
         fail(f"memory journal event missing key: {key}")
 
 state = json.loads((root / "workspace" / "state" / "smoke-sprint" / "state.json").read_text(encoding="utf-8"))
-for key in ("task_id", "status", "mode", "owner", "experts", "openspec", "runtime", "lease", "git", "verification", "memory", "updated_at"):
+for key in ("task_id", "status", "mode", "owner", "experts", "openspec", "runtime", "lease", "git", "verification", "memory", "team", "updated_at"):
     if key not in state:
         fail(f"state missing key: {key}")
 
@@ -395,6 +404,9 @@ context = json.loads((root / "workspace" / "state" / "smoke-sprint" / "context.j
 for key in ("task_id", "runtime", "state", "memory", "continuation", "documents", "context_summary"):
     if key not in context:
         fail(f"context missing key: {key}")
+for key in ("supervisor_count", "scale_out_recommended", "scale_out_triggers"):
+    if key not in context["context_summary"]:
+        fail(f"context_summary missing key: {key}")
 
 
 def run_json(command, cwd=None):
@@ -426,7 +438,7 @@ if context_build["memory_count"] < 1:
 
 state_read = run_json([str(root / "scripts" / "state-read.sh"), "--task-id", "smoke-sprint"])
 require_keys(state_read, ("state", "summary"))
-require_keys(state_read["summary"], ("verification_complete", "has_context", "has_runtime_report", "event_count"))
+require_keys(state_read["summary"], ("verification_complete", "has_context", "has_runtime_report", "has_supervisor", "supervisor_count", "scale_out_recommended", "scale_out_triggers", "event_count"))
 
 worktree_status = run_json([str(root / "scripts" / "worktree-status.sh"), "--task-id", "smoke-sprint"])
 require_keys(worktree_status, ("clean", "dirty_files", "linked_contract", "linked_handoff"))

@@ -72,6 +72,11 @@ allowed = {
     "memory_reads",
     "memory_writes",
     "last_selected_memory_ids",
+    "supervisors",
+    "executors",
+    "skeptics",
+    "high_risk_mode",
+    "integration_pressure",
     "note",
 }
 unknown = sorted(set(data) - allowed)
@@ -82,6 +87,57 @@ if unknown:
 timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 state = json.loads(state_path.read_text(encoding="utf-8"))
 before = json.loads(json.dumps(state, ensure_ascii=False))
+
+
+def normalize_people(items, field_name):
+    if not isinstance(items, list):
+        raise ValueError(f"{field_name} must be a list of agent ids")
+    seen = set()
+    result = []
+    for item in items:
+        if not isinstance(item, str):
+            raise ValueError(f"{field_name} must contain strings")
+        value = item.strip()
+        if not value or value in seen:
+            continue
+        seen.add(value)
+        result.append(value)
+    return result
+
+
+def load_verification_history(path: Path):
+    if not path.exists():
+        return []
+    history = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if event.get("op") != "state_update":
+            continue
+        changes = event.get("changes", {})
+        if isinstance(changes, dict) and "last_pass" in changes:
+            history.append(bool(changes["last_pass"]))
+    return history
+
+
+def compute_scale_out(owner, supervisors, executors, high_risk_mode, integration_pressure, verification_history):
+    triggers = []
+    recent = verification_history[-2:]
+    if len(executors) >= 2:
+        triggers.append("parallel_execution_slices")
+    if len(recent) == 2 and not any(recent):
+        triggers.append("repeated_verification_failures")
+    if high_risk_mode:
+        triggers.append("high_risk_mode")
+    if integration_pressure:
+        triggers.append("integration_pressure")
+    if owner and owner in executors and len(supervisors) == 1 and supervisors[0] == owner:
+        triggers.append("lead_role_conflict")
+    return triggers
 
 for key in ("status", "mode", "current_focus", "blocked_reason", "active_expert"):
     if key in data:
@@ -158,6 +214,64 @@ if "memory_writes" in data:
 state["memory"].setdefault("last_selected_ids", [])
 if "last_selected_memory_ids" in data:
     state["memory"]["last_selected_ids"] = data["last_selected_memory_ids"]
+
+state.setdefault("team", {})
+team = state["team"] if isinstance(state["team"], dict) else {}
+state["team"] = team
+
+try:
+    owner = state.get("owner", "lead") or "lead"
+    supervisors = normalize_people(team.get("supervisors", []), "team.supervisors") if "supervisors" in team else []
+    if not supervisors:
+        supervisors = [owner]
+    executors = normalize_people(team.get("executors", []), "team.executors") if "executors" in team else []
+    if not executors:
+        executors = normalize_people(state.get("experts", []), "state.experts")
+    skeptics = normalize_people(team.get("skeptics", []), "team.skeptics") if "skeptics" in team else []
+    if not skeptics:
+        fallback_skeptics = executors[1:] if len(executors) > 1 else executors[:1]
+        skeptics = normalize_people(fallback_skeptics, "team.skeptics")
+    high_risk_mode = bool(team.get("high_risk_mode", False))
+    integration_pressure = bool(team.get("integration_pressure", False))
+
+    if "supervisors" in data:
+        supervisors = normalize_people(data["supervisors"], "supervisors")
+    if "executors" in data:
+        executors = normalize_people(data["executors"], "executors")
+    if "skeptics" in data:
+        skeptics = normalize_people(data["skeptics"], "skeptics")
+    if "high_risk_mode" in data:
+        high_risk_mode = bool(data["high_risk_mode"])
+    if "integration_pressure" in data:
+        integration_pressure = bool(data["integration_pressure"])
+    if not supervisors:
+        raise ValueError("at least one supervisor is required")
+
+    verification_history = load_verification_history(events_path)
+    if "last_pass" in data:
+        verification_history.append(bool(data["last_pass"]))
+    scale_out_triggers = compute_scale_out(
+        owner=owner,
+        supervisors=supervisors,
+        executors=executors,
+        high_risk_mode=high_risk_mode,
+        integration_pressure=integration_pressure,
+        verification_history=verification_history,
+    )
+except ValueError as exc:
+    print(json.dumps({"error": str(exc)}, ensure_ascii=False))
+    raise SystemExit(3)
+
+team.update({
+    "supervisor_min_count": 1,
+    "supervisors": supervisors,
+    "executors": executors,
+    "skeptics": skeptics,
+    "high_risk_mode": high_risk_mode,
+    "integration_pressure": integration_pressure,
+    "scale_out_recommended": bool(scale_out_triggers),
+    "scale_out_triggers": scale_out_triggers,
+})
 
 state.setdefault("notes", [])
 if data.get("note"):

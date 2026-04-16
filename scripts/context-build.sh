@@ -140,6 +140,9 @@ packet = {
         "has_task": bool(openspec["task"]),
         "lease_status": state.get("lease", {}).get("status", ""),
         "resume_checkpoint": state.get("lease", {}).get("resume_checkpoint", ""),
+        "supervisor_count": len(state.get("team", {}).get("supervisors", [])) if isinstance(state.get("team"), dict) else 0,
+        "scale_out_recommended": bool(state.get("team", {}).get("scale_out_recommended", False)) if isinstance(state.get("team"), dict) else False,
+        "scale_out_triggers": state.get("team", {}).get("scale_out_triggers", []) if isinstance(state.get("team"), dict) else [],
     },
 }
 context_path.write_text(json.dumps(packet, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
