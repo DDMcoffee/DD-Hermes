@@ -29,35 +29,10 @@ repo = Path(sys.argv[1]).resolve()
 task_id = sys.argv[2]
 errors = []
 checked = []
+script_dir = (repo / "scripts").resolve()
+sys.path.insert(0, str(script_dir))
 
-
-def parse_frontmatter(text):
-    if not text.startswith("---\n"):
-        return {}
-    try:
-        _, frontmatter, _ = text.split("---\n", 2)
-    except ValueError:
-        return {}
-    data = {}
-    current = None
-    for line in frontmatter.splitlines():
-        if not line.strip():
-            continue
-        if line.startswith("  - ") and current:
-            data.setdefault(current, []).append(line[4:].strip())
-            continue
-        if ":" not in line:
-            continue
-        key, value = line.split(":", 1)
-        key = key.strip()
-        value = value.strip()
-        if value:
-            data[key] = value.strip('"')
-            current = None
-        else:
-            data[key] = []
-            current = key
-    return data
+from artifact_semantics import closeout_semantic_analysis, parse_frontmatter
 
 
 def check_markdown(path, required_frontmatter, required_sections, label):
@@ -114,7 +89,9 @@ for handoff_path in handoff_paths:
 closeout_paths = sorted((repo / "workspace" / "closeouts").glob(f"{task_id}-*.md"))
 if not closeout_paths:
     errors.append(f"closeout missing for task {task_id}")
+closeout_semantics = []
 for closeout_path in closeout_paths:
+    closeout_text = closeout_path.read_text(encoding="utf-8") if closeout_path.exists() else ""
     closeout_frontmatter = check_markdown(
         closeout_path,
         required_frontmatter=(
@@ -138,10 +115,15 @@ for closeout_path in closeout_paths:
         missing = [key for key in ("schema_version", "quality_review_status", "quality_findings_summary") if key not in closeout_frontmatter]
         if missing:
             errors.append(f"closeout missing v2 frontmatter keys {missing}: {closeout_path}")
-        if "## Quality Review" not in closeout_path.read_text(encoding="utf-8"):
+        if "## Quality Review" not in closeout_text:
             errors.append(f"closeout missing section '## Quality Review': {closeout_path}")
+    closeout_semantics.append({
+        "path": str(closeout_path),
+        **closeout_semantic_analysis(closeout_frontmatter, closeout_text),
+    })
 
 state_path = repo / "workspace" / "state" / task_id / "state.json"
+state = None
 if not state_path.exists():
     errors.append(f"state missing: {state_path}")
 else:
@@ -156,7 +138,7 @@ else:
     if missing_team:
         errors.append(f"state.team missing keys {missing_team}: {state_path}")
     integrity = team.get("role_integrity", {}) if isinstance(team.get("role_integrity"), dict) else {}
-    required_integrity_keys = ("independent_skeptic", "degraded", "role_conflicts", "role_overlap")
+    required_integrity_keys = ("independent_skeptic", "degraded", "degraded_ack_by", "degraded_ack_at", "role_conflicts", "role_overlap")
     missing_integrity = [key for key in required_integrity_keys if key not in integrity]
     if missing_integrity:
         errors.append(f"state.team.role_integrity missing keys {missing_integrity}: {state_path}")
@@ -182,6 +164,23 @@ else:
             errors.append(f"state.quality missing keys {missing_quality}: {state_path}")
     checked.append(str(state_path))
 
+semantic_errors = []
+if state is not None:
+    closeout_semantics = [
+        {
+            "path": item["path"],
+            **closeout_semantic_analysis(
+                parse_frontmatter(Path(item["path"]).read_text(encoding="utf-8")),
+                Path(item["path"]).read_text(encoding="utf-8"),
+                state,
+            ),
+        }
+        for item in closeout_semantics
+    ]
+for item in closeout_semantics:
+    for reason in item.get("reasons", []):
+        semantic_errors.append(f"{reason}: {item['path']}")
+
 result = {
     "task_id": task_id,
     "checked": checked,
@@ -193,6 +192,10 @@ result = {
     },
     "errors": errors,
     "valid": len(errors) == 0,
+    "closeout_semantics": closeout_semantics,
+    "semantic_errors": semantic_errors,
+    "semantic_valid": len(semantic_errors) == 0,
+    "ready_for_execution_slice_done": bool(closeout_semantics) and all(item.get("ready") for item in closeout_semantics),
 }
 print(json.dumps(result, ensure_ascii=False))
 PY

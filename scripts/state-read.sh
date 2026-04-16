@@ -33,6 +33,7 @@ state_path = repo / "workspace" / "state" / task_id / "state.json"
 events_path = repo / "workspace" / "state" / task_id / "events.jsonl"
 
 from team_governance import (
+    degraded_ack_analysis,
     merge_triggers,
     product_gate_analysis,
     quality_anchor_analysis,
@@ -68,9 +69,13 @@ role_analysis = scale_out_analysis(
 )
 scale_out_triggers = merge_triggers(team.get("scale_out_triggers", []), role_analysis["scale_out_triggers"])
 role_integrity = role_analysis["role_integrity"]
+stored_role_integrity = team.get("role_integrity", {}) if isinstance(team.get("role_integrity"), dict) else {}
+role_integrity["degraded_ack_by"] = stored_role_integrity.get("degraded_ack_by", "")
+role_integrity["degraded_ack_at"] = stored_role_integrity.get("degraded_ack_at", "")
 product_gate = product_gate_analysis(state.get("product", {}), product_anchors, team.get("anchor_policy", {}))
 quality_anchor = quality_anchor_analysis(state.get("quality", {}), quality_anchors, team.get("anchor_policy", {}))
 quality_review = quality_review_analysis(state.get("quality", {}), quality_anchors, team.get("anchor_policy", {}))
+degraded_ack = degraded_ack_analysis(role_integrity)
 summary = {
     "blocked": bool(state.get("blocked_reason")) or state.get("status") == "blocked",
     "paused": state.get("lease", {}).get("status") == "paused",
@@ -95,7 +100,14 @@ summary = {
     "skeptic_count": len(skeptics),
     "product_anchor_count": len(product_anchors),
     "quality_anchor_count": len(quality_anchors),
+    "product_anchor_name": state.get("product", {}).get("anchor", ""),
+    "product_anchor_role": team.get("anchor_policy", {}).get("product_anchor_role", ""),
+    "quality_anchor_name": state.get("quality", {}).get("anchor", ""),
+    "quality_anchor_role": team.get("anchor_policy", {}).get("quality_anchor_role", ""),
     "product_goal_ready": bool(state.get("product", {}).get("goal", "")),
+    "product_user_value": state.get("product", {}).get("user_value", ""),
+    "product_non_goals": state.get("product", {}).get("non_goals", []),
+    "product_acceptance": state.get("product", {}).get("product_acceptance", []),
     "product_user_value_ready": bool(state.get("product", {}).get("user_value", "")),
     "product_non_goal_count": len(state.get("product", {}).get("non_goals", [])),
     "product_acceptance_count": len(state.get("product", {}).get("product_acceptance", [])),
@@ -113,6 +125,10 @@ summary = {
     "anchor_policy_constant_seats": bool(team.get("anchor_policy", {}).get("constant_anchor_seats", False)),
     "independent_skeptic": role_integrity["independent_skeptic"],
     "role_integrity_degraded": role_integrity["degraded"],
+    "degraded_ack_required": degraded_ack["required"],
+    "degraded_ack_ready": degraded_ack["ready"],
+    "degraded_ack_by": degraded_ack["ack_by"],
+    "degraded_ack_at": degraded_ack["ack_at"],
     "role_conflicts": role_integrity["role_conflicts"],
     "scale_out_recommended": bool(team.get("scale_out_recommended")) or bool(scale_out_triggers),
     "scale_out_triggers": scale_out_triggers,

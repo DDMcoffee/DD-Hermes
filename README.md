@@ -5,6 +5,7 @@ DD Hermes 是一个 workspace-first 的 Hermes agent harness，用来在 Codex I
 ## 体验入口
 
 - 先运行：`./scripts/demo-entry.sh`
+- 它会直接显示当前 `Product Anchor / Quality Anchor / degraded ack` 真相。
 - 当前最适合直接阅读的一页：`指挥文档/06-一期PhaseDone审计.md`
 - 当前线程策略与任务拆分：`指挥文档/04-任务重校准与线程策略.md`
 - 下一阶段路线说明：`指挥文档/08-恒定锚点策略.md`

@@ -65,6 +65,7 @@ runtime_path = state_dir / "runtime.json"
 context_path = state_dir / "context.json"
 
 from team_governance import (
+    degraded_ack_analysis,
     merge_triggers,
     product_gate_analysis,
     quality_anchor_analysis,
@@ -161,6 +162,10 @@ packet = {
         "supervisor_count": len(state.get("team", {}).get("supervisors", [])) if isinstance(state.get("team"), dict) else 0,
         "product_anchor_count": len(state.get("team", {}).get("product_anchors", [])) if isinstance(state.get("team"), dict) else 0,
         "quality_anchor_count": len(state.get("team", {}).get("quality_anchors", [])) if isinstance(state.get("team"), dict) else 0,
+        "product_anchor_name": state.get("product", {}).get("anchor", ""),
+        "product_anchor_role": state.get("team", {}).get("anchor_policy", {}).get("product_anchor_role", "") if isinstance(state.get("team"), dict) else "",
+        "quality_anchor_name": state.get("quality", {}).get("anchor", ""),
+        "quality_anchor_role": state.get("team", {}).get("anchor_policy", {}).get("quality_anchor_role", "") if isinstance(state.get("team"), dict) else "",
         "product_goal": state.get("product", {}).get("goal", ""),
         "product_goal_status": state.get("product", {}).get("goal_status", ""),
         "goal_drift_flags": state.get("product", {}).get("goal_drift_flags", []),
@@ -182,14 +187,23 @@ role_analysis = scale_out_analysis(
     high_risk_mode=bool(team.get("high_risk_mode", False)),
     integration_pressure=bool(team.get("integration_pressure", False)),
 )
+role_integrity = dict(role_analysis["role_integrity"])
+stored_role_integrity = team.get("role_integrity", {}) if isinstance(team.get("role_integrity"), dict) else {}
+role_integrity["degraded_ack_by"] = stored_role_integrity.get("degraded_ack_by", "")
+role_integrity["degraded_ack_at"] = stored_role_integrity.get("degraded_ack_at", "")
 product_anchors = team.get("product_anchors", []) if isinstance(team.get("product_anchors"), list) else []
 quality_anchors = team.get("quality_anchors", []) if isinstance(team.get("quality_anchors"), list) else []
 product_gate = product_gate_analysis(state.get("product", {}), product_anchors, team.get("anchor_policy", {}))
 quality_anchor = quality_anchor_analysis(state.get("quality", {}), quality_anchors, team.get("anchor_policy", {}))
 quality_review = quality_review_analysis(state.get("quality", {}), quality_anchors, team.get("anchor_policy", {}))
-packet["context_summary"]["independent_skeptic"] = role_analysis["role_integrity"]["independent_skeptic"]
-packet["context_summary"]["role_integrity_degraded"] = role_analysis["role_integrity"]["degraded"]
-packet["context_summary"]["role_conflicts"] = role_analysis["role_integrity"]["role_conflicts"]
+degraded_ack = degraded_ack_analysis(role_integrity)
+packet["context_summary"]["independent_skeptic"] = role_integrity["independent_skeptic"]
+packet["context_summary"]["role_integrity_degraded"] = role_integrity["degraded"]
+packet["context_summary"]["degraded_ack_required"] = degraded_ack["required"]
+packet["context_summary"]["degraded_ack_ready"] = degraded_ack["ready"]
+packet["context_summary"]["degraded_ack_by"] = degraded_ack["ack_by"]
+packet["context_summary"]["degraded_ack_at"] = degraded_ack["ack_at"]
+packet["context_summary"]["role_conflicts"] = role_integrity["role_conflicts"]
 packet["context_summary"]["scale_out_triggers"] = merge_triggers(team.get("scale_out_triggers", []), role_analysis["scale_out_triggers"])
 packet["context_summary"]["scale_out_recommended"] = bool(team.get("scale_out_recommended", False)) or bool(packet["context_summary"]["scale_out_triggers"])
 packet["context_summary"]["product_user_value"] = state.get("product", {}).get("user_value", "")

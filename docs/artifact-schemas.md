@@ -89,6 +89,8 @@
 - Required `team.role_integrity` keys:
   - `independent_skeptic`
   - `degraded`
+  - `degraded_ack_by`
+  - `degraded_ack_at`
   - `role_conflicts`
   - `role_overlap`
 - Required `product` keys when `state_version >= 2`:
@@ -128,6 +130,12 @@
   - `schema_version`
   - `quality_review_status`
   - `quality_findings_summary`
+- Semantic completion requirements for `execution slice done`:
+  - `execution_commit` 不能为空，且应与 `state.git.latest_commit` 对齐
+  - `verified_steps` 不能为空，且不能停留在模板占位值
+  - `verified_files` 不能为空，且不能停留在模板占位值
+  - `quality_review_status` 必须是 `approved` 或 `degraded-approved`
+  - `quality_findings_summary` 必须是真实复核摘要，不是占位句
 - Sections required:
   - `## Context`
   - `## Required Fields`
@@ -154,7 +162,7 @@
 - Key fields in `context_summary`:
   - `runtime_generated_at` — ISO timestamp of when the context was built
   - `runtime_stale_warning` — non-empty string if previous runtime snapshot was >60 min old
-  - `independent_skeptic`, `role_integrity_degraded`, `role_conflicts`
+  - `independent_skeptic`, `role_integrity_degraded`, `degraded_ack_required`, `degraded_ack_ready`, `role_conflicts`
   - `scale_out_recommended`, `scale_out_triggers`
 
 ## 7) Lease Check Output
@@ -175,4 +183,5 @@
 ## Validation Entry
 
 - `scripts/check-artifact-schemas.sh --task-id <task_id>` 是字段校验入口。
+- 该入口同时返回 `semantic_valid` 与 `ready_for_execution_slice_done`，用于区分“结构完整”与“真的可以宣称 execution slice done”。
 - `scripts/test-artifact-schemas.sh` 与 `tests/smoke.sh schema` 都应覆盖该入口。

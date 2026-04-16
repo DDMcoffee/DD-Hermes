@@ -194,6 +194,27 @@ def quality_review_analysis(quality, quality_anchors=None, anchor_policy=None):
     }
 
 
+def degraded_ack_analysis(role_integrity):
+    role_integrity = role_integrity if isinstance(role_integrity, dict) else {}
+    degraded = bool(role_integrity.get("degraded", False))
+    ack_by = _clean_text(role_integrity.get("degraded_ack_by", ""))
+    ack_at = _clean_text(role_integrity.get("degraded_ack_at", ""))
+
+    reasons = []
+    if degraded and not ack_by:
+        reasons.append("degraded_ack_by_missing")
+    if degraded and not ack_at:
+        reasons.append("degraded_ack_at_missing")
+
+    return {
+        "required": degraded,
+        "ready": (not degraded) or bool(ack_by and ack_at),
+        "reasons": reasons,
+        "ack_by": ack_by,
+        "ack_at": ack_at,
+    }
+
+
 def analyze_role_integrity(supervisors, executors, skeptics):
     supervisors = normalize_people(supervisors)
     executors = normalize_people(executors)

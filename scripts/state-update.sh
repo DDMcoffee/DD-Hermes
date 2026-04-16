@@ -36,6 +36,7 @@ state_path = repo / "workspace" / "state" / task_id / "state.json"
 events_path = repo / "workspace" / "state" / task_id / "events.jsonl"
 
 from team_governance import (
+    degraded_ack_analysis,
     default_product_anchors,
     default_quality_anchors,
     default_skeptics,
@@ -106,6 +107,8 @@ allowed = {
     "quality_review_findings",
     "quality_review_examples",
     "quality_last_review_at",
+    "degraded_ack_by",
+    "degraded_ack_at",
     "supervisors",
     "executors",
     "skeptics",
@@ -276,6 +279,7 @@ if "quality_last_review_at" in data:
 state.setdefault("team", {})
 team = state["team"] if isinstance(state["team"], dict) else {}
 state["team"] = team
+existing_role_integrity = team.get("role_integrity", {}) if isinstance(team.get("role_integrity"), dict) else {}
 
 try:
     owner = state.get("owner", "lead") or "lead"
@@ -326,6 +330,11 @@ try:
         integration_pressure=integration_pressure,
         verification_history=verification_history,
     )
+    role_integrity = {
+        **scale_out["role_integrity"],
+        "degraded_ack_by": data.get("degraded_ack_by", existing_role_integrity.get("degraded_ack_by", "")),
+        "degraded_ack_at": data.get("degraded_ack_at", existing_role_integrity.get("degraded_ack_at", "")),
+    }
 except ValueError as exc:
     print(json.dumps({"error": str(exc)}, ensure_ascii=False))
     raise SystemExit(3)
@@ -346,7 +355,7 @@ team.update({
     "integration_pressure": integration_pressure,
     "scale_out_recommended": scale_out["scale_out_recommended"],
     "scale_out_triggers": scale_out["scale_out_triggers"],
-    "role_integrity": scale_out["role_integrity"],
+    "role_integrity": role_integrity,
 })
 
 state["product"].setdefault("anchor", product_anchors[0] if product_anchors else owner)
@@ -370,6 +379,7 @@ state["quality"]["anchor"] = quality_anchors[0] if quality_anchors else ""
 product_gate = product_gate_analysis(state.get("product", {}), product_anchors, team.get("anchor_policy", {}))
 quality_anchor = quality_anchor_analysis(state.get("quality", {}), quality_anchors, team.get("anchor_policy", {}))
 quality_review = quality_review_analysis(state.get("quality", {}), quality_anchors, team.get("anchor_policy", {}))
+degraded_ack = degraded_ack_analysis(role_integrity)
 
 state.setdefault("notes", [])
 if data.get("note"):
@@ -379,6 +389,7 @@ if data.get("note"):
         "product_gate_ready": product_gate["ready"],
         "quality_anchor_ready": quality_anchor["ready"],
         "quality_review_ready": quality_review["ready"],
+        "degraded_ack_ready": degraded_ack["ready"],
     })
 
 state["updated_at"] = timestamp

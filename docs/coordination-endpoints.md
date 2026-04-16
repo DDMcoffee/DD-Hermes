@@ -32,6 +32,7 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
   - `summary.has_runtime_report`
   - `summary.has_supervisor`
   - `summary.independent_skeptic`
+  - `summary.degraded_ack_ready`
   - `summary.role_conflicts`
   - `summary.product_gate_ready`
   - `summary.quality_review_ready`
@@ -59,6 +60,7 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
   - `memory_count`
   - `context_summary.product_gate_ready`
   - `context_summary.quality_anchor_ready`
+  - `context_summary.degraded_ack_ready`
 
 ### 4) `dispatch.create`
 
@@ -67,7 +69,7 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
 - Purpose: 从 `state.team` 物化 supervisor/executor/skeptic assignment。
 - Response required fields:
   - `task_id`, `state_path`, `context_path`, `runtime_path`
-  - `independent_skeptic`, `degraded`, `role_conflicts`
+  - `independent_skeptic`, `degraded`, `degraded_ack_ready`, `role_conflicts`
   - `summary.supervisor_count`, `summary.executor_count`, `summary.skeptic_count`
   - `assignments`
 
@@ -82,6 +84,8 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
   - `artifacts`
   - `errors`
   - `valid`
+  - `semantic_valid`
+  - `ready_for_execution_slice_done`
 
 ### 6) `lease.check`
 
@@ -104,6 +108,7 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
   - `state.team.executors` 不能为空
   - `product gate` 必须完整，不能缺少 `user_value / non_goals / product_acceptance / drift_risk`
   - `quality anchor` 必须已分配
+  - 若 `role_integrity.degraded == true`，必须先有显式 `degraded ack`
 - Response required fields:
   - `pass`, `target_thread`, `blocked_reason`
 
@@ -151,5 +156,6 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
 ## Gate Rules
 
 - 若 `summary.independent_skeptic == false`，不得宣称“独立质疑位已覆盖”，应标注为 degraded。
-- 若 closeout 缺少 required fields，不得判定 `execution slice done`。
+- 若 `degraded_ack_ready == false`，不得进入 execution。
+- 若 closeout 结构不完整或 `ready_for_execution_slice_done == false`，不得判定 `execution slice done`。
 - 若 state 未写入 commit 锚点和 verification 证据，不得判定 `task done`。

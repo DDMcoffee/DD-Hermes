@@ -212,10 +212,27 @@ EOF
 {"skeptics":["lead"],"note":"dispatch degraded skeptic fixture"}
 EOF
 
-  local degraded
-  degraded=$("$ROOT/scripts/dispatch-create.sh" --task-id smoke-sprint)
-  assert_json_field "$degraded" "data['independent_skeptic'] is False and data['degraded'] is True"
-  assert_json_field "$degraded" "'supervisor_skeptic_overlap:lead' in data['role_conflicts'] and 'independent_skeptic_unavailable' in data['scale_out_triggers']"
+  set +e
+  "$ROOT/scripts/dispatch-create.sh" --task-id smoke-sprint >/tmp/dd-hermes-dispatch-degraded.json
+  local status=$?
+  set -e
+  [[ $status -eq 2 ]]
+  python3 - <<'PY' /tmp/dd-hermes-dispatch-degraded.json
+import json, sys
+payload = json.loads(open(sys.argv[1], encoding="utf-8").read())
+assert payload["blocked"] is True
+assert "degraded supervision" in payload["error"]
+assert "degraded_ack_by_missing" in payload["degraded_ack_reasons"]
+PY
+
+  "$ROOT/scripts/state-update.sh" --task-id smoke-sprint <<'EOF' >/dev/null
+{"degraded_ack_by":"lead","degraded_ack_at":"2026-04-17T09:00:00Z","note":"dispatch degraded ack fixture"}
+EOF
+
+  local degraded_ready
+  degraded_ready=$("$ROOT/scripts/dispatch-create.sh" --task-id smoke-sprint)
+  assert_json_field "$degraded_ready" "data['independent_skeptic'] is False and data['degraded'] is True and data['degraded_ack_ready'] is True"
+  assert_json_field "$degraded_ready" "'supervisor_skeptic_overlap:lead' in data['role_conflicts'] and 'independent_skeptic_unavailable' in data['scale_out_triggers']"
 }
 
 run_git_management() {
@@ -424,6 +441,9 @@ Route architecture work through discussion before execution.
 """, encoding="utf-8")
 PY
 
+  "$ROOT/scripts/state-update.sh" --task-id architecture-sprint <<'EOF' >/dev/null
+{"degraded_ack_by":"lead","degraded_ack_at":"2026-04-17T10:30:00Z","note":"architecture degraded ack fixture"}
+EOF
   "$ROOT/scripts/dispatch-create.sh" --task-id architecture-sprint >/dev/null
   local architecture_gate_pass
   architecture_gate_pass=$("$ROOT/hooks/thread-switch-gate.sh" --task-id architecture-sprint --target execution)
@@ -442,6 +462,9 @@ PY
   [[ $gate_status -eq 2 ]]
   assert_json_field "$delivery_gate_before_dispatch" "data['pass'] is False and 'context packet is missing' in data['blocked_reason'] and 'execution worktree is missing' in data['blocked_reason']"
 
+  "$ROOT/scripts/state-update.sh" --task-id delivery-sprint <<'EOF' >/dev/null
+{"degraded_ack_by":"lead","degraded_ack_at":"2026-04-17T10:35:00Z","note":"delivery degraded ack fixture"}
+EOF
   "$ROOT/scripts/dispatch-create.sh" --task-id delivery-sprint >/dev/null
   local delivery_gate
   delivery_gate=$("$ROOT/hooks/thread-switch-gate.sh" --task-id delivery-sprint --target execution)
@@ -580,7 +603,7 @@ for key in ("task_id", "status", "mode", "owner", "experts", "openspec", "runtim
 for key in ("supervisors", "executors", "skeptics", "product_anchors", "quality_anchors", "anchor_policy", "scale_out_recommended", "scale_out_triggers", "role_integrity"):
     if key not in state["team"]:
         fail(f"team missing key: {key}")
-for key in ("independent_skeptic", "degraded", "role_conflicts", "role_overlap"):
+for key in ("independent_skeptic", "degraded", "degraded_ack_by", "degraded_ack_at", "role_conflicts", "role_overlap"):
     if key not in state["team"]["role_integrity"]:
         fail(f"team.role_integrity missing key: {key}")
 for key in ("anchor", "goal", "user_value", "non_goals", "product_acceptance", "drift_risk", "goal_status", "goal_drift_flags", "last_product_review_at"):
@@ -594,7 +617,7 @@ context = json.loads((root / "workspace" / "state" / "smoke-sprint" / "context.j
 for key in ("task_id", "runtime", "state", "memory", "continuation", "documents", "context_summary"):
     if key not in context:
         fail(f"context missing key: {key}")
-for key in ("supervisor_count", "product_anchor_count", "quality_anchor_count", "product_goal", "product_goal_status", "quality_review_status", "scale_out_recommended", "scale_out_triggers", "product_gate_ready", "quality_anchor_ready", "quality_review_ready"):
+for key in ("supervisor_count", "product_anchor_count", "quality_anchor_count", "product_anchor_name", "product_anchor_role", "quality_anchor_name", "quality_anchor_role", "product_goal", "product_goal_status", "quality_review_status", "scale_out_recommended", "scale_out_triggers", "product_gate_ready", "quality_anchor_ready", "quality_review_ready", "degraded_ack_required", "degraded_ack_ready"):
     if key not in context["context_summary"]:
         fail(f"context_summary missing key: {key}")
 for key in ("independent_skeptic", "role_integrity_degraded", "role_conflicts"):
@@ -633,7 +656,7 @@ subprocess.run(
 )
 
 dispatch = run_json([str(root / "scripts" / "dispatch-create.sh"), "--task-id", "smoke-sprint"])
-require_keys(dispatch, ("task_id", "contract_path", "state_path", "context_path", "runtime_path", "independent_skeptic", "degraded", "role_conflicts", "role_overlap", "scale_out_recommended", "scale_out_triggers", "summary", "assignments"))
+require_keys(dispatch, ("task_id", "contract_path", "state_path", "context_path", "runtime_path", "independent_skeptic", "degraded", "degraded_ack_ready", "role_conflicts", "role_overlap", "scale_out_recommended", "scale_out_triggers", "summary", "assignments"))
 require_keys(dispatch["summary"], ("supervisor_count", "executor_count", "skeptic_count", "assignment_count", "created_worktree_count", "existing_worktree_count"))
 if dispatch["summary"]["supervisor_count"] < 1 or dispatch["summary"]["executor_count"] < 2 or dispatch["summary"]["skeptic_count"] < 1:
     fail("dispatch summary counts are incomplete")
@@ -649,12 +672,84 @@ if context_build["memory_count"] < 1:
 
 state_read = run_json([str(root / "scripts" / "state-read.sh"), "--task-id", "smoke-sprint"])
 require_keys(state_read, ("state", "summary"))
-require_keys(state_read["summary"], ("verification_complete", "has_context", "has_runtime_report", "has_supervisor", "supervisor_count", "product_anchor_count", "quality_anchor_count", "product_goal_ready", "product_goal_status", "quality_review_status", "product_gate_ready", "quality_anchor_ready", "quality_review_ready", "independent_skeptic", "role_integrity_degraded", "role_conflicts", "scale_out_recommended", "scale_out_triggers", "event_count"))
+require_keys(state_read["summary"], ("verification_complete", "has_context", "has_runtime_report", "has_supervisor", "supervisor_count", "product_anchor_count", "quality_anchor_count", "product_anchor_name", "product_anchor_role", "product_goal_ready", "product_goal_status", "quality_review_status", "product_gate_ready", "quality_anchor_ready", "quality_review_ready", "independent_skeptic", "role_integrity_degraded", "degraded_ack_required", "degraded_ack_ready", "role_conflicts", "scale_out_recommended", "scale_out_triggers", "event_count"))
 
 artifact_check = run_json([str(root / "scripts" / "check-artifact-schemas.sh"), "--task-id", "smoke-sprint"])
-require_keys(artifact_check, ("task_id", "checked", "artifacts", "errors", "valid"))
+require_keys(artifact_check, ("task_id", "checked", "artifacts", "errors", "valid", "semantic_valid", "ready_for_execution_slice_done"))
 if not artifact_check["valid"]:
     fail(f"artifact schema check failed: {artifact_check['errors']}")
+if artifact_check["semantic_valid"]:
+    fail("artifact schema semantic_valid should be false before closeout is completed")
+
+state["git"]["latest_commit"] = "1234567890abcdef1234567890abcdef12345678"
+(root / "workspace" / "state" / "smoke-sprint" / "state.json").write_text(json.dumps(state, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+for expert in ("expert-a", "expert-b", "expert-c"):
+    closeout_path = root / "workspace" / "closeouts" / f"smoke-sprint-{expert}.md"
+    closeout_path.write_text(f"""---
+schema_version: 2
+task_id: smoke-sprint
+from: {expert}
+to: lead
+scope: smoke-sprint execution slice closeout for {expert}
+execution_commit: 1234567890abcdef1234567890abcdef12345678
+state_path: workspace/state/smoke-sprint/state.json
+context_path: workspace/state/smoke-sprint/context.json
+runtime_path: workspace/state/smoke-sprint/runtime.json
+verified_steps:
+  - bash tests/smoke.sh workflow
+verified_files:
+  - scripts/dispatch-create.sh
+quality_review_status: degraded-approved
+quality_findings_summary:
+  - Degraded review accepted with explicit ack because independent skeptic is unavailable in the fixture.
+open_risks:
+  - none
+next_actions:
+  - integrate fixture changes
+---
+
+# Execution Closeout
+
+## Context
+
+Smoke fixture closeout for {expert} upgraded to semantic completion state.
+
+## Required Fields
+
+- `task_id`
+- `from`
+- `to`
+- `scope`
+- `execution_commit`
+- `state_path`
+- `context_path`
+- `runtime_path`
+- `verified_steps`
+- `verified_files`
+- `quality_review_status`
+- `quality_findings_summary`
+- `open_risks`
+- `next_actions`
+
+## Completion
+
+- Completed the smoke execution slice and wrote a real execution commit.
+
+## Verification
+
+- Ran `bash tests/smoke.sh workflow` and verified the dispatch fixture paths.
+
+## Quality Review
+
+- Quality anchor accepted a degraded review for fixture purposes after explicit degraded acknowledgement.
+
+## Open Questions
+
+- None.
+""", encoding="utf-8")
+artifact_check = run_json([str(root / "scripts" / "check-artifact-schemas.sh"), "--task-id", "smoke-sprint"])
+if not artifact_check["semantic_valid"] or not artifact_check["ready_for_execution_slice_done"]:
+    fail(f"artifact semantic check failed after closeout completion: {artifact_check['semantic_errors']}")
 
 worktree_status = run_json([str(root / "scripts" / "worktree-status.sh"), "--task-id", "smoke-sprint"])
 require_keys(worktree_status, ("clean", "dirty_files", "linked_contract", "linked_handoff"))
@@ -687,27 +782,43 @@ PY
 
 run_endpoint() {
   "$ROOT/scripts/coordination-endpoint.sh" --task-id smoke-sprint --endpoint state.update <<'EOF' >/dev/null
-{"skeptics":["lead"],"note":"endpoint router degraded skeptic fixture"}
+{"skeptics":["lead"],"degraded_ack_by":"","degraded_ack_at":"","note":"endpoint router degraded skeptic fixture"}
 EOF
 
   local state
   state=$("$ROOT/scripts/coordination-endpoint.sh" --task-id smoke-sprint --endpoint state.read)
   assert_json_field "$state" "'state' in data and 'summary' in data and data['summary']['has_supervisor'] is True"
-  assert_json_field "$state" "data['summary']['independent_skeptic'] is False and 'supervisor_skeptic_overlap:lead' in data['summary']['role_conflicts']"
+  assert_json_field "$state" "data['summary']['independent_skeptic'] is False and data['summary']['degraded_ack_ready'] is False and 'supervisor_skeptic_overlap:lead' in data['summary']['role_conflicts']"
 
   local context
   context=$("$ROOT/scripts/coordination-endpoint.sh" --task-id smoke-sprint --endpoint context.build --agent-role commander --memory-limit 5)
   assert_json_field "$context" "data['context_path'].endswith('context.json') and data['runtime_path'].endswith('runtime.json') and data['state_path'].endswith('state.json')"
   assert_json_field "$context" "data['memory_count'] >= 1 and data['handoff_count'] >= 1 and data['exploration_count'] >= 1"
 
+  set +e
+  "$ROOT/scripts/coordination-endpoint.sh" --task-id smoke-sprint --endpoint dispatch.create >/tmp/dd-hermes-endpoint-degraded.json
+  local status=$?
+  set -e
+  [[ $status -eq 2 ]]
+  python3 - <<'PY' /tmp/dd-hermes-endpoint-degraded.json
+import json, sys
+payload = json.loads(open(sys.argv[1], encoding="utf-8").read())
+assert payload["blocked"] is True
+assert "degraded supervision" in payload["error"]
+PY
+
+  "$ROOT/scripts/coordination-endpoint.sh" --task-id smoke-sprint --endpoint state.update <<'EOF' >/dev/null
+{"degraded_ack_by":"lead","degraded_ack_at":"2026-04-17T10:00:00Z","note":"endpoint degraded ack fixture"}
+EOF
+
   local dispatch
   dispatch=$("$ROOT/scripts/coordination-endpoint.sh" --task-id smoke-sprint --endpoint dispatch.create)
   assert_json_field "$dispatch" "data['task_id'] == 'smoke-sprint' and 'summary' in data and data['summary']['supervisor_count'] >= 1 and data['summary']['executor_count'] >= 2 and data['summary']['skeptic_count'] >= 1"
-  assert_json_field "$dispatch" "data['independent_skeptic'] is False and data['degraded'] is True and 'supervisor_skeptic_overlap:lead' in data['role_conflicts']"
+  assert_json_field "$dispatch" "data['independent_skeptic'] is False and data['degraded'] is True and data['degraded_ack_ready'] is True and 'supervisor_skeptic_overlap:lead' in data['role_conflicts']"
 
   local closeout
   closeout=$("$ROOT/scripts/coordination-endpoint.sh" --task-id smoke-sprint --endpoint closeout.check)
-  assert_json_field "$closeout" "data['task_id'] == 'smoke-sprint' and data['valid'] is True and len(data['errors']) == 0"
+  assert_json_field "$closeout" "data['task_id'] == 'smoke-sprint' and data['valid'] is True and 'semantic_valid' in data and 'ready_for_execution_slice_done' in data"
 
   set +e
   "$ROOT/scripts/coordination-endpoint.sh" --task-id smoke-sprint --endpoint unknown >/dev/null
@@ -766,7 +877,12 @@ case "$SECTION" in
     run_dispatch
     run_context_state
     ;;
-  verify) run_verify ;;
+  verify)
+    run_workflow
+    run_dispatch
+    run_context_state
+    run_verify
+    ;;
   endpoint)
     run_workflow
     run_dispatch

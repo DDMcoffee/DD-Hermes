@@ -36,7 +36,7 @@ target = sys.argv[2]
 script_dir = Path(sys.argv[3]).resolve()
 sys.path.insert(0, str(script_dir))
 
-from team_governance import product_gate_analysis, quality_anchor_analysis
+from team_governance import degraded_ack_analysis, product_gate_analysis, quality_anchor_analysis
 
 if not state_path.exists():
     print(json.dumps({
@@ -100,8 +100,10 @@ if target == "execution":
     product = state.get("product", {}) if isinstance(state.get("product"), dict) else {}
     quality = state.get("quality", {}) if isinstance(state.get("quality"), dict) else {}
     team = state.get("team", {}) if isinstance(state.get("team"), dict) else {}
+    role_integrity = team.get("role_integrity", {}) if isinstance(team.get("role_integrity"), dict) else {}
     product_gate = product_gate_analysis(product, team.get("product_anchors", []), team.get("anchor_policy", {}))
     quality_anchor = quality_anchor_analysis(quality, team.get("quality_anchors", []), team.get("anchor_policy", {}))
+    degraded_ack = degraded_ack_analysis(role_integrity)
     goal = product.get("goal", "").strip()
     goal_status = product.get("goal_status", "")
     drift_flags = product.get("goal_drift_flags", [])
@@ -115,6 +117,8 @@ if target == "execution":
         reasons.append(f"product gate not ready: {', '.join(product_gate['reasons'])}")
     if not quality_anchor["ready"]:
         reasons.append(f"quality anchor not ready: {', '.join(quality_anchor['reasons'])}")
+    if not degraded_ack["ready"]:
+        reasons.append(f"degraded supervision not acknowledged: {', '.join(degraded_ack['reasons'])}")
 
     executors = [e for e in team.get("executors", []) if isinstance(e, str) and e.strip()]
     if not executors:

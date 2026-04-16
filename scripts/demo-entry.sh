@@ -62,6 +62,7 @@ gap_1=$(read_frontmatter_field current_gap_1)
 gap_2=$(read_frontmatter_field current_gap_2)
 archive_doc="$repo/$archive_rel"
 task_doc="$repo/$task_doc_rel"
+mainline_state_json=$("$repo/scripts/state-read.sh" --task-id "$next_task" 2>/dev/null || true)
 
 missing=()
 for path in "$archive_doc" "$task_doc"; do
@@ -81,6 +82,43 @@ fi
 execution_commit=$(find_commit "feat(${proof_task}):")
 integration_commit=$(find_commit "integrate(${proof_task}):")
 entry_task_commit=$(latest_touch_commit "$task_doc_rel")
+mainline_summary=$(STATE_JSON="$mainline_state_json" python3 - <<'PY'
+import json
+import os
+
+payload = os.environ.get("STATE_JSON", "")
+if not payload:
+    print("")
+    raise SystemExit(0)
+try:
+    data = json.loads(payload)
+except json.JSONDecodeError:
+    print("")
+    raise SystemExit(0)
+summary = data.get("summary", {})
+lines = [
+    "当前锚点真相",
+    f"- Product Anchor：{summary.get('product_anchor_name', '未设置')} ({summary.get('product_anchor_role', '未设置')})",
+    f"- Product Goal：{summary.get('goal', '未设置')}",
+    f"- User Value：{summary.get('product_user_value', '未设置')}",
+]
+non_goals = summary.get("product_non_goals", [])
+if non_goals:
+    lines.append(f"- Non-goals：{'；'.join(non_goals)}")
+lines.extend([
+    f"- Product Gate：{'ready' if summary.get('product_gate_ready') else 'blocked'}",
+    f"- Quality Anchor：{summary.get('quality_anchor_name', '未设置')} ({summary.get('quality_anchor_role', '未设置')})",
+    f"- Independent Skeptic：{'yes' if summary.get('independent_skeptic') else 'no'}",
+    f"- Degraded Ack：{'ready' if summary.get('degraded_ack_ready') else 'missing'}",
+])
+reasons = summary.get("product_gate_reasons", [])
+if reasons:
+    lines.append(f"- Product Gate Reasons：{', '.join(reasons)}")
+if summary.get("degraded_ack_required") and not summary.get("degraded_ack_ready"):
+    lines.append("- Degraded Ack Reasons：degraded supervision requires explicit acknowledgement")
+print("\n".join(lines))
+PY
+)
 
 cat <<EOF
 DD Hermes 体验入口
@@ -110,3 +148,7 @@ DD Hermes 体验入口
 2. 再看：$task_doc_rel
 3. 若要看第一次真实证明：$archive_rel
 EOF
+
+if [[ -n "$mainline_summary" ]]; then
+  printf '\n%s\n' "$mainline_summary"
+fi

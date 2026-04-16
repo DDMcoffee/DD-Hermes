@@ -53,6 +53,7 @@ runtime_path = context_wrapper["runtime_path"]
 state_path = context_wrapper["state_path"]
 
 from team_governance import (
+    degraded_ack_analysis,
     merge_triggers,
     normalize_people,
     product_gate_analysis,
@@ -96,8 +97,15 @@ role_analysis = scale_out_analysis(
     integration_pressure=bool(team.get("integration_pressure", False)),
 )
 scale_out_triggers = merge_triggers(team.get("scale_out_triggers", []), role_analysis["scale_out_triggers"])
+stored_role_integrity = team.get("role_integrity", {}) if isinstance(team.get("role_integrity"), dict) else {}
+role_integrity = {
+    **role_analysis["role_integrity"],
+    "degraded_ack_by": stored_role_integrity.get("degraded_ack_by", ""),
+    "degraded_ack_at": stored_role_integrity.get("degraded_ack_at", ""),
+}
 product_gate = product_gate_analysis(product, product_anchors, team.get("anchor_policy", {}))
 quality_anchor = quality_anchor_analysis(quality, quality_anchors, team.get("anchor_policy", {}))
+degraded_ack = degraded_ack_analysis(role_integrity)
 
 if not supervisors:
     print(json.dumps({"error": "dispatch requires at least one supervisor", "blocked": True}, ensure_ascii=False))
@@ -123,6 +131,13 @@ if not quality_anchor["ready"]:
         "error": f"dispatch blocked by quality anchor: {', '.join(quality_anchor['reasons'])}",
         "blocked": True,
         "quality_anchor_reasons": quality_anchor["reasons"],
+    }, ensure_ascii=False))
+    raise SystemExit(2)
+if not degraded_ack["ready"]:
+    print(json.dumps({
+        "error": f"dispatch blocked by degraded supervision: {', '.join(degraded_ack['reasons'])}",
+        "blocked": True,
+        "degraded_ack_reasons": degraded_ack["reasons"],
     }, ensure_ascii=False))
     raise SystemExit(2)
 
@@ -229,10 +244,14 @@ print(json.dumps({
         "quality_anchor_ready": quality_anchor["ready"],
         "quality_anchor_reasons": quality_anchor["reasons"],
     },
-    "independent_skeptic": role_analysis["role_integrity"]["independent_skeptic"],
-    "degraded": role_analysis["role_integrity"]["degraded"],
-    "role_conflicts": role_analysis["role_integrity"]["role_conflicts"],
-    "role_overlap": role_analysis["role_integrity"]["role_overlap"],
+    "independent_skeptic": role_integrity["independent_skeptic"],
+    "degraded": role_integrity["degraded"],
+    "degraded_ack_required": degraded_ack["required"],
+    "degraded_ack_ready": degraded_ack["ready"],
+    "degraded_ack_by": degraded_ack["ack_by"],
+    "degraded_ack_at": degraded_ack["ack_at"],
+    "role_conflicts": role_integrity["role_conflicts"],
+    "role_overlap": role_integrity["role_overlap"],
     "scale_out_recommended": bool(team.get("scale_out_recommended", False)) or bool(scale_out_triggers),
     "scale_out_triggers": scale_out_triggers,
     "summary": {

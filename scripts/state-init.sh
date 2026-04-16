@@ -51,6 +51,7 @@ sys.path.insert(0, str(script_dir))
 timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 from team_governance import (
+    degraded_ack_analysis,
     default_product_anchors,
     default_quality_anchors,
     default_skeptics,
@@ -262,6 +263,7 @@ elif openspec["design_path"]:
 
 resolved_owner = contract_frontmatter.get("owner") or state.get("owner") or owner
 existing_team = state.get("team", {}) if isinstance(state.get("team"), dict) else {}
+existing_role_integrity = existing_team.get("role_integrity", {}) if isinstance(existing_team.get("role_integrity"), dict) else {}
 supervisors = normalize_people(existing_team.get("supervisors", [])) or normalize_people([resolved_owner or "lead"])
 executors = normalize_people(existing_team.get("executors", [])) or experts
 skeptics = normalize_people(existing_team.get("skeptics", []))
@@ -283,6 +285,11 @@ scale_out = scale_out_analysis(
     high_risk_mode=high_risk_mode,
     integration_pressure=integration_pressure,
 )
+role_integrity = {
+    **scale_out["role_integrity"],
+    "degraded_ack_by": existing_role_integrity.get("degraded_ack_by", ""),
+    "degraded_ack_at": existing_role_integrity.get("degraded_ack_at", ""),
+}
 
 state.update({
     "state_version": 2 if schema_version == "2" else state.get("state_version", 1),
@@ -317,7 +324,7 @@ state.update({
         "integration_pressure": integration_pressure,
         "scale_out_recommended": scale_out["scale_out_recommended"],
         "scale_out_triggers": scale_out["scale_out_triggers"],
-        "role_integrity": scale_out["role_integrity"],
+        "role_integrity": role_integrity,
     },
     "updated_at": timestamp,
 })
@@ -350,6 +357,7 @@ state["quality"].update({
 product_gate = product_gate_analysis(state.get("product", {}), product_anchors, state["team"].get("anchor_policy", {}))
 quality_anchor = quality_anchor_analysis(state.get("quality", {}), quality_anchors, state["team"].get("anchor_policy", {}))
 quality_review = quality_review_analysis(state.get("quality", {}), quality_anchors, state["team"].get("anchor_policy", {}))
+degraded_ack = degraded_ack_analysis(role_integrity)
 state.setdefault("notes", [])
 state["notes"].append({
     "timestamp": timestamp,
@@ -357,6 +365,7 @@ state["notes"].append({
     "product_gate_ready": product_gate["ready"],
     "quality_anchor_ready": quality_anchor["ready"],
     "quality_review_ready": quality_review["ready"],
+    "degraded_ack_ready": degraded_ack["ready"],
 })
 
 state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

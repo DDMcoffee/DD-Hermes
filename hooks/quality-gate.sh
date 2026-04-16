@@ -27,10 +27,12 @@ from pathlib import Path
 script_dir = Path(sys.argv[1]).resolve()
 sys.path.insert(0, str(script_dir))
 
-from team_governance import product_gate_analysis, quality_review_analysis
+from artifact_semantics import closeout_semantic_analysis, parse_frontmatter
+from team_governance import degraded_ack_analysis, product_gate_analysis, quality_review_analysis
 
 data = json.loads(os.environ.get("INPUT_JSON", "{}"))
 state_path = os.environ.get("STATE_PATH", "")
+state_data = {}
 if state_path and state_path != "-":
     path = Path(state_path)
     if path.exists():
@@ -51,11 +53,15 @@ quality_review_status = data.get("quality_review_status")
 if quality_review_status is None and isinstance(data.get("quality"), dict):
     quality_review_status = data["quality"].get("review_status")
 team = data.get("team", {}) if isinstance(data.get("team"), dict) else {}
+role_integrity = team.get("role_integrity", {}) if isinstance(team.get("role_integrity"), dict) else {}
 product_gate = product_gate_analysis(data.get("product", {}), team.get("product_anchors", []), team.get("anchor_policy", {}))
 quality_review = quality_review_analysis(data.get("quality", {}), team.get("quality_anchors", []), team.get("anchor_policy", {}))
+degraded_ack = degraded_ack_analysis(role_integrity)
 
 missing = []
 uncovered = []
+closeout_path = ""
+closeout_reasons = []
 if changed_code and not verified:
     missing.append("verified_steps")
 if changed_code and last_exit not in (None, 0):
@@ -69,8 +75,35 @@ if changed_code:
             missing.append("verified_files")
 if changed_code and (product_goal_status in ("missing", "drifted", "blocked", "unknown") or not product_gate["ready"]):
     missing.append("product_gate")
+if changed_code and not degraded_ack["ready"]:
+    missing.append("degraded_ack")
 if changed_code and (quality_review_status not in ("approved", "degraded-approved") or not quality_review["ready"]):
     missing.append("quality_review")
+if changed_code and state_path and state_path != "-":
+    path = Path(state_path)
+    if path.exists():
+        repo_root = path.parents[3]
+        task_id = data.get("task_id", "")
+        active_expert = data.get("active_expert", "")
+        closeout_candidates = sorted((repo_root / "workspace" / "closeouts").glob(f"{task_id}-*.md")) if task_id else []
+        selected = []
+        if active_expert:
+            selected = [candidate for candidate in closeout_candidates if candidate.name == f"{task_id}-{active_expert}.md"]
+        elif len(closeout_candidates) == 1:
+            selected = closeout_candidates
+        elif closeout_candidates:
+            closeout_reasons = ["closeout_selection_ambiguous"]
+        else:
+            closeout_reasons = ["closeout_missing"]
+
+        if selected:
+            closeout_path = str(selected[0])
+            closeout_text = selected[0].read_text(encoding="utf-8")
+            closeout_frontmatter = parse_frontmatter(closeout_text)
+            closeout = closeout_semantic_analysis(closeout_frontmatter, closeout_text, state_data)
+            closeout_reasons = closeout["reasons"]
+        if closeout_reasons:
+            missing.append("closeout")
 
 passed = not missing
 result = {
@@ -79,7 +112,10 @@ result = {
     "missing_verification": missing,
     "uncovered_files": uncovered,
     "product_gate_reasons": product_gate["reasons"],
+    "degraded_ack_reasons": degraded_ack["reasons"],
     "quality_review_reasons": quality_review["reasons"],
+    "closeout_path": closeout_path,
+    "closeout_reasons": closeout_reasons,
     "blocked_reason": "" if passed else "code changed without completed and covering verification",
     "required_next_step": "" if passed else "run tests that cover changed files or pass coverage:all before claiming completion",
 }
