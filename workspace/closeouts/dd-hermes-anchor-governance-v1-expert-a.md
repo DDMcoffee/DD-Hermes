@@ -40,7 +40,7 @@ open_risks:
   - The task is still in degraded supervision mode; a later phase should decide whether to allocate an independent quality seat instead of relying on explicit degraded acknowledgement.
   - This slice proves execution gating and closeout semantics, but phase-2 still lacks integration/archive evidence.
 next_actions:
-  - Lead should decide whether to promote this task from planning proof to integration/archive proof.
+  - Archive record now exists; keep this closeout as the execution evidence for the integrated slice.
   - If phase-2 continues, preserve degraded acknowledgement rules until an independent skeptic is assigned.
 ---
 
@@ -94,4 +94,4 @@ Recorded the phase-2 execution slice that hardened degraded supervision acknowle
 
 ## Open Questions
 
-- Should phase-2 stop at “testable and gated” or continue immediately into integration/archive proof for `dd-hermes-anchor-governance-v1`?
+- This closeout is now frozen as the execution evidence for `dd-hermes-anchor-governance-v1`; later phase-2 work should use a new task id.
