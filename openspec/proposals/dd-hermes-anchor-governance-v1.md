@@ -38,6 +38,8 @@ DD Hermes already has anchor fields and role vocabulary, but they are still too 
 - Product anchor truth is reflected in `state-read` and `context-build` summaries.
 - Dispatch and thread-switch gates refuse incomplete product-anchor tasks.
 - Completion gate refuses changed-code completion without a quality review.
+- Dispatch and thread-switch refuse degraded supervision until an explicit degraded acknowledgement is recorded.
+- Closeout checking distinguishes structural completeness from execution-ready evidence.
 - Smoke coverage proves both blocking and passing paths.
 
 ## Verification
