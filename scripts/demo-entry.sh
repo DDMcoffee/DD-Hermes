@@ -134,7 +134,7 @@ DD Hermes 体验入口
 - integration commit：$(short_sha "$integration_commit")
 - archive：$archive_rel
 
-当前归档任务
+当前 phase-2 主线
 - task_id：$next_task
 - 任务说明最新提交：$(short_sha "$entry_task_commit")
 - 任务说明：$task_doc_rel
