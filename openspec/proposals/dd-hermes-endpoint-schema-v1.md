@@ -9,7 +9,7 @@ checks:
   - ./scripts/test-artifact-schemas.sh
   - ./tests/smoke.sh all
 links:
-  - 指挥文档/03-执行线程干到底说明.md
+  - 指挥文档/02-三层终点定义.md
   - docs/coordination-endpoints.md
   - docs/artifact-schemas.md
 ---

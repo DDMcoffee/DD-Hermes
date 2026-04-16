@@ -52,7 +52,13 @@ context_path = context_wrapper["context_path"]
 runtime_path = context_wrapper["runtime_path"]
 state_path = context_wrapper["state_path"]
 
-from team_governance import merge_triggers, normalize_people, scale_out_analysis
+from team_governance import (
+    merge_triggers,
+    normalize_people,
+    product_gate_analysis,
+    quality_anchor_analysis,
+    scale_out_analysis,
+)
 
 
 def handoff_for(agent_id):
@@ -90,6 +96,8 @@ role_analysis = scale_out_analysis(
     integration_pressure=bool(team.get("integration_pressure", False)),
 )
 scale_out_triggers = merge_triggers(team.get("scale_out_triggers", []), role_analysis["scale_out_triggers"])
+product_gate = product_gate_analysis(product, product_anchors, team.get("anchor_policy", {}))
+quality_anchor = quality_anchor_analysis(quality, quality_anchors, team.get("anchor_policy", {}))
 
 if not supervisors:
     print(json.dumps({"error": "dispatch requires at least one supervisor", "blocked": True}, ensure_ascii=False))
@@ -100,11 +108,22 @@ if not executors:
 if not skeptics:
     print(json.dumps({"error": "dispatch requires at least one skeptic", "blocked": True}, ensure_ascii=False))
     raise SystemExit(2)
-if not product.get("goal", "").strip():
-    print(json.dumps({"error": "dispatch requires product.goal before implementation", "blocked": True}, ensure_ascii=False))
+if not product_gate["ready"]:
+    print(json.dumps({
+        "error": f"dispatch blocked by product gate: {', '.join(product_gate['reasons'])}",
+        "blocked": True,
+        "product_gate_reasons": product_gate["reasons"],
+    }, ensure_ascii=False))
     raise SystemExit(2)
 if product.get("goal_status") in {"drifted", "blocked"}:
     print(json.dumps({"error": f"dispatch blocked by product.goal_status={product.get('goal_status')}", "blocked": True}, ensure_ascii=False))
+    raise SystemExit(2)
+if not quality_anchor["ready"]:
+    print(json.dumps({
+        "error": f"dispatch blocked by quality anchor: {', '.join(quality_anchor['reasons'])}",
+        "blocked": True,
+        "quality_anchor_reasons": quality_anchor["reasons"],
+    }, ensure_ascii=False))
     raise SystemExit(2)
 
 assignments = []
@@ -202,7 +221,13 @@ print(json.dumps({
         "quality_anchors": quality_anchors,
         "product_goal": product.get("goal", ""),
         "product_goal_status": product.get("goal_status", ""),
+        "product_gate_ready": product_gate["ready"],
+        "product_gate_reasons": product_gate["reasons"],
+        "product_user_value": product.get("user_value", ""),
+        "product_non_goals": product.get("non_goals", []),
         "quality_review_status": quality.get("review_status", ""),
+        "quality_anchor_ready": quality_anchor["ready"],
+        "quality_anchor_reasons": quality_anchor["reasons"],
     },
     "independent_skeptic": role_analysis["role_integrity"]["independent_skeptic"],
     "degraded": role_analysis["role_integrity"]["degraded"],

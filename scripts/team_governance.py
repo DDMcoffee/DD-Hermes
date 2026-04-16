@@ -41,6 +41,27 @@ def merge_triggers(*groups):
     return merged
 
 
+def _clean_text(value):
+    return value.strip() if isinstance(value, str) else ""
+
+
+def _clean_list(items):
+    if items is None:
+        return []
+    if isinstance(items, tuple):
+        items = list(items)
+    if not isinstance(items, list):
+        items = [items]
+    result = []
+    for item in items:
+        if not isinstance(item, str):
+            continue
+        value = item.strip()
+        if value:
+            result.append(value)
+    return result
+
+
 def default_skeptics(owner, supervisors, executors):
     supervisors = normalize_people(supervisors)
     executors = normalize_people(executors)
@@ -68,6 +89,109 @@ def default_quality_anchors(owner, supervisors, skeptics, executors):
         return anchors
     fallback = default_skeptics(owner, supervisors, executors)
     return normalize_people(fallback)
+
+
+def product_gate_analysis(product, product_anchors=None, anchor_policy=None):
+    product = product if isinstance(product, dict) else {}
+    product_anchors = normalize_people(product_anchors)
+    anchor_policy = anchor_policy if isinstance(anchor_policy, dict) else {}
+
+    anchor = _clean_text(product.get("anchor", ""))
+    goal = _clean_text(product.get("goal", ""))
+    user_value = _clean_text(product.get("user_value", ""))
+    non_goals = _clean_list(product.get("non_goals", []))
+    acceptance = _clean_list(product.get("product_acceptance", []))
+    drift_risk = _clean_text(product.get("drift_risk", ""))
+    goal_status = _clean_text(product.get("goal_status", ""))
+    goal_drift_flags = _clean_list(product.get("goal_drift_flags", []))
+    last_product_review_at = _clean_text(product.get("last_product_review_at", ""))
+
+    reasons = []
+    if not product_anchors:
+        reasons.append("product_anchor_unassigned")
+    if not anchor:
+        reasons.append("product_anchor_missing")
+    elif product_anchors and anchor not in product_anchors:
+        reasons.append("product_anchor_not_in_team")
+    if not goal:
+        reasons.append("product_goal_missing")
+    if not user_value:
+        reasons.append("product_user_value_missing")
+    if not non_goals:
+        reasons.append("product_non_goals_missing")
+    if not acceptance:
+        reasons.append("product_acceptance_missing")
+    if not drift_risk:
+        reasons.append("product_drift_risk_missing")
+    if goal_status in {"", "missing", "drifted", "blocked", "unknown"}:
+        reasons.append(f"product_goal_status_{goal_status or 'missing'}")
+    if goal_drift_flags:
+        reasons.append("product_goal_drift")
+    if not last_product_review_at:
+        reasons.append("product_review_missing")
+    if not bool(anchor_policy.get("constant_anchor_seats", False)):
+        reasons.append("constant_anchor_seats_disabled")
+
+    return {
+        "ready": not reasons,
+        "reasons": reasons,
+        "anchor": anchor,
+        "goal": goal,
+        "goal_status": goal_status,
+        "user_value": user_value,
+        "non_goal_count": len(non_goals),
+        "product_acceptance_count": len(acceptance),
+        "drift_risk": drift_risk,
+        "last_product_review_at": last_product_review_at,
+    }
+
+
+def quality_anchor_analysis(quality, quality_anchors=None, anchor_policy=None):
+    quality = quality if isinstance(quality, dict) else {}
+    quality_anchors = normalize_people(quality_anchors)
+    anchor_policy = anchor_policy if isinstance(anchor_policy, dict) else {}
+
+    anchor = _clean_text(quality.get("anchor", ""))
+    reasons = []
+    if not quality_anchors:
+        reasons.append("quality_anchor_unassigned")
+    if not anchor:
+        reasons.append("quality_anchor_missing")
+    elif quality_anchors and anchor not in quality_anchors:
+        reasons.append("quality_anchor_not_in_team")
+    if not bool(anchor_policy.get("constant_anchor_seats", False)):
+        reasons.append("constant_anchor_seats_disabled")
+
+    return {
+        "ready": not reasons,
+        "reasons": reasons,
+        "anchor": anchor,
+    }
+
+
+def quality_review_analysis(quality, quality_anchors=None, anchor_policy=None):
+    quality = quality if isinstance(quality, dict) else {}
+    anchor_status = quality_anchor_analysis(quality, quality_anchors, anchor_policy)
+    review_status = _clean_text(quality.get("review_status", ""))
+    last_review_at = _clean_text(quality.get("last_review_at", ""))
+    findings = _clean_list(quality.get("review_findings", []))
+    examples = _clean_list(quality.get("review_examples", []))
+
+    reasons = list(anchor_status["reasons"])
+    if review_status not in {"approved", "degraded-approved"}:
+        reasons.append(f"quality_review_status_{review_status or 'missing'}")
+    if not last_review_at:
+        reasons.append("quality_review_timestamp_missing")
+
+    return {
+        "ready": not reasons,
+        "reasons": reasons,
+        "anchor": anchor_status["anchor"],
+        "review_status": review_status,
+        "last_review_at": last_review_at,
+        "finding_count": len(findings),
+        "example_count": len(examples),
+    }
 
 
 def analyze_role_integrity(supervisors, executors, skeptics):

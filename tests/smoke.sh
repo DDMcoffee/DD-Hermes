@@ -90,7 +90,7 @@ EOF
   [[ $status -eq 2 ]]
 
   "$ROOT/hooks/quality-gate.sh" --event Stop <<'EOF' >/dev/null
-{"changed_code_files":["scripts/x.sh"],"verified_steps":["tests/smoke.sh","coverage:all"],"verified_files":["scripts/x.sh"],"last_test_exit_code":0,"product_goal_status":"validated","quality_review_status":"approved"}
+{"changed_code_files":["scripts/x.sh"],"verified_steps":["tests/smoke.sh","coverage:all"],"verified_files":["scripts/x.sh"],"last_test_exit_code":0,"product_goal_status":"validated","quality_review_status":"approved","team":{"product_anchors":["lead"],"quality_anchors":["expert-c"],"anchor_policy":{"product_anchor_role":"supervisor","quality_anchor_role":"skeptic","constant_anchor_seats":true}},"product":{"anchor":"lead","goal":"Ship the smoke slice.","user_value":"Keep DD Hermes task-bound.","non_goals":["No runtime rewrite."],"product_acceptance":["Traceable outcome."],"drift_risk":"Could drift into unrelated cleanup.","goal_status":"validated","goal_drift_flags":[],"last_product_review_at":"2026-04-16T10:00:00Z"},"quality":{"anchor":"expert-c","review_status":"approved","review_findings":[],"review_examples":[],"last_review_at":"2026-04-16T10:05:00Z"}}
 EOF
 
   local session_log
@@ -206,6 +206,7 @@ EOF
   assert_json_field "$dispatch" "all(item['handoff_path'].endswith('.md') for item in data['assignments'] if item['role'] == 'executor') and any(item['status'] in ('created', 'existing') for item in data['assignments'] if item['role'] == 'executor')"
   assert_json_field "$dispatch" "data['independent_skeptic'] is True and data['degraded'] is False and data['role_conflicts'] == []"
   assert_json_field "$dispatch" "data['anchors']['product_goal'] != '' and len(data['anchors']['product_anchors']) >= 1 and len(data['anchors']['quality_anchors']) >= 1"
+  assert_json_field "$dispatch" "data['anchors']['product_gate_ready'] is True and data['anchors']['quality_anchor_ready'] is True"
 
   "$ROOT/scripts/state-update.sh" --task-id smoke-sprint <<'EOF' >/dev/null
 {"skeptics":["lead"],"note":"dispatch degraded skeptic fixture"}
@@ -298,6 +299,7 @@ EOF
   local updated
   updated=$("$ROOT/scripts/state-read.sh" --task-id smoke-sprint)
   assert_json_field "$updated" "data['state']['mode'] == 'execution' and data['state']['active_expert'] == 'expert-a' and data['state']['lease']['status'] == 'running' and data['summary']['scale_out_recommended'] is True and 'parallel_execution_slices' in data['summary']['scale_out_triggers'] and 'integration_pressure' in data['summary']['scale_out_triggers'] and data['summary']['independent_skeptic'] is True and data['summary']['role_conflicts'] == []"
+  assert_json_field "$updated" "data['summary']['product_gate_ready'] is True and data['summary']['quality_anchor_ready'] is True"
 
   set +e
   "$ROOT/scripts/state-update.sh" --task-id smoke-sprint <<'EOF' >/dev/null
@@ -340,6 +342,7 @@ PY
 )
   assert_json_field "$paused_packet" "data['continuation']['lease']['status'] == 'paused' and data['continuation']['lease']['resume_checkpoint'] == 'expert-a:after-hooks'"
   assert_json_field "$paused_packet" "data['context_summary']['supervisor_count'] >= 1 and data['context_summary']['scale_out_recommended'] is True and 'parallel_execution_slices' in data['context_summary']['scale_out_triggers'] and data['context_summary']['independent_skeptic'] is True"
+  assert_json_field "$paused_packet" "data['context_summary']['product_gate_ready'] is True and data['context_summary']['quality_anchor_ready'] is True"
 
   "$ROOT/scripts/state-update.sh" --task-id smoke-sprint <<'EOF' >/dev/null
 {"lease_status":"running","pause_reason":"","resume_after":"","current_focus":"resume from checkpoint","note":"resume execution"}
@@ -443,6 +446,18 @@ PY
   local delivery_gate
   delivery_gate=$("$ROOT/hooks/thread-switch-gate.sh" --task-id delivery-sprint --target execution)
   assert_json_field "$delivery_gate" "data['pass'] is True and data['discussion_policy'] == 'direct'"
+
+  "$ROOT/scripts/sprint-init.sh" --task-id product-gap-sprint --owner lead --experts expert-a --current-focus "delivery bugfix" >/dev/null
+  "$ROOT/scripts/state-update.sh" --task-id product-gap-sprint <<'EOF' >/dev/null
+{"product_goal":"","user_value":"","non_goals":[],"product_acceptance":[],"drift_risk":"","last_product_review_at":"","note":"product gate gap fixture"}
+EOF
+  set +e
+  local product_gap_gate
+  product_gap_gate=$("$ROOT/hooks/thread-switch-gate.sh" --task-id product-gap-sprint --target execution)
+  gate_status=$?
+  set -e
+  [[ $gate_status -eq 2 ]]
+  assert_json_field "$product_gap_gate" "data['pass'] is False and 'product gate not ready' in data['blocked_reason']"
 
   local prompt
   prompt=$("$ROOT/scripts/execution-thread-prompt.sh" --task-id smoke-sprint --expert expert-b)
@@ -579,7 +594,7 @@ context = json.loads((root / "workspace" / "state" / "smoke-sprint" / "context.j
 for key in ("task_id", "runtime", "state", "memory", "continuation", "documents", "context_summary"):
     if key not in context:
         fail(f"context missing key: {key}")
-for key in ("supervisor_count", "product_anchor_count", "quality_anchor_count", "product_goal", "product_goal_status", "quality_review_status", "scale_out_recommended", "scale_out_triggers"):
+for key in ("supervisor_count", "product_anchor_count", "quality_anchor_count", "product_goal", "product_goal_status", "quality_review_status", "scale_out_recommended", "scale_out_triggers", "product_gate_ready", "quality_anchor_ready", "quality_review_ready"):
     if key not in context["context_summary"]:
         fail(f"context_summary missing key: {key}")
 for key in ("independent_skeptic", "role_integrity_degraded", "role_conflicts"):
@@ -634,7 +649,7 @@ if context_build["memory_count"] < 1:
 
 state_read = run_json([str(root / "scripts" / "state-read.sh"), "--task-id", "smoke-sprint"])
 require_keys(state_read, ("state", "summary"))
-require_keys(state_read["summary"], ("verification_complete", "has_context", "has_runtime_report", "has_supervisor", "supervisor_count", "product_anchor_count", "quality_anchor_count", "product_goal_ready", "product_goal_status", "quality_review_status", "independent_skeptic", "role_integrity_degraded", "role_conflicts", "scale_out_recommended", "scale_out_triggers", "event_count"))
+require_keys(state_read["summary"], ("verification_complete", "has_context", "has_runtime_report", "has_supervisor", "supervisor_count", "product_anchor_count", "quality_anchor_count", "product_goal_ready", "product_goal_status", "quality_review_status", "product_gate_ready", "quality_anchor_ready", "quality_review_ready", "independent_skeptic", "role_integrity_degraded", "role_conflicts", "scale_out_recommended", "scale_out_triggers", "event_count"))
 
 artifact_check = run_json([str(root / "scripts" / "check-artifact-schemas.sh"), "--task-id", "smoke-sprint"])
 require_keys(artifact_check, ("task_id", "checked", "artifacts", "errors", "valid"))

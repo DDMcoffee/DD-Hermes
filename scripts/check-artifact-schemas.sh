@@ -165,6 +165,11 @@ else:
         missing_team_v2 = [key for key in required_team_v2 if key not in team]
         if missing_team_v2:
             errors.append(f"state.team missing v2 keys {missing_team_v2}: {state_path}")
+        anchor_policy = team.get("anchor_policy", {}) if isinstance(team.get("anchor_policy"), dict) else {}
+        required_anchor_policy = ("product_anchor_role", "quality_anchor_role", "constant_anchor_seats")
+        missing_anchor_policy = [key for key in required_anchor_policy if key not in anchor_policy]
+        if missing_anchor_policy:
+            errors.append(f"state.team.anchor_policy missing keys {missing_anchor_policy}: {state_path}")
         product = state.get("product", {}) if isinstance(state.get("product"), dict) else {}
         required_product = ("anchor", "goal", "user_value", "non_goals", "product_acceptance", "drift_risk", "goal_status", "goal_drift_flags", "last_product_review_at")
         missing_product = [key for key in required_product if key not in product]

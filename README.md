@@ -6,7 +6,9 @@ DD Hermes 是一个 workspace-first 的 Hermes agent harness，用来在 Codex I
 
 - 先运行：`./scripts/demo-entry.sh`
 - 当前最适合直接阅读的一页：`指挥文档/06-一期PhaseDone审计.md`
-- 下一阶段路线说明：`指挥文档/05-体验版本路线图.md`
+- 当前线程策略与任务拆分：`指挥文档/04-任务重校准与线程策略.md`
+- 下一阶段路线说明：`指挥文档/08-恒定锚点策略.md`
+- 当前 phase-2 主线任务：`dd-hermes-anchor-governance-v1`
 
 ## What This Repo Is
 
@@ -39,9 +41,11 @@ DD Hermes 是一个 workspace-first 的 Hermes agent harness，用来在 Codex I
 - `docs/git-management.md`: baseline commit、worktree 生命周期和提交边界。
 - `docs/textbook-agent.md`: 教材记录 agent 的职责和每日总结结构。
 - `指挥文档/`: 给指挥线程和项目负责人看的中文目标、终点和执行收尾文档。
-  - 当前新增 `06-一期PhaseDone审计.md` 和 `07-体验入口任务说明.md`，分别用于 phase 裁决和下一条主线任务定义。
-  - `08-恒定锚点策略.md` 用来固定产品锚点与质量锚点的职责、触发点和降级规则。
-  - `./scripts/demo-entry.sh` 会把它们收成一个只读体验入口。
+  - 目录长期限制为 `7` 份 Markdown 以内。
+  - `06-一期PhaseDone审计.md` 是当前单一体验入口说明。
+  - `04-任务重校准与线程策略.md` 记录当前主线、线程裁决和任务拆分。
+  - `08-恒定锚点策略.md` 固定产品锚点与质量锚点的职责、触发点和降级规则。
+  - `./scripts/demo-entry.sh` 会把这些事实收成一个只读体验入口。
 - `memory/`: 记忆卡、journal 和人类可读视图。
 - `openspec/`: proposal/design/task/archive 生命周期目录和模板。
 - `scripts/`: worktree、context/runtime/state、记忆读写、spec 检查、验证编排。

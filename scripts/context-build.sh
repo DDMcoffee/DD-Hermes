@@ -64,7 +64,13 @@ events_path = state_dir / "events.jsonl"
 runtime_path = state_dir / "runtime.json"
 context_path = state_dir / "context.json"
 
-from team_governance import merge_triggers, scale_out_analysis
+from team_governance import (
+    merge_triggers,
+    product_gate_analysis,
+    quality_anchor_analysis,
+    quality_review_analysis,
+    scale_out_analysis,
+)
 
 
 def read_doc(path: Path):
@@ -127,7 +133,7 @@ packet = {
     "product": state.get("product", {}),
     "quality": state.get("quality", {}),
     "continuation": {
-        "goal": state.get("lease", {}).get("goal", ""),
+        "goal": state.get("product", {}).get("goal", "") or state.get("lease", {}).get("goal", ""),
         "lease": state.get("lease", {}),
         "current_focus": state.get("current_focus", ""),
         "active_expert": state.get("active_expert", ""),
@@ -176,11 +182,29 @@ role_analysis = scale_out_analysis(
     high_risk_mode=bool(team.get("high_risk_mode", False)),
     integration_pressure=bool(team.get("integration_pressure", False)),
 )
+product_anchors = team.get("product_anchors", []) if isinstance(team.get("product_anchors"), list) else []
+quality_anchors = team.get("quality_anchors", []) if isinstance(team.get("quality_anchors"), list) else []
+product_gate = product_gate_analysis(state.get("product", {}), product_anchors, team.get("anchor_policy", {}))
+quality_anchor = quality_anchor_analysis(state.get("quality", {}), quality_anchors, team.get("anchor_policy", {}))
+quality_review = quality_review_analysis(state.get("quality", {}), quality_anchors, team.get("anchor_policy", {}))
 packet["context_summary"]["independent_skeptic"] = role_analysis["role_integrity"]["independent_skeptic"]
 packet["context_summary"]["role_integrity_degraded"] = role_analysis["role_integrity"]["degraded"]
 packet["context_summary"]["role_conflicts"] = role_analysis["role_integrity"]["role_conflicts"]
 packet["context_summary"]["scale_out_triggers"] = merge_triggers(team.get("scale_out_triggers", []), role_analysis["scale_out_triggers"])
 packet["context_summary"]["scale_out_recommended"] = bool(team.get("scale_out_recommended", False)) or bool(packet["context_summary"]["scale_out_triggers"])
+packet["context_summary"]["product_user_value"] = state.get("product", {}).get("user_value", "")
+packet["context_summary"]["product_non_goals"] = state.get("product", {}).get("non_goals", [])
+packet["context_summary"]["product_acceptance"] = state.get("product", {}).get("product_acceptance", [])
+packet["context_summary"]["product_drift_risk"] = state.get("product", {}).get("drift_risk", "")
+packet["context_summary"]["product_gate_ready"] = product_gate["ready"]
+packet["context_summary"]["product_gate_reasons"] = product_gate["reasons"]
+packet["context_summary"]["quality_anchor_ready"] = quality_anchor["ready"]
+packet["context_summary"]["quality_anchor_reasons"] = quality_anchor["reasons"]
+packet["context_summary"]["quality_review_ready"] = quality_review["ready"]
+packet["context_summary"]["quality_review_reasons"] = quality_review["reasons"]
+packet["context_summary"]["quality_review_findings"] = state.get("quality", {}).get("review_findings", [])
+packet["context_summary"]["quality_review_examples"] = state.get("quality", {}).get("review_examples", [])
+packet["context_summary"]["anchor_policy"] = team.get("anchor_policy", {})
 
 if runtime_path.exists():
     try:

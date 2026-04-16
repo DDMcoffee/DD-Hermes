@@ -1,6 +1,6 @@
 # DD Hermes Coordination Endpoints (v1)
 
-本文档把 `指挥文档/02-三层终点定义.md` 与 `指挥文档/03-执行线程干到底说明.md` 落成可执行的 endpoint/schema 约定。
+本文档把 `指挥文档/02-三层终点定义.md` 落成可执行的 endpoint/schema 约定；实现阶段的进入条件与停止条件也已经并入该页。
 
 ## 三层终点映射
 
@@ -33,6 +33,8 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
   - `summary.has_supervisor`
   - `summary.independent_skeptic`
   - `summary.role_conflicts`
+  - `summary.product_gate_ready`
+  - `summary.quality_review_ready`
 
 ### 2) `state.update`
 
@@ -55,6 +57,8 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
   - `runtime_path`
   - `state_path`
   - `memory_count`
+  - `context_summary.product_gate_ready`
+  - `context_summary.quality_anchor_ready`
 
 ### 4) `dispatch.create`
 
@@ -98,6 +102,8 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
   - `discussion.policy == 3-explorer-then-execute` 时 `synthesis_path` 必须存在
   - `lease.status` 不能是 `paused`
   - `state.team.executors` 不能为空
+  - `product gate` 必须完整，不能缺少 `user_value / non_goals / product_acceptance / drift_risk`
+  - `quality anchor` 必须已分配
 - Response required fields:
   - `pass`, `target_thread`, `blocked_reason`
 

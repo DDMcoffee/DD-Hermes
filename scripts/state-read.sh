@@ -32,7 +32,13 @@ sys.path.insert(0, str(script_dir))
 state_path = repo / "workspace" / "state" / task_id / "state.json"
 events_path = repo / "workspace" / "state" / task_id / "events.jsonl"
 
-from team_governance import merge_triggers, scale_out_analysis
+from team_governance import (
+    merge_triggers,
+    product_gate_analysis,
+    quality_anchor_analysis,
+    quality_review_analysis,
+    scale_out_analysis,
+)
 
 if not state_path.exists():
     print(json.dumps({"error": "state not found", "task_id": task_id}, ensure_ascii=False))
@@ -62,10 +68,14 @@ role_analysis = scale_out_analysis(
 )
 scale_out_triggers = merge_triggers(team.get("scale_out_triggers", []), role_analysis["scale_out_triggers"])
 role_integrity = role_analysis["role_integrity"]
+product_gate = product_gate_analysis(state.get("product", {}), product_anchors, team.get("anchor_policy", {}))
+quality_anchor = quality_anchor_analysis(state.get("quality", {}), quality_anchors, team.get("anchor_policy", {}))
+quality_review = quality_review_analysis(state.get("quality", {}), quality_anchors, team.get("anchor_policy", {}))
 summary = {
     "blocked": bool(state.get("blocked_reason")) or state.get("status") == "blocked",
     "paused": state.get("lease", {}).get("status") == "paused",
-    "goal": state.get("lease", {}).get("goal", ""),
+    "goal": state.get("product", {}).get("goal", "") or state.get("lease", {}).get("goal", ""),
+    "lease_goal": state.get("lease", {}).get("goal", ""),
     "lease_status": state.get("lease", {}).get("status", ""),
     "deadline_at": state.get("lease", {}).get("deadline_at", ""),
     "resume_after": state.get("lease", {}).get("resume_after", ""),
@@ -86,9 +96,21 @@ summary = {
     "product_anchor_count": len(product_anchors),
     "quality_anchor_count": len(quality_anchors),
     "product_goal_ready": bool(state.get("product", {}).get("goal", "")),
+    "product_user_value_ready": bool(state.get("product", {}).get("user_value", "")),
+    "product_non_goal_count": len(state.get("product", {}).get("non_goals", [])),
+    "product_acceptance_count": len(state.get("product", {}).get("product_acceptance", [])),
     "product_goal_status": state.get("product", {}).get("goal_status", ""),
     "goal_drift_flags": state.get("product", {}).get("goal_drift_flags", []),
+    "product_review_recorded": bool(state.get("product", {}).get("last_product_review_at", "")),
+    "product_gate_ready": product_gate["ready"],
+    "product_gate_reasons": product_gate["reasons"],
     "quality_review_status": state.get("quality", {}).get("review_status", ""),
+    "quality_anchor_ready": quality_anchor["ready"],
+    "quality_anchor_reasons": quality_anchor["reasons"],
+    "quality_review_recorded": bool(state.get("quality", {}).get("last_review_at", "")),
+    "quality_review_ready": quality_review["ready"],
+    "quality_review_reasons": quality_review["reasons"],
+    "anchor_policy_constant_seats": bool(team.get("anchor_policy", {}).get("constant_anchor_seats", False)),
     "independent_skeptic": role_integrity["independent_skeptic"],
     "role_integrity_degraded": role_integrity["degraded"],
     "role_conflicts": role_integrity["role_conflicts"],

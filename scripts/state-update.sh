@@ -40,6 +40,9 @@ from team_governance import (
     default_quality_anchors,
     default_skeptics,
     normalize_people,
+    product_gate_analysis,
+    quality_anchor_analysis,
+    quality_review_analysis,
     scale_out_analysis,
 )
 
@@ -240,6 +243,11 @@ if "last_selected_memory_ids" in data:
 state.setdefault("product", {})
 if "product_goal" in data:
     state["product"]["goal"] = data["product_goal"]
+    lease_goal = state.get("lease", {}).get("goal", "")
+    previous_goal = before.get("product", {}).get("goal", "") if isinstance(before.get("product"), dict) else ""
+    if "goal" not in data and (not isinstance(lease_goal, str) or not lease_goal.strip() or lease_goal == previous_goal):
+        state.setdefault("lease", {})
+        state["lease"]["goal"] = data["product_goal"]
 if "user_value" in data:
     state["product"]["user_value"] = data["user_value"]
 if "non_goals" in data:
@@ -359,9 +367,19 @@ state["quality"].setdefault("review_examples", [])
 state["quality"].setdefault("last_review_at", "")
 state["quality"]["anchor"] = quality_anchors[0] if quality_anchors else ""
 
+product_gate = product_gate_analysis(state.get("product", {}), product_anchors, team.get("anchor_policy", {}))
+quality_anchor = quality_anchor_analysis(state.get("quality", {}), quality_anchors, team.get("anchor_policy", {}))
+quality_review = quality_review_analysis(state.get("quality", {}), quality_anchors, team.get("anchor_policy", {}))
+
 state.setdefault("notes", [])
 if data.get("note"):
-    state["notes"].append({"timestamp": timestamp, "text": data["note"]})
+    state["notes"].append({
+        "timestamp": timestamp,
+        "text": data["note"],
+        "product_gate_ready": product_gate["ready"],
+        "quality_anchor_ready": quality_anchor["ready"],
+        "quality_review_ready": quality_review["ready"],
+    })
 
 state["updated_at"] = timestamp
 state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

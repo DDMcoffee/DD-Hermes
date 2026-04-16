@@ -25,7 +25,7 @@ fi
 repo=$(shared_repo_root)
 state_path="$repo/workspace/state/$task_id/state.json"
 
-payload=$(python3 - <<'PY' "$state_path" "$target_thread"
+payload=$(python3 - <<'PY' "$state_path" "$target_thread" "$SCRIPT_DIR/../scripts"
 import json
 import re
 import sys
@@ -33,6 +33,10 @@ from pathlib import Path
 
 state_path = Path(sys.argv[1])
 target = sys.argv[2]
+script_dir = Path(sys.argv[3]).resolve()
+sys.path.insert(0, str(script_dir))
+
+from team_governance import product_gate_analysis, quality_anchor_analysis
 
 if not state_path.exists():
     print(json.dumps({
@@ -94,6 +98,10 @@ if target == "execution" and lease_status == "paused":
 
 if target == "execution":
     product = state.get("product", {}) if isinstance(state.get("product"), dict) else {}
+    quality = state.get("quality", {}) if isinstance(state.get("quality"), dict) else {}
+    team = state.get("team", {}) if isinstance(state.get("team"), dict) else {}
+    product_gate = product_gate_analysis(product, team.get("product_anchors", []), team.get("anchor_policy", {}))
+    quality_anchor = quality_anchor_analysis(quality, team.get("quality_anchors", []), team.get("anchor_policy", {}))
     goal = product.get("goal", "").strip()
     goal_status = product.get("goal_status", "")
     drift_flags = product.get("goal_drift_flags", [])
@@ -103,8 +111,11 @@ if target == "execution":
         reasons.append(f"product.goal_status is {goal_status}; resolve product drift before entering implementation mode")
     if drift_flags:
         reasons.append(f"product.goal_drift_flags present: {', '.join(drift_flags)}")
+    if not product_gate["ready"]:
+        reasons.append(f"product gate not ready: {', '.join(product_gate['reasons'])}")
+    if not quality_anchor["ready"]:
+        reasons.append(f"quality anchor not ready: {', '.join(quality_anchor['reasons'])}")
 
-    team = state.get("team", {}) if isinstance(state.get("team"), dict) else {}
     executors = [e for e in team.get("executors", []) if isinstance(e, str) and e.strip()]
     if not executors:
         reasons.append("no executors assigned in state.team; run dispatch-create.sh first")
