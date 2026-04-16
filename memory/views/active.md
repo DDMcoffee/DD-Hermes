@@ -6,6 +6,8 @@
   User does not want to manually run generator/bootstrap helper commands; assistant should run them directly and provide ready-to-use outputs.
 - `task/dd-hermes-endpoint-router-v1` | commitment | scope=dd-hermes-endpoint-router-v1 | confidence=0.9
   Router task uses task-bound backfill artifacts to trace an execution slice that was already integrated on main.
+- `task/dd-hermes-experience-demo-v1` | commitment | scope=dd-hermes-experience-demo-v1 | confidence=0.95
+  The first DD Hermes experience demo proved end-to-end task flow by auto-routing architecture work into discussion mode and tightening execution gating.
 - `task/dd-hermes-multi-agent-dispatch` | commitment | scope=dd-hermes-multi-agent-dispatch | confidence=0.9
   Dispatch task uses task-bound backfill artifacts to trace the integrated multi-agent dispatch slice and its degraded skeptic truth on main.
 - `task/worktree-first` | commitment | scope=multi-agent sprint execution | confidence=1.00

@@ -1,17 +1,17 @@
 # Memory Views
 
-- Total cards: 7
-- Active: 7
+- Total cards: 8
+- Active: 8
 - Expired: 0
 - Conflict events: 0
 
 ## By Kind
 
 - user: 2
-- task: 3
+- task: 4
 - world: 1
 - self: 1
 
 ## By Status
 
-- active: 7
+- active: 8
