@@ -41,6 +41,16 @@
 - workspace 产物只做运行时协作，不替代长期知识库。
 - 进入 execution thread 前，必须至少有 `contract + state + context + handoff + worktree`。
 
+## Multi-Agent Strategy
+
+- 单线程：只用于治理、裁决、归档、状态回填、文档修订、trace 收口这类不产生 execution slice 的任务。
+- `Lead + Executor`：用于单一、边界清晰、写集可控的实现切片；前提是 `contract + state + context + handoff + worktree` 已齐备。
+- `Lead + Executor + Skeptic`：用于架构、策略、控制面、线程模型、权限/安全边界、状态机和高回归风险任务；`Skeptic` 必须是独立质疑位。
+- `Lead + Executor A + Executor B + Skeptic`：用于需要两条独立证据链才能证明正确性的任务，例如公共 schema / protocol、并发状态机、跨切片集成、上线前关键路径。
+- 若 `discussion.policy == 3-explorer-then-execute`，任何执行形态都必须先有 `synthesis_path`，否则不得进入 execution thread。
+- 若 `state.team.role_integrity.independent_skeptic == false`，必须显式标记为 `degraded`，不得宣称“已完成独立监督”。
+- 若任务只是收口已有能力的 task-bound traceability，优先由指挥线程单线程完成，不为文档回填额外开 execution thread。
+
 ## Git Rules
 
 - 真实仓库在创建 Expert worktree 前必须先有一个 baseline commit。

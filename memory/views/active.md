@@ -4,6 +4,10 @@
   User prefers Plotly in analysis-facing data visualization tasks.
 - `user/user-pref-no-manual-generator-commands` | preference | scope=dd-hermes workflow command delegation | confidence=1.0
   User does not want to manually run generator/bootstrap helper commands; assistant should run them directly and provide ready-to-use outputs.
+- `task/dd-hermes-endpoint-router-v1` | commitment | scope=dd-hermes-endpoint-router-v1 | confidence=0.9
+  Router task uses task-bound backfill artifacts to trace an execution slice that was already integrated on main.
+- `task/dd-hermes-multi-agent-dispatch` | commitment | scope=dd-hermes-multi-agent-dispatch | confidence=0.9
+  Dispatch task uses task-bound backfill artifacts to trace the integrated multi-agent dispatch slice and its degraded skeptic truth on main.
 - `task/worktree-first` | commitment | scope=multi-agent sprint execution | confidence=1.00
   Multi-agent implementation starts with sprint bootstrap and isolated worktrees.
 - `world/no-destruction-without-confirmation` | constraint | scope=destructive-ops repo-safety | confidence=1.00

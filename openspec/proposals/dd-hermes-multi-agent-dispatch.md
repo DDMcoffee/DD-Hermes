@@ -3,44 +3,44 @@ status: proposed
 owner: lead
 scope: dd-hermes-multi-agent-dispatch
 decision_log:
-  - Materialize multi-agent assignments from task state instead of stopping at role metadata.
+  - Materialize task-bound dispatch assignments from `state.team` instead of relying on implicit chat roles.
+  - Expose degraded role-integrity truth when `Skeptic` is not independent.
 checks:
   - bash -n scripts/dispatch-create.sh tests/smoke.sh
   - ./tests/smoke.sh workflow
   - ./tests/smoke.sh all
 links:
+  - scripts/dispatch-create.sh
+  - scripts/team_governance.py
   - docs/long-term-agent-division.md
-  - scripts/state-init.sh
-  - scripts/state-update.sh
-  - scripts/context-build.sh
+  - README.md
+  - workspace/contracts/dd-hermes-multi-agent-dispatch.md
+  - workspace/exploration/exploration-lead-dd-hermes-multi-agent-dispatch.md
 ---
 
 # Proposal
 
 ## What
 
-Add a `scripts/dispatch-create.sh` entrypoint that reads `workspace/state/<task_id>/state.json`, creates or confirms executor worktrees, and emits normalized assignment payloads for `Supervisor`, `Executor`, and `Skeptic`.
-
-Extend the same role-governance model so dispatch, state, and context can tell whether the `Skeptic` is actually independent or only a degraded fallback.
+Add a concrete multi-agent dispatch layer that turns `state.team` into auditable `Supervisor` / `Executor` / `Skeptic` assignments, then expose degraded role-integrity truth when `Skeptic` is not independent.
 
 ## Why
 
-The repo already models long-term roles in `state.team`, but it still does not turn those roles into runnable execution units. Without a dispatch layer, “multi agent” remains documentation and metadata rather than runtime behavior.
+DD Hermes already had role concepts in docs, but it still lacked a task-bound dispatch surface that could materialize assignments, create executor worktrees, and tell the truth about role overlap. Without that, “多 agent” remained a naming convention instead of an executable control-plane capability.
 
 ## Non-goals
 
-- Do not implement a full scheduler or automatic supervisor loop in this change.
-- Do not redesign the worktree model or replace existing `worktree-create.sh`.
-- Do not add external orchestration services.
+- Do not add a new runtime service or scheduler.
+- Do not pretend degraded skeptic fallback is equivalent to independent supervision.
+- Do not redesign unrelated endpoint or git-management behavior.
 
 ## Acceptance
 
-- `dispatch-create.sh` returns at least one supervisor assignment, one skeptic assignment, and one assignment per executor listed in task state.
-- Executor assignments create or confirm isolated worktrees under `.worktrees/`.
-- Dispatch output includes enough data for a caller to start each role without manually reconstructing paths.
-- Dispatch output exposes whether `Skeptic` is independent, and reports `role_conflicts` when one agent is covering multiple roles.
-- Default skeptic fallback prefers a non-executor over collapsing skepticism back into the implementation role.
-- Smoke coverage fails if multi-agent dispatch collapses back to a single implicit executor flow.
+- `scripts/dispatch-create.sh` materializes `Supervisor` / `Executor` / `Skeptic` assignments from `state.team`.
+- Dispatch output includes `independent_skeptic`, `degraded`, `role_conflicts`, and `scale_out_triggers`.
+- Dispatch either creates or reuses executor worktrees and emits next-command packets per role.
+- Smoke coverage verifies both independent-skeptic and degraded-skeptic dispatch behavior.
+- Docs and README make the dispatch surface and degraded truth visible.
 
 ## Verification
 
