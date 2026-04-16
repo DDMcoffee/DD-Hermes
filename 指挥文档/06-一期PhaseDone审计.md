@@ -1,9 +1,11 @@
 ---
-phase_status: 一期已经达到“体验版本 v0 已出现”，但还没有达到完整的 `phase done`。
-latest_proof_task_id: dd-hermes-experience-demo-v1
-latest_proof_archive: openspec/archive/dd-hermes-experience-demo-v1.md
-current_mainline_task_id: dd-hermes-demo-entry-v1
-current_mainline_doc: 指挥文档/07-体验入口任务说明.md
+phase_status: 一期已经达到完整的 `phase done`；体验入口和单线程默认模型都已落到 main。
+latest_proof_task_id: dd-hermes-demo-entry-v1
+latest_proof_archive: openspec/archive/dd-hermes-demo-entry-v1.md
+current_mainline_task_id: 待定义 phase-2
+current_mainline_doc: 指挥文档/05-体验版本路线图.md
+current_gap_1: 下一阶段主线仍待定义，需要切到 phase-2 规划。
+current_gap_2: 若要继续提升质量，应把独立 Skeptic 默认化是否能力化单独立项。
 ---
 
 # DD Hermes 一期 Phase Done 审计
@@ -15,14 +17,14 @@ current_mainline_doc: 指挥文档/07-体验入口任务说明.md
 
 ## 审计结论
 
-一期已经达到“体验版本 v0 已出现”，但还没有达到完整的 `phase done`。
+一期已经达到完整的 `phase done`。
 
 更准确地说：
 
 - `体验版本完成`：是。
-- `一期完全收口`：还不是。
+- `一期完全收口`：是。
 
-原因不是控制面还缺大块能力，而是还差最后一层“用户可见入口 + phase 级裁决”。
+原因很直接：最后一层“用户可见入口 + phase 级裁决”已经由 `dd-hermes-demo-entry-v1` 收口并合入 `main`。
 
 ## 已经完成的事实
 
@@ -35,31 +37,33 @@ current_mainline_doc: 指挥文档/07-体验入口任务说明.md
    - 有 archive
    - 有 task memory
    - 证明了一次真实的 end-to-end 体验闭环已经成立
+5. `dd-hermes-demo-entry-v1` 已经完成：
+   - 有 execution commit
+   - 有 integration commit
+   - 有 archive
+   - 把体验版真相收成了 `./scripts/demo-entry.sh` 和本页这类单一入口
 
-所以，DD Hermes 不是“快有体验版”，而是“已经有体验版 v0，只是入口还不够清楚”。
+所以，DD Hermes 不是“快有体验版”，而是“一期体验版本已经收口完成”。
 
-## 还没达到 `phase done` 的原因
+## 为什么现在算 `phase done`
 
-### 1. 缺少单一用户可见入口
+### 1. 单一用户可见入口已经建立
 
-当前体验版真相分散在：
+现在已经有：
 
-- `README.md`
-- `指挥文档/05-体验版本路线图.md`
-- `openspec/archive/dd-hermes-experience-demo-v1.md`
-- task memory / handoff / closeout / state 痕迹
+- `./scripts/demo-entry.sh`
+- `指挥文档/06-一期PhaseDone审计.md`
+- `openspec/archive/dd-hermes-demo-entry-v1.md`
 
-这说明体验版已经存在，但还没有一个“给人看”的统一入口。
+这说明体验版不仅存在，而且已经有了单一入口和对应的主线收口证据。
 
-### 2. 缺少 phase 级裁决
+### 2. phase 级裁决已经固定成仓库事实
 
-现在仓库已经证明：
+本页 frontmatter 和正文现在明确固定：
 
-- 多 agent 可以跑真实任务
-- 讨论模式和执行模式能被真实 gate 管住
-- task 能从定义一路收成 `done/archive`
-
-但“一期到底什么时候算收口”还没被最后裁决成仓库级共识。需要把下一条主线和剩余 blocker 明确写死，避免又回到无限补脚手架。
+- 一期已到 `phase done`
+- 最新证明任务是 `dd-hermes-demo-entry-v1`
+- 下一条主线不再属于一期，而是 `phase-2` 待定义
 
 ## 关于 `独立 Skeptic` 的裁决
 
@@ -88,27 +92,22 @@ current_mainline_doc: 指挥文档/07-体验入口任务说明.md
 
 ## 剩余 blocker
 
-当前只剩 2 个 phase 级 blocker：
-
-1. 建立一个单一、真实、用户可见的体验入口。
-2. 把“一期已达到体验版 v0，但尚未 phase done”的裁决固化为仓库事实。
-
-其中第 2 条已经由本页完成；当前唯一剩余的执行 blocker 是第 1 条。
+- 一期无剩余 blocker。
+- 下一阶段只有新的规划问题，没有一期遗留问题。
 
 ## 下一条唯一主线任务
 
-下一条唯一主线任务应当是：
+下一条唯一主线暂未定义。
 
-- `dd-hermes-demo-entry-v1`
+当前正确表述是：
 
-它不是新的控制面扩展，而是把已经证明过的体验版事实做成：
-
-- 一个命令入口
-- 一页中文入口说明
+- 一期已经收口。
+- 下一步应切到 `phase-2` 规划。
+- “独立 Skeptic 是否默认化”可以成为 phase-2 的候选主线之一。
 
 ## 审计后的线程策略
 
 - 这个线程继续作为唯一主线程。
-- 下一步在当前线程内继续推进实现，不再默认切到新的聊天线程。
+- 默认仍然是单线程角色切换 + 按需隔离 worktree。
 - 不开第二个并跑主线线程。
-- `dd-hermes-demo-entry-v1` 完成后，再决定是否已经达到一期 `phase done`。
+- 下一步先做 `phase-2` 目标定义，再决定是否需要新的实现任务。

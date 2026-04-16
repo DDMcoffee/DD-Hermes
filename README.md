@@ -6,7 +6,7 @@ DD Hermes 是一个 workspace-first 的 Hermes agent harness，用来在 Codex I
 
 - 先运行：`./scripts/demo-entry.sh`
 - 当前最适合直接阅读的一页：`指挥文档/06-一期PhaseDone审计.md`
-- 当前主线任务说明：`指挥文档/07-体验入口任务说明.md`
+- 下一阶段路线说明：`指挥文档/05-体验版本路线图.md`
 
 ## What This Repo Is
 

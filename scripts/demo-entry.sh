@@ -58,6 +58,8 @@ proof_task=$(read_frontmatter_field latest_proof_task_id)
 archive_rel=$(read_frontmatter_field latest_proof_archive)
 task_doc_rel=$(read_frontmatter_field current_mainline_doc)
 next_task=$(read_frontmatter_field current_mainline_task_id)
+gap_1=$(read_frontmatter_field current_gap_1)
+gap_2=$(read_frontmatter_field current_gap_2)
 archive_doc="$repo/$archive_rel"
 task_doc="$repo/$task_doc_rel"
 
@@ -100,8 +102,8 @@ DD Hermes 体验入口
 - 任务说明：$task_doc_rel
 
 当前还没做到什么
-- 还没有完成一期的最终收口裁决
-- 还需要把单一用户可见入口持续维护为 repo 真相，而不是口头说明
+- $gap_1
+- $gap_2
 
 推荐阅读顺序
 1. 先看：$landing_doc_rel

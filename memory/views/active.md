@@ -4,6 +4,8 @@
   User prefers Plotly in analysis-facing data visualization tasks.
 - `user/user-pref-no-manual-generator-commands` | preference | scope=dd-hermes workflow command delegation | confidence=1.0
   User does not want to manually run generator/bootstrap helper commands; assistant should run them directly and provide ready-to-use outputs.
+- `task/dd-hermes-demo-entry-v1` | commitment | scope=dd-hermes-demo-entry-v1 | confidence=0.95
+  The DD Hermes phase-1 closeout added a single-command experience entry and moved the default workflow to single-thread role switching.
 - `task/dd-hermes-endpoint-router-v1` | commitment | scope=dd-hermes-endpoint-router-v1 | confidence=0.9
   Router task uses task-bound backfill artifacts to trace an execution slice that was already integrated on main.
 - `task/dd-hermes-experience-demo-v1` | commitment | scope=dd-hermes-experience-demo-v1 | confidence=0.95
