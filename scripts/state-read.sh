@@ -41,6 +41,7 @@ if events_path.exists():
 
 runtime = state.get("runtime", {})
 verification = state.get("verification", {})
+discussion = state.get("discussion", {})
 summary = {
     "blocked": bool(state.get("blocked_reason")) or state.get("status") == "blocked",
     "paused": state.get("lease", {}).get("status") == "paused",
@@ -52,6 +53,9 @@ summary = {
     "dispatch_cursor": state.get("lease", {}).get("dispatch_cursor", ""),
     "current_focus": state.get("current_focus", ""),
     "active_expert": state.get("active_expert", ""),
+    "discussion_policy": discussion.get("policy", ""),
+    "decision_id": discussion.get("decision_id", ""),
+    "current_executor": discussion.get("current_executor", ""),
     "verification_complete": bool(verification.get("last_pass")) and bool(verification.get("verified_steps")),
     "has_context": bool(runtime.get("last_context_path")) and Path(runtime.get("last_context_path", "")).exists(),
     "has_runtime_report": bool(runtime.get("last_runtime_report_path")) and Path(runtime.get("last_runtime_report_path", "")).exists(),

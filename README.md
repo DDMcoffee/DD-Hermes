@@ -25,7 +25,9 @@ DD Hermes 是一个 workspace-first 的 Hermes agent harness，用来在 Codex I
 - `.codex/templates/`: Sprint、Handoff、Exploration、OpenSpec 模板。
 - `hooks/`: 安全门、质量门、类型检查、会话日志、通知适配。
 - `docs/context-runtime-state-memory.md`: context / runtime / state / memory 的边界定义。
+- `docs/decision-discussion.md`: 3-explorer 决策讨论协议。
 - `docs/git-management.md`: baseline commit、worktree 生命周期和提交边界。
+- `docs/textbook-agent.md`: 教材记录 agent 的职责和每日总结结构。
 - `memory/`: 记忆卡、journal 和人类可读视图。
 - `openspec/`: proposal/design/task/archive 生命周期目录和模板。
 - `scripts/`: worktree、context/runtime/state、记忆读写、spec 检查、验证编排。
@@ -40,7 +42,10 @@ DD Hermes 是一个 workspace-first 的 Hermes agent harness，用来在 Codex I
 5. 用 `scripts/memory-write.sh` / `scripts/memory-manage.sh` 维护记忆卡和 journal，并用 `scripts/memory-refresh-views.sh` 刷新视图。
 6. 用 `scripts/state-read.sh` / `scripts/state-update.sh` 推进任务级短期状态，而不是污染长期记忆。
 7. 用 `scripts/verify-loop.sh` 驱动技术层与用户层验证。
-8. 用 `tests/smoke.sh` 验证 hooks、workflow、context/state、memory 和 verify gate 的闭环。
+8. 用 `scripts/decision-init.sh` 建立 3-explorer 决策讨论包，再由主线程收敛。
+9. 用 `scripts/execution-thread-prompt.sh` 生成切到代码执行线程时的提示包。
+10. 用 `scripts/textbook-record.sh` 记录教材条目，用 `scripts/textbook-summary.sh` 生成日总结草稿。
+11. 用 `tests/smoke.sh` 验证 hooks、workflow、discussion、context/state、memory 和 verify gate 的闭环。
 
 ## Git Management
 
@@ -57,6 +62,7 @@ DD Hermes 是一个 workspace-first 的 Hermes agent harness，用来在 Codex I
 - 执行线程是数据面：消费 `workspace/state/<task_id>/context.json`，在隔离 worktree 中编码并把结果写回 handoff / exploration / verification。
 - 多 agent 并行不是靠聊天历史隐式维持，而是靠 `contract + state + context + worktree` 这四类显式工件维持。
 - 长任务通过 `state.lease` 建模：目标、运行窗口、暂停原因、恢复时间点都写进 state，而不是塞进聊天历史。
+- 涉及架构或方向性选择时，默认先走 `3-explorer-then-execute`：先讨论，后编码。
 
 ## Verification
 
@@ -69,7 +75,9 @@ DD Hermes 是一个 workspace-first 的 Hermes agent harness，用来在 Codex I
 ## Related Docs
 
 - `docs/context-runtime-state-memory.md`
+- `docs/decision-discussion.md`
 - `docs/git-management.md`
+- `docs/textbook-agent.md`
 - `memory 哲学二.md`
 - `openspec/README.md`
 - `.codex/skills/*/SKILL.md`

@@ -24,6 +24,7 @@
 - Expert 负责在独立 worktree 中实现，不在主工作区直接混写。
 - 指挥线程维护 `contract + state + context`，执行线程消费这些工件并产出 code + handoff + verification。
 - `state` 只保存短期控制面，`memory` 只保存跨会话知识；两者不能互相替代。
+- 架构性问题默认先走 `3-explorer-then-execute`，先收三份不同视角结论，再由主线程归并裁决。
 
 ## Dangerous Ops
 
@@ -38,6 +39,7 @@
 - `BLOCKED` 是有效探索结果，不视为失败。
 - handoff 必须写清 scope、已决策事项、风险和下一步检查。
 - workspace 产物只做运行时协作，不替代长期知识库。
+- 进入 execution thread 前，必须至少有 `contract + state + context + handoff + worktree`。
 
 ## Git Rules
 

@@ -58,6 +58,15 @@ allowed = {
     "commit_branch",
     "commit_upstream",
     "commit_remote_urls",
+    "discussion_policy",
+    "decision_id",
+    "explorer_queue",
+    "explorer_findings",
+    "synthesis_path",
+    "current_executor",
+    "textbook_entry_path",
+    "textbook_summary_path",
+    "textbook_summary_at",
     "openspec_stage",
     "proposal_path",
     "design_path",
@@ -134,6 +143,28 @@ if "commit_upstream" in data:
     state["git"]["latest_upstream"] = data["commit_upstream"]
 if "commit_remote_urls" in data:
     state["git"]["latest_remote_urls"] = data["commit_remote_urls"]
+
+state.setdefault("discussion", {})
+if "discussion_policy" in data:
+    state["discussion"]["policy"] = data["discussion_policy"]
+if "decision_id" in data:
+    state["discussion"]["decision_id"] = data["decision_id"]
+if "explorer_queue" in data:
+    state["discussion"]["explorer_queue"] = data["explorer_queue"]
+if "explorer_findings" in data:
+    state["discussion"]["explorer_findings"] = data["explorer_findings"]
+if "synthesis_path" in data:
+    state["discussion"]["synthesis_path"] = data["synthesis_path"]
+if "current_executor" in data:
+    state["discussion"]["current_executor"] = data["current_executor"]
+
+state.setdefault("textbook", {})
+if "textbook_entry_path" in data:
+    state["textbook"]["last_entry_path"] = data["textbook_entry_path"]
+if "textbook_summary_path" in data:
+    state["textbook"]["last_summary_path"] = data["textbook_summary_path"]
+if "textbook_summary_at" in data:
+    state["textbook"]["last_summary_at"] = data["textbook_summary_at"]
 
 state.setdefault("verification", {})
 for key in ("verified_steps", "verified_files"):

@@ -277,6 +277,31 @@ PY
 EOF
 }
 
+run_discussion_textbook() {
+  local decision
+  decision=$("$ROOT/scripts/decision-init.sh" --task-id smoke-sprint --decision-id decision-smoke)
+  assert_json_field "$decision" "len(data['explorer_paths']) == 3 and data['synthesis_path'].endswith('synthesis.md')"
+
+  local state_after_decision
+  state_after_decision=$("$ROOT/scripts/state-read.sh" --task-id smoke-sprint)
+  assert_json_field "$state_after_decision" "data['summary']['discussion_policy'] == '3-explorer-then-execute' and data['summary']['decision_id'] == 'decision-smoke'"
+
+  local prompt
+  prompt=$("$ROOT/scripts/execution-thread-prompt.sh" --task-id smoke-sprint --expert expert-b)
+  assert_json_field "$prompt" "'context.json' in data['prompt'] and data['expert'] == 'expert-b'"
+
+  local textbook_entry
+  textbook_entry=$("$ROOT/scripts/textbook-record.sh" --topic "codex-workflow" <<'EOF'
+{"date":"2026-04-16","experience":"Split command and execution threads.","links":["https://example.com/thread-model"],"conclusions":"Commander thread should not code directly.","patterns":"Discuss first, then execute.","next_lesson":"Decision synthesis."}
+EOF
+)
+  assert_json_field "$textbook_entry" "data['entry_path'].endswith('codex-workflow.md')"
+
+  local textbook_summary
+  textbook_summary=$("$ROOT/scripts/textbook-summary.sh" 2026-04-16)
+  assert_json_field "$textbook_summary" "data['summary_path'].endswith('2026-04-16.md') and data['entry_count'] >= 1"
+}
+
 run_verify() {
   local pass
   pass=$("$ROOT/scripts/verify-loop.sh" --task-id smoke-sprint --max-rounds 2 --checks "true" --user-gate pass)
@@ -346,6 +371,7 @@ case "$SECTION" in
     run_memory
     run_workflow
     run_git_management
+    run_discussion_textbook
     run_context_state
     run_verify
     run_schema
@@ -356,6 +382,10 @@ case "$SECTION" in
   git)
     run_workflow
     run_git_management
+    ;;
+  discussion)
+    run_workflow
+    run_discussion_textbook
     ;;
   context)
     run_workflow

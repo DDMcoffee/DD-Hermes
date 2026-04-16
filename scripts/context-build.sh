@@ -119,12 +119,14 @@ packet = {
     "runtime": runtime,
     "state": state,
     "memory": memory,
+    "discussion": state.get("discussion", {}),
     "continuation": {
         "goal": state.get("lease", {}).get("goal", ""),
         "lease": state.get("lease", {}),
         "current_focus": state.get("current_focus", ""),
         "active_expert": state.get("active_expert", ""),
         "blocked_reason": state.get("blocked_reason", ""),
+        "current_executor": state.get("discussion", {}).get("current_executor", ""),
     },
     "documents": {
         "contract": contract,
@@ -140,6 +142,8 @@ packet = {
         "has_task": bool(openspec["task"]),
         "lease_status": state.get("lease", {}).get("status", ""),
         "resume_checkpoint": state.get("lease", {}).get("resume_checkpoint", ""),
+        "discussion_policy": state.get("discussion", {}).get("policy", ""),
+        "decision_id": state.get("discussion", {}).get("decision_id", ""),
     },
 }
 context_path.write_text(json.dumps(packet, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

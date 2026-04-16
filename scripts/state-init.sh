@@ -113,6 +113,14 @@ else:
             "latest_upstream": "",
             "latest_remote_urls": {},
         },
+        "discussion": {
+            "policy": "direct",
+            "decision_id": "",
+            "explorer_queue": [],
+            "explorer_findings": [],
+            "synthesis_path": "",
+            "current_executor": "",
+        },
         "verification": {
             "last_pass": False,
             "last_run_at": "",
@@ -142,6 +150,11 @@ else:
             "reads": [],
             "writes": [],
             "last_selected_ids": [],
+        },
+        "textbook": {
+            "last_entry_path": "",
+            "last_summary_path": "",
+            "last_summary_at": "",
         },
         "notes": [],
     }
