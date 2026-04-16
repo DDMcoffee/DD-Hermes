@@ -23,7 +23,7 @@ DD Hermes 是一个 workspace-first 的 Hermes agent harness，用来在 Codex I
 - `CLAUDE.md`: Claude Code 兼容 shim，不是主规范。
 - `.codex/skills/`: `spec-first`、`deep-research`、`coding-harness`、`auto-verify`。
 - `.codex/templates/`: Sprint、Handoff、Exploration、OpenSpec 模板。
-- `hooks/`: 安全门、质量门、类型检查、会话日志、通知适配。
+- `hooks/`: 安全门、质量门、线程切换门、类型检查、会话日志、通知适配。
 - `docs/coordination-endpoints.md`: 控制面 endpoint 语义和三层终点映射。
 - `docs/artifact-schemas.md`: contract/handoff/state/closeout 字段级 schema。
 - `docs/context-runtime-state-memory.md`: context / runtime / state / memory 的边界定义。
@@ -50,7 +50,12 @@ DD Hermes 是一个 workspace-first 的 Hermes agent harness，用来在 Codex I
 10. 用 `scripts/execution-thread-prompt.sh` 生成切到代码执行线程时的提示包。
 11. 用 `scripts/textbook-record.sh` 记录教材条目，用 `scripts/textbook-summary.sh` 生成日总结草稿。
 12. 用 `scripts/check-artifact-schemas.sh` 校验 contract/handoff/state/closeout 必填字段。
-13. 用 `tests/smoke.sh` 验证 hooks、workflow、dispatch、endpoint、discussion、context/state、memory 和 verify gate 的闭环。
+13. 用 `scripts/git-integrate-task.sh` 合并执行分支回主分支，含 pre-check（handoff / verification / dirty）和 state 回写。
+14. 用 `scripts/lease-check.sh` 检查任务 lease 是否超时，支持 `--auto-pause` 自动暂停。
+15. 用 `scripts/session-analytics.sh` 分析会话日志，统计工具使用、错误频率、碎片化得分，自动建议 KB 条目。
+16. 用 `scripts/memory-decay-schedule.sh` 扫描超龄记忆卡并执行 confidence 衰减。
+17. 用 `hooks/thread-switch-gate.sh` 在派发执行线程前检查 synthesis 是否完成、lease 是否暂停、executor 是否分配。
+18. 用 `tests/smoke.sh` 验证 hooks、workflow、dispatch、endpoint、discussion、context/state、memory 和 verify gate 的闭环。
 
 ## Git Management
 
@@ -58,6 +63,7 @@ DD Hermes 是一个 workspace-first 的 Hermes agent harness，用来在 Codex I
 - 用 `scripts/git-bootstrap.sh` 生成首个 managed baseline commit；没有这个 commit，真实仓库里的 `git worktree` 流程不能启动。
 - 用 `scripts/git-snapshot.sh` 统一输出当前 worktree 的 branch / HEAD / upstream / remote / dirty 真相。
 - 用 `scripts/git-commit-task.sh` 把执行线程的改动收口成 execution commit，并把 commit 锚点写回 task state。
+- 用 `scripts/git-integrate-task.sh` 将执行分支合并回主分支（integration commit），并更新 state。
 - 用 `scripts/worktree-create.sh` / `scripts/worktree-remove.sh` 管理 Expert worktree 生命周期。
 - 用 `scripts/dispatch-create.sh` 从 `state.team` 派发多角色 assignment，并为 executor 物化 worktree；同时暴露 `independent_skeptic` / `role_conflicts` 真相，避免“名义三角色、实际同一人兼岗”。
 - 指挥线程只负责基线、分支和验收边界；执行线程只在自己的 worktree 内提交。
