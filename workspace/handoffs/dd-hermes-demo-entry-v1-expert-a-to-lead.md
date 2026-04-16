@@ -52,7 +52,7 @@ This execution slice does two things together: it adds the first user-visible DD
 - `./scripts/spec-first.sh --changed-files AGENTS.md,docs/context-runtime-state-memory.md,scripts/demo-entry.sh,scripts/execution-thread-prompt.sh,README.md,指挥文档/README.md,指挥文档/03-执行线程干到底说明.md,指挥文档/04-任务重校准与线程策略.md,指挥文档/06-一期PhaseDone审计.md,指挥文档/07-体验入口任务说明.md --spec-path openspec/proposals/dd-hermes-demo-entry-v1.md --task-id dd-hermes-demo-entry-v1`
 - `bash -n scripts/demo-entry.sh scripts/execution-thread-prompt.sh`
 - `./scripts/demo-entry.sh`
-- execution commit: pending lead commit after verification
+- execution commit: `cae67bf` (`feat(dd-hermes-demo-entry-v1): add single-thread experience entry`)
 
 ## Open Questions
 
