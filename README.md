@@ -34,13 +34,13 @@ DD Hermes 是一个 workspace-first 的 Hermes agent harness，用来在 Codex I
 ## Core Workflows
 
 1. 用 `scripts/sprint-init.sh` 初始化一次 Sprint。
-2. 用 `scripts/worktree-create.sh` 为 Expert 创建隔离 worktree。
+2. 用 `scripts/state-read.sh` / `scripts/state-update.sh` 推进任务级短期状态，而不是污染长期记忆。
 3. 用 `scripts/context-build.sh` 在指挥线程生成任务 context packet，供执行线程消费。
-4. 在实现前运行 `scripts/spec-first.sh` 确认是否必须先写 spec。
-5. 用 `scripts/memory-write.sh` / `scripts/memory-manage.sh` 维护记忆卡和 journal，并用 `scripts/memory-refresh-views.sh` 刷新视图。
-6. 用 `scripts/state-read.sh` / `scripts/state-update.sh` 推进任务级短期状态，而不是污染长期记忆。
+4. 用 `scripts/dispatch-create.sh` 把 `Supervisor` / `Executor` / `Skeptic` 角色物化为实际 assignment，并为 executor 建立或确认隔离 worktree。
+5. 在实现前运行 `scripts/spec-first.sh` 确认是否必须先写 spec。
+6. 用 `scripts/memory-write.sh` / `scripts/memory-manage.sh` 维护记忆卡和 journal，并用 `scripts/memory-refresh-views.sh` 刷新视图。
 7. 用 `scripts/verify-loop.sh` 驱动技术层与用户层验证。
-8. 用 `tests/smoke.sh` 验证 hooks、workflow、context/state、memory 和 verify gate 的闭环。
+8. 用 `tests/smoke.sh` 验证 hooks、workflow、dispatch、context/state、memory 和 verify gate 的闭环。
 
 ## Git Management
 
@@ -49,6 +49,7 @@ DD Hermes 是一个 workspace-first 的 Hermes agent harness，用来在 Codex I
 - 用 `scripts/git-snapshot.sh` 统一输出当前 worktree 的 branch / HEAD / upstream / remote / dirty 真相。
 - 用 `scripts/git-commit-task.sh` 把执行线程的改动收口成 execution commit，并把 commit 锚点写回 task state。
 - 用 `scripts/worktree-create.sh` / `scripts/worktree-remove.sh` 管理 Expert worktree 生命周期。
+- 用 `scripts/dispatch-create.sh` 从 `state.team` 派发多角色 assignment，并为 executor 物化 worktree。
 - 指挥线程只负责基线、分支和验收边界；执行线程只在自己的 worktree 内提交。
 
 ## Thread Model

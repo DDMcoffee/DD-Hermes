@@ -67,6 +67,20 @@
 - `Executor`：`.worktrees/`、execution commit、`workspace/handoffs/`
 - `Skeptic`：`tests/`、`scripts/verify-loop.sh`、回归挑战记录
 
+## 派发行为
+
+- `scripts/dispatch-create.sh` 是三职能落到运行面的入口。
+- `Supervisor`
+  - 不默认分配独立 worktree。
+  - 消费 `contract + state + context`，输出裁决与 gating decision。
+- `Executor`
+  - 必须被派发为实际 assignment。
+  - 默认需要隔离 worktree，并绑定对应 handoff。
+- `Skeptic`
+  - 默认不需要独立 worktree，但必须获得独立 assignment。
+  - 其输入至少包含 `contract + state + context`，输出反证和挑战检查项。
+- 如果 `state.team.scale_out_recommended = true`，派发结果不应退化成单 executor 单元。
+
 ## 完成定义（分工层面）
 
 - 三个职能位都被显式指派。

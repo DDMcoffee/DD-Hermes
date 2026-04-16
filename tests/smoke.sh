@@ -187,6 +187,15 @@ run_workflow() {
   assert_json_field "$status_from_worktree" "'smoke-sprint.md' in data['linked_contract'] and data['clean'] is True"
 }
 
+run_dispatch() {
+  local dispatch
+  dispatch=$("$ROOT/scripts/dispatch-create.sh" --task-id smoke-sprint)
+  assert_json_field "$dispatch" "data['task_id'] == 'smoke-sprint' and data['summary']['supervisor_count'] >= 1 and data['summary']['executor_count'] >= 2 and data['summary']['skeptic_count'] >= 1"
+  assert_json_field "$dispatch" "len([item for item in data['assignments'] if item['role'] == 'supervisor']) >= 1 and len([item for item in data['assignments'] if item['role'] == 'executor']) >= 2 and len([item for item in data['assignments'] if item['role'] == 'skeptic']) >= 1"
+  assert_json_field "$dispatch" "all(item['next_commands'] for item in data['assignments']) and all(item['artifacts']['context_path'].endswith('context.json') for item in data['assignments'])"
+  assert_json_field "$dispatch" "all(item['handoff_path'].endswith('.md') for item in data['assignments'] if item['role'] == 'executor') and any(item['status'] in ('created', 'existing') for item in data['assignments'] if item['role'] == 'executor')"
+}
+
 run_git_management() {
   local report
   report=$("$ROOT/scripts/git-status-report.sh")
@@ -431,6 +440,12 @@ require_keys(runtime_report, ("timestamp", "repo_root", "worktree", "git", "hook
 if not runtime_report["task_surfaces"].get("state_path"):
     fail("runtime-report task_surfaces.state_path is empty")
 
+dispatch = run_json([str(root / "scripts" / "dispatch-create.sh"), "--task-id", "smoke-sprint"])
+require_keys(dispatch, ("task_id", "contract_path", "state_path", "context_path", "runtime_path", "scale_out_recommended", "scale_out_triggers", "summary", "assignments"))
+require_keys(dispatch["summary"], ("supervisor_count", "executor_count", "skeptic_count", "assignment_count", "created_worktree_count", "existing_worktree_count"))
+if dispatch["summary"]["supervisor_count"] < 1 or dispatch["summary"]["executor_count"] < 2 or dispatch["summary"]["skeptic_count"] < 1:
+    fail("dispatch summary counts are incomplete")
+
 context_build = run_json([str(root / "scripts" / "context-build.sh"), "--task-id", "smoke-sprint", "--agent-role", "commander", "--memory-limit", "5"])
 require_keys(context_build, ("context_path", "runtime_path", "state_path", "memory_count", "handoff_count", "exploration_count"))
 if context_build["memory_count"] < 1:
@@ -474,6 +489,7 @@ case "$SECTION" in
     run_hooks
     run_memory
     run_workflow
+    run_dispatch
     run_git_management
     run_context_state
     run_verify
@@ -482,17 +498,24 @@ case "$SECTION" in
   hooks) run_hooks ;;
   memory) run_memory ;;
   workflow) run_workflow ;;
+  dispatch)
+    run_workflow
+    run_dispatch
+    ;;
   git)
     run_workflow
+    run_dispatch
     run_git_management
     ;;
   context)
     run_workflow
+    run_dispatch
     run_context_state
     ;;
   verify) run_verify ;;
   schema)
     run_workflow
+    run_dispatch
     run_context_state
     run_schema
     ;;
