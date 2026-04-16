@@ -600,6 +600,22 @@ EOF
   local status=$?
   set -e
   [[ $status -eq 3 ]]
+
+  local lease
+  lease=$("$ROOT/scripts/coordination-endpoint.sh" --task-id smoke-sprint --endpoint lease.check)
+  assert_json_field "$lease" "'lease_status' in data and 'exceeded' in data and 'lease_conflict' in data"
+
+  local analytics
+  analytics=$("$ROOT/scripts/coordination-endpoint.sh" --task-id smoke-sprint --endpoint session.analytics)
+  assert_json_field "$analytics" "'session_count' in data and 'tool_usage' in data and 'kb_suggestions' in data"
+
+  local decay
+  decay=$("$ROOT/scripts/coordination-endpoint.sh" --task-id smoke-sprint --endpoint memory.decay)
+  assert_json_field "$decay" "'candidates' in data and 'count' in data and 'max_age_days' in data"
+
+  local compact
+  compact=$("$ROOT/scripts/coordination-endpoint.sh" --task-id smoke-sprint --endpoint journal.compact)
+  assert_json_field "$compact" "'compacted' in data and 'kept' in data and 'dry_run' in data and data['dry_run'] is True"
 }
 
 case "$SECTION" in

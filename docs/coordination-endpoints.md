@@ -79,6 +79,63 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
   - `errors`
   - `valid`
 
+### 6) `lease.check`
+
+- Router entry: `scripts/coordination-endpoint.sh --endpoint lease.check --task-id <task_id>`
+- Implementation: `scripts/lease-check.sh --task-id <task_id>`
+- Purpose: 检查任务 lease 是否超时，并可通过 `AUTO_PAUSE=1` 自动暂停。
+- Response required fields:
+  - `lease_status`, `exceeded`, `should_pause`
+  - `elapsed_minutes`, `remaining_minutes`
+  - `active_expert`, `lease_conflict`, `lease_conflict_reason`
+
+### 7) `thread.gate`
+
+- Router entry: `scripts/coordination-endpoint.sh --endpoint thread.gate --task-id <task_id>`
+- Implementation: `hooks/thread-switch-gate.sh --task-id <task_id> --target execution`
+- Purpose: 线程切换门卫 — 在派发执行线程前检查前置条件。
+- Gate checks:
+  - `discussion.policy == 3-explorer-then-execute` 时 `synthesis_path` 必须存在
+  - `lease.status` 不能是 `paused`
+  - `state.team.executors` 不能为空
+- Response required fields:
+  - `pass`, `target_thread`, `blocked_reason`
+
+### 8) `git.integrate`
+
+- Router entry: `EXPERT=<agent_id> scripts/coordination-endpoint.sh --endpoint git.integrate --task-id <task_id>`
+- Implementation: `scripts/git-integrate-task.sh --task-id <task_id> --expert <agent_id>`
+- Purpose: 将执行分支合并回主分支（integration commit），含前置检查。
+- Pre-checks: handoff 存在、verification.last_pass 为 true、worktree 无脏文件。
+- Response required fields:
+  - `task_id`, `integrated_branch`, `commit_sha`
+  - `pre_check_warnings`, `handoff_found`, `verification_pass`
+
+### 9) `session.analytics`
+
+- Router entry: `scripts/coordination-endpoint.sh --endpoint session.analytics --task-id <any>`
+- Implementation: `scripts/session-analytics.sh --days 7`
+- Purpose: 分析会话日志，统计工具使用/错误频率/碎片化，自动建议 KB 条目。
+- Response required fields:
+  - `session_count`, `tool_usage`, `error_frequency`
+  - `fragmentation_score`, `kb_suggestions`
+
+### 10) `memory.decay`
+
+- Router entry: `scripts/coordination-endpoint.sh --endpoint memory.decay --task-id <any>`
+- Implementation: `scripts/memory-decay-schedule.sh --dry-run`
+- Purpose: 扫描超龄记忆卡并报告衰减候选（默认 dry-run 模式）。
+- Response required fields:
+  - `candidates`, `count`, `max_age_days`
+
+### 11) `journal.compact`
+
+- Router entry: `scripts/coordination-endpoint.sh --endpoint journal.compact --task-id <any>`
+- Implementation: `scripts/journal-compact.sh --dry-run`
+- Purpose: 将超龄 journal 文件归档到 `memory/journal/archive/`（默认 dry-run）。
+- Response required fields:
+  - `compacted`, `kept`, `dry_run`
+
 ## Closeout Flow
 
 1. `scripts/sprint-init.sh` 初始化 sprint 时，自动生成 `workspace/closeouts/<task_id>-<expert>.md`。
