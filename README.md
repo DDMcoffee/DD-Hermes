@@ -24,6 +24,8 @@ DD Hermes 是一个 workspace-first 的 Hermes agent harness，用来在 Codex I
 - `.codex/skills/`: `spec-first`、`deep-research`、`coding-harness`、`auto-verify`。
 - `.codex/templates/`: Sprint、Handoff、Exploration、OpenSpec 模板。
 - `hooks/`: 安全门、质量门、类型检查、会话日志、通知适配。
+- `docs/coordination-endpoints.md`: 控制面 endpoint 语义和三层终点映射。
+- `docs/artifact-schemas.md`: contract/handoff/state/closeout 字段级 schema。
 - `docs/context-runtime-state-memory.md`: context / runtime / state / memory 的边界定义。
 - `docs/git-management.md`: baseline commit、worktree 生命周期和提交边界。
 - `memory/`: 记忆卡、journal 和人类可读视图。
@@ -40,7 +42,8 @@ DD Hermes 是一个 workspace-first 的 Hermes agent harness，用来在 Codex I
 5. 在实现前运行 `scripts/spec-first.sh` 确认是否必须先写 spec。
 6. 用 `scripts/memory-write.sh` / `scripts/memory-manage.sh` 维护记忆卡和 journal，并用 `scripts/memory-refresh-views.sh` 刷新视图。
 7. 用 `scripts/verify-loop.sh` 驱动技术层与用户层验证。
-8. 用 `tests/smoke.sh` 验证 hooks、workflow、dispatch、context/state、memory 和 verify gate 的闭环。
+8. 用 `scripts/check-artifact-schemas.sh` 校验 contract/handoff/state/closeout 必填字段。
+9. 用 `tests/smoke.sh` 验证 hooks、workflow、dispatch、context/state、memory 和 verify gate 的闭环。
 
 ## Git Management
 
@@ -62,6 +65,7 @@ DD Hermes 是一个 workspace-first 的 Hermes agent harness，用来在 Codex I
 ## Verification
 
 - `tests/smoke.sh`
+- `scripts/test-artifact-schemas.sh`
 - `scripts/test-hooks.sh`
 - `scripts/test-memory.sh`
 - `scripts/test-workflow.sh`

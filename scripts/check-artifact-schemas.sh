@@ -1,0 +1,172 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+source "$SCRIPT_DIR/common.sh"
+
+task_id=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --task-id) task_id="$2"; shift 2 ;;
+    --stdin|--json) shift ;;
+    *) shift ;;
+  esac
+done
+
+if [[ -z "$task_id" ]]; then
+  json_out '{"error":"task_id is required"}'
+  exit 3
+fi
+
+repo=$(shared_repo_root)
+payload=$(python3 - <<'PY' "$repo" "$task_id"
+import json
+import sys
+from pathlib import Path
+
+repo = Path(sys.argv[1]).resolve()
+task_id = sys.argv[2]
+errors = []
+checked = []
+
+
+def parse_frontmatter(text):
+    if not text.startswith("---\n"):
+        return {}
+    try:
+        _, frontmatter, _ = text.split("---\n", 2)
+    except ValueError:
+        return {}
+    data = {}
+    current = None
+    for line in frontmatter.splitlines():
+        if not line.strip():
+            continue
+        if line.startswith("  - ") and current:
+            data.setdefault(current, []).append(line[4:].strip())
+            continue
+        if ":" not in line:
+            continue
+        key, value = line.split(":", 1)
+        key = key.strip()
+        value = value.strip()
+        if value:
+            data[key] = value.strip('"')
+            current = None
+        else:
+            data[key] = []
+            current = key
+    return data
+
+
+def check_markdown(path, required_frontmatter, required_sections, label):
+    if not path.exists():
+        errors.append(f"{label} missing: {path}")
+        return
+    text = path.read_text(encoding="utf-8")
+    frontmatter = parse_frontmatter(text)
+    missing_keys = [key for key in required_frontmatter if key not in frontmatter]
+    if missing_keys:
+        errors.append(f"{label} missing frontmatter keys {missing_keys}: {path}")
+    for section in required_sections:
+        if section not in text:
+            errors.append(f"{label} missing section '{section}': {path}")
+    checked.append(str(path))
+
+
+contract_path = repo / "workspace" / "contracts" / f"{task_id}.md"
+check_markdown(
+    contract_path,
+    required_frontmatter=("task_id", "owner", "experts", "acceptance", "blocked_if", "memory_reads", "memory_writes"),
+    required_sections=("## Context", "## Scope", "## Required Fields", "## Acceptance", "## Verification", "## Open Questions"),
+    label="contract",
+)
+
+handoff_paths = sorted((repo / "workspace" / "handoffs").glob(f"{task_id}-*.md"))
+if not handoff_paths:
+    errors.append(f"handoff missing for task {task_id}")
+for handoff_path in handoff_paths:
+    check_markdown(
+        handoff_path,
+        required_frontmatter=("from", "to", "scope", "files", "decisions", "risks", "next_checks"),
+        required_sections=("## Context", "## Required Fields", "## Acceptance", "## Verification", "## Open Questions"),
+        label="handoff",
+    )
+
+closeout_paths = sorted((repo / "workspace" / "closeouts").glob(f"{task_id}-*.md"))
+if not closeout_paths:
+    errors.append(f"closeout missing for task {task_id}")
+for closeout_path in closeout_paths:
+    check_markdown(
+        closeout_path,
+        required_frontmatter=(
+            "task_id",
+            "from",
+            "to",
+            "scope",
+            "execution_commit",
+            "state_path",
+            "context_path",
+            "runtime_path",
+            "verified_steps",
+            "verified_files",
+            "open_risks",
+            "next_actions",
+        ),
+        required_sections=("## Context", "## Required Fields", "## Completion", "## Verification", "## Open Questions"),
+        label="closeout",
+    )
+
+state_path = repo / "workspace" / "state" / task_id / "state.json"
+if not state_path.exists():
+    errors.append(f"state missing: {state_path}")
+else:
+    state = json.loads(state_path.read_text(encoding="utf-8"))
+    required_state_keys = ("task_id", "status", "mode", "owner", "experts", "verification", "runtime", "git", "memory", "team", "updated_at")
+    missing_state = [key for key in required_state_keys if key not in state]
+    if missing_state:
+        errors.append(f"state missing keys {missing_state}: {state_path}")
+    team = state.get("team", {}) if isinstance(state.get("team"), dict) else {}
+    required_team_keys = ("supervisors", "executors", "skeptics", "scale_out_recommended", "scale_out_triggers", "role_integrity")
+    missing_team = [key for key in required_team_keys if key not in team]
+    if missing_team:
+        errors.append(f"state.team missing keys {missing_team}: {state_path}")
+    integrity = team.get("role_integrity", {}) if isinstance(team.get("role_integrity"), dict) else {}
+    required_integrity_keys = ("independent_skeptic", "degraded", "role_conflicts", "role_overlap")
+    missing_integrity = [key for key in required_integrity_keys if key not in integrity]
+    if missing_integrity:
+        errors.append(f"state.team.role_integrity missing keys {missing_integrity}: {state_path}")
+    checked.append(str(state_path))
+
+result = {
+    "task_id": task_id,
+    "checked": checked,
+    "artifacts": {
+        "contract_path": str(contract_path),
+        "handoff_paths": [str(path) for path in handoff_paths],
+        "closeout_paths": [str(path) for path in closeout_paths],
+        "state_path": str(state_path),
+    },
+    "errors": errors,
+    "valid": len(errors) == 0,
+}
+print(json.dumps(result, ensure_ascii=False))
+PY
+) || status_code=$?
+
+status_code=${status_code:-0}
+json_out "$payload"
+if [[ "$status_code" -ne 0 ]]; then
+  exit "$status_code"
+fi
+
+is_valid=$(PAYLOAD="$payload" python3 - <<'PY'
+import json
+import os
+print("1" if json.loads(os.environ["PAYLOAD"]).get("valid") else "0")
+PY
+)
+if [[ "$is_valid" != "1" ]]; then
+  exit 2
+fi

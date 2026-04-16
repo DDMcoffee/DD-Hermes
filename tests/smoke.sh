@@ -169,6 +169,9 @@ run_workflow() {
   grep -q "## Acceptance" "$ROOT/workspace/handoffs/smoke-sprint-lead-to-expert-a.md"
   ! grep -q "subsystem-or-slice" "$ROOT/workspace/handoffs/smoke-sprint-lead-to-expert-a.md"
   ! grep -q "TBD" "$ROOT/workspace/handoffs/smoke-sprint-lead-to-expert-a.md"
+  [[ -f "$ROOT/workspace/closeouts/smoke-sprint-expert-a.md" ]]
+  grep -q "## Completion" "$ROOT/workspace/closeouts/smoke-sprint-expert-a.md"
+  ! grep -q "sprint-000" "$ROOT/workspace/closeouts/smoke-sprint-expert-a.md"
 
   "$ROOT/scripts/spec-first.sh" --task-id smoke-sprint --changed-files a,b,c >/dev/null
   "$ROOT/scripts/openspec-init.sh" --task-id smoke-sprint --stage design >/dev/null
@@ -389,6 +392,25 @@ for section in ("## What", "## Why", "## Non-goals", "## Acceptance", "## Verifi
     if section not in proposal_text:
         fail(f"proposal missing section: {section}")
 
+coordination_doc = root / "docs" / "coordination-endpoints.md"
+coordination_text = coordination_doc.read_text(encoding="utf-8")
+for section in ("## 三层终点映射", "## Endpoint Surface", "### 5) `closeout.check`"):
+    if section not in coordination_text:
+        fail(f"coordination-endpoints missing section: {section}")
+
+artifact_doc = root / "docs" / "artifact-schemas.md"
+artifact_text = artifact_doc.read_text(encoding="utf-8")
+for section in ("## 1) Sprint Contract", "## 2) Handoff (Lead/Expert)", "## 3) Task State", "## 4) Execution Closeout"):
+    if section not in artifact_text:
+        fail(f"artifact-schemas missing section: {section}")
+
+closeout_template = root / ".codex" / "templates" / "EXECUTION-CLOSEOUT.md"
+closeout_template_text = closeout_template.read_text(encoding="utf-8")
+closeout_fields = {line.split(":", 1)[0].strip() for line in closeout_template_text.split("---\n", 2)[1].splitlines() if ":" in line}
+required_closeout_fields = {"task_id", "from", "to", "scope", "execution_commit", "state_path", "context_path", "runtime_path", "verified_steps", "verified_files", "open_risks", "next_actions"}
+if not required_closeout_fields.issubset(closeout_fields):
+    fail(f"execution closeout template missing keys: {sorted(required_closeout_fields - closeout_fields)}")
+
 # Schema smoke can run standalone without run_memory; seed one journal event if needed.
 journal_dir = root / "memory" / "journal"
 journal_files = list(journal_dir.glob("*.jsonl"))
@@ -489,6 +511,11 @@ if context_build["memory_count"] < 1:
 state_read = run_json([str(root / "scripts" / "state-read.sh"), "--task-id", "smoke-sprint"])
 require_keys(state_read, ("state", "summary"))
 require_keys(state_read["summary"], ("verification_complete", "has_context", "has_runtime_report", "has_supervisor", "supervisor_count", "independent_skeptic", "role_integrity_degraded", "role_conflicts", "scale_out_recommended", "scale_out_triggers", "event_count"))
+
+artifact_check = run_json([str(root / "scripts" / "check-artifact-schemas.sh"), "--task-id", "smoke-sprint"])
+require_keys(artifact_check, ("task_id", "checked", "artifacts", "errors", "valid"))
+if not artifact_check["valid"]:
+    fail(f"artifact schema check failed: {artifact_check['errors']}")
 
 worktree_status = run_json([str(root / "scripts" / "worktree-status.sh"), "--task-id", "smoke-sprint"])
 require_keys(worktree_status, ("clean", "dirty_files", "linked_contract", "linked_handoff"))
