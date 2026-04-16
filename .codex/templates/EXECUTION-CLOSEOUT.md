@@ -1,4 +1,5 @@
 ---
+schema_version: 2
 task_id: sprint-000
 from: expert-a
 to: lead
@@ -11,6 +12,9 @@ verified_steps:
   - command and result
 verified_files:
   - path/to/file
+quality_review_status: pending
+quality_findings_summary:
+  - Summarize the quality anchor review status here.
 open_risks:
   - residual risk
 next_actions:
@@ -35,6 +39,8 @@ Summarize what this execution slice implemented and why.
 - `runtime_path`
 - `verified_steps`
 - `verified_files`
+- `quality_review_status`
+- `quality_findings_summary`
 - `open_risks`
 - `next_actions`
 
@@ -45,6 +51,10 @@ Summarize what this execution slice implemented and why.
 ## Verification
 
 - Include concrete commands and pass/fail evidence.
+
+## Quality Review
+
+- Record the quality anchor judgment, key findings, and suggested fixes or examples.
 
 ## Open Questions
 

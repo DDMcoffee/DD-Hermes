@@ -1,8 +1,16 @@
 ---
+schema_version: 2
 task_id: sprint-000
 owner: lead
 experts:
   - expert-a
+product_goal: Define the concrete DD Hermes improvement this sprint must deliver.
+user_value: Explain why a maintainer or operator should care about this sprint.
+non_goals:
+  - List explicit non-goals here.
+product_acceptance:
+  - State the user-visible product acceptance here.
+drift_risk: Describe how this sprint could drift away from the intended product goal.
 acceptance:
   - Define acceptance criteria here.
 blocked_if:
@@ -29,6 +37,11 @@ Describe the task boundary, expected outcome, and why this sprint exists.
 - `task_id`
 - `owner`
 - `experts`
+- `product_goal`
+- `user_value`
+- `non_goals`
+- `product_acceptance`
+- `drift_risk`
 - `acceptance`
 - `blocked_if`
 - `memory_reads`
@@ -38,6 +51,10 @@ Describe the task boundary, expected outcome, and why this sprint exists.
 
 - Add verifiable checks.
 
+## Product Gate
+
+- State the user-visible outcome, product boundary, and drift trigger here.
+
 ## Verification
 
 - Commands:
@@ -46,4 +63,3 @@ Describe the task boundary, expected outcome, and why this sprint exists.
 ## Open Questions
 
 - List unresolved assumptions here.
-

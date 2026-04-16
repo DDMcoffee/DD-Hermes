@@ -90,7 +90,7 @@ EOF
   [[ $status -eq 2 ]]
 
   "$ROOT/hooks/quality-gate.sh" --event Stop <<'EOF' >/dev/null
-{"changed_code_files":["scripts/x.sh"],"verified_steps":["tests/smoke.sh","coverage:all"],"verified_files":["scripts/x.sh"],"last_test_exit_code":0}
+{"changed_code_files":["scripts/x.sh"],"verified_steps":["tests/smoke.sh","coverage:all"],"verified_files":["scripts/x.sh"],"last_test_exit_code":0,"product_goal_status":"validated","quality_review_status":"approved"}
 EOF
 
   local session_log
@@ -160,6 +160,7 @@ run_workflow() {
   [[ -f "$ROOT/workspace/contracts/smoke-sprint.md" ]]
   grep -q "## Required Fields" "$ROOT/workspace/contracts/smoke-sprint.md"
   grep -q "## Open Questions" "$ROOT/workspace/contracts/smoke-sprint.md"
+  grep -q "## Product Gate" "$ROOT/workspace/contracts/smoke-sprint.md"
   ! grep -q "sprint-000" "$ROOT/workspace/contracts/smoke-sprint.md"
   [[ -f "$ROOT/workspace/exploration/exploration-lead-smoke-sprint.md" ]]
   grep -q "## Evidence" "$ROOT/workspace/exploration/exploration-lead-smoke-sprint.md"
@@ -167,10 +168,12 @@ run_workflow() {
   grep -q "## Verification" "$ROOT/openspec/proposals/smoke-sprint.md"
   [[ -f "$ROOT/workspace/state/smoke-sprint/state.json" ]]
   grep -q "## Acceptance" "$ROOT/workspace/handoffs/smoke-sprint-lead-to-expert-a.md"
+  grep -q "## Product Check" "$ROOT/workspace/handoffs/smoke-sprint-lead-to-expert-a.md"
   ! grep -q "subsystem-or-slice" "$ROOT/workspace/handoffs/smoke-sprint-lead-to-expert-a.md"
   ! grep -q "TBD" "$ROOT/workspace/handoffs/smoke-sprint-lead-to-expert-a.md"
   [[ -f "$ROOT/workspace/closeouts/smoke-sprint-expert-a.md" ]]
   grep -q "## Completion" "$ROOT/workspace/closeouts/smoke-sprint-expert-a.md"
+  grep -q "## Quality Review" "$ROOT/workspace/closeouts/smoke-sprint-expert-a.md"
   ! grep -q "sprint-000" "$ROOT/workspace/closeouts/smoke-sprint-expert-a.md"
 
   "$ROOT/scripts/spec-first.sh" --task-id smoke-sprint --changed-files a,b,c >/dev/null
@@ -202,6 +205,7 @@ EOF
   assert_json_field "$dispatch" "all(item['next_commands'] for item in data['assignments']) and all(item['artifacts']['context_path'].endswith('context.json') for item in data['assignments'])"
   assert_json_field "$dispatch" "all(item['handoff_path'].endswith('.md') for item in data['assignments'] if item['role'] == 'executor') and any(item['status'] in ('created', 'existing') for item in data['assignments'] if item['role'] == 'executor')"
   assert_json_field "$dispatch" "data['independent_skeptic'] is True and data['degraded'] is False and data['role_conflicts'] == []"
+  assert_json_field "$dispatch" "data['anchors']['product_goal'] != '' and len(data['anchors']['product_anchors']) >= 1 and len(data['anchors']['quality_anchors']) >= 1"
 
   "$ROOT/scripts/state-update.sh" --task-id smoke-sprint <<'EOF' >/dev/null
 {"skeptics":["lead"],"note":"dispatch degraded skeptic fixture"}
@@ -521,7 +525,7 @@ for section in ("## 1) Sprint Contract", "## 2) Handoff (Lead/Expert)", "## 3) T
 closeout_template = root / ".codex" / "templates" / "EXECUTION-CLOSEOUT.md"
 closeout_template_text = closeout_template.read_text(encoding="utf-8")
 closeout_fields = {line.split(":", 1)[0].strip() for line in closeout_template_text.split("---\n", 2)[1].splitlines() if ":" in line}
-required_closeout_fields = {"task_id", "from", "to", "scope", "execution_commit", "state_path", "context_path", "runtime_path", "verified_steps", "verified_files", "open_risks", "next_actions"}
+required_closeout_fields = {"schema_version", "task_id", "from", "to", "scope", "execution_commit", "state_path", "context_path", "runtime_path", "verified_steps", "verified_files", "quality_review_status", "quality_findings_summary", "open_risks", "next_actions"}
 if not required_closeout_fields.issubset(closeout_fields):
     fail(f"execution closeout template missing keys: {sorted(required_closeout_fields - closeout_fields)}")
 
@@ -558,18 +562,24 @@ state = json.loads((root / "workspace" / "state" / "smoke-sprint" / "state.json"
 for key in ("task_id", "status", "mode", "owner", "experts", "openspec", "runtime", "lease", "git", "verification", "memory", "team", "updated_at"):
     if key not in state:
         fail(f"state missing key: {key}")
-for key in ("supervisors", "executors", "skeptics", "scale_out_recommended", "scale_out_triggers", "role_integrity"):
+for key in ("supervisors", "executors", "skeptics", "product_anchors", "quality_anchors", "anchor_policy", "scale_out_recommended", "scale_out_triggers", "role_integrity"):
     if key not in state["team"]:
         fail(f"team missing key: {key}")
 for key in ("independent_skeptic", "degraded", "role_conflicts", "role_overlap"):
     if key not in state["team"]["role_integrity"]:
         fail(f"team.role_integrity missing key: {key}")
+for key in ("anchor", "goal", "user_value", "non_goals", "product_acceptance", "drift_risk", "goal_status", "goal_drift_flags", "last_product_review_at"):
+    if key not in state["product"]:
+        fail(f"state.product missing key: {key}")
+for key in ("anchor", "review_status", "review_findings", "review_examples", "last_review_at"):
+    if key not in state["quality"]:
+        fail(f"state.quality missing key: {key}")
 
 context = json.loads((root / "workspace" / "state" / "smoke-sprint" / "context.json").read_text(encoding="utf-8"))
 for key in ("task_id", "runtime", "state", "memory", "continuation", "documents", "context_summary"):
     if key not in context:
         fail(f"context missing key: {key}")
-for key in ("supervisor_count", "scale_out_recommended", "scale_out_triggers"):
+for key in ("supervisor_count", "product_anchor_count", "quality_anchor_count", "product_goal", "product_goal_status", "quality_review_status", "scale_out_recommended", "scale_out_triggers"):
     if key not in context["context_summary"]:
         fail(f"context_summary missing key: {key}")
 for key in ("independent_skeptic", "role_integrity_degraded", "role_conflicts"):
@@ -624,7 +634,7 @@ if context_build["memory_count"] < 1:
 
 state_read = run_json([str(root / "scripts" / "state-read.sh"), "--task-id", "smoke-sprint"])
 require_keys(state_read, ("state", "summary"))
-require_keys(state_read["summary"], ("verification_complete", "has_context", "has_runtime_report", "has_supervisor", "supervisor_count", "independent_skeptic", "role_integrity_degraded", "role_conflicts", "scale_out_recommended", "scale_out_triggers", "event_count"))
+require_keys(state_read["summary"], ("verification_complete", "has_context", "has_runtime_report", "has_supervisor", "supervisor_count", "product_anchor_count", "quality_anchor_count", "product_goal_ready", "product_goal_status", "quality_review_status", "independent_skeptic", "role_integrity_degraded", "role_conflicts", "scale_out_recommended", "scale_out_triggers", "event_count"))
 
 artifact_check = run_json([str(root / "scripts" / "check-artifact-schemas.sh"), "--task-id", "smoke-sprint"])
 require_keys(artifact_check, ("task_id", "checked", "artifacts", "errors", "valid"))

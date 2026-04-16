@@ -119,9 +119,15 @@ def render_doc(template, frontmatter=None, sections=None):
 contract = render_doc(
     load_template(contract_template),
     frontmatter={
+        "schema_version": "2",
         "task_id": task_id,
         "owner": owner,
         "experts": expert_list,
+        "product_goal": f"Advance DD Hermes through task {task_id} without drifting from the current product focus.",
+        "user_value": "Keep the next DD Hermes slice connected to a user-visible or operator-visible outcome instead of generic busywork.",
+        "non_goals": ["Do not expand into unrelated runtime, provider, or gateway work."],
+        "product_acceptance": ["The task remains traceable to one clear product outcome and one explicit non-goal boundary."],
+        "drift_risk": "This task could drift into generic infrastructure cleanup if the product outcome stops being explicit.",
         "acceptance": ["Complete sprint artifacts and verification."],
         "blocked_if": ["Missing repo facts or missing verification."],
         "memory_reads": ["memory/world/no-destruction-without-confirmation.md"],
@@ -137,12 +143,21 @@ contract = render_doc(
             "- `task_id`",
             "- `owner`",
             "- `experts`",
+            "- `product_goal`",
+            "- `user_value`",
+            "- `non_goals`",
+            "- `product_acceptance`",
+            "- `drift_risk`",
             "- `acceptance`",
             "- `blocked_if`",
             "- `memory_reads`",
             "- `memory_writes`",
         ],
         "Acceptance": ["- All artifacts exist and are linked by task id."],
+        "Product Gate": [
+            "- The task must remain tied to one clear DD Hermes product outcome.",
+            "- If the slice starts expanding beyond the declared non-goals, stop and recalibrate before implementation.",
+        ],
         "Verification": [
             f"- Commands: `scripts/test-workflow.sh --task-id {task_id}`",
             "- User-visible proof: workflow test passes and bootstrap artifacts exist on disk.",
@@ -161,9 +176,13 @@ for expert in expert_list:
     handoff = render_doc(
         handoff_tpl,
         frontmatter={
+            "schema_version": "2",
             "from": owner,
             "to": expert,
             "scope": f"{task_id} bootstrap artifact slice",
+            "product_rationale": f"This slice should advance task {task_id} in a way a DD Hermes maintainer can explain and verify.",
+            "goal_drift_risk": "The slice could drift into generic control-plane churn if it stops serving the declared product goal.",
+            "user_visible_outcome": "A maintainer can point to one concrete outcome instead of scattered partial work.",
             "files": [
                 f"workspace/contracts/{task_id}.md",
                 f"openspec/proposals/{task_id}.md",
@@ -188,6 +207,9 @@ for expert in expert_list:
                 "- `from`",
                 "- `to`",
                 "- `scope`",
+                "- `product_rationale`",
+                "- `goal_drift_risk`",
+                "- `user_visible_outcome`",
                 "- `files`",
                 "- `decisions`",
                 "- `risks`",
@@ -195,6 +217,9 @@ for expert in expert_list:
             ],
             "Acceptance": [
                 "- Keep the sprint bootstrap artifacts task-bound, template-aligned, and ready for execution handoff.",
+            ],
+            "Product Check": [
+                "- Confirm the slice still serves the stated product goal and does not expand into the declared non-goals.",
             ],
             "Verification": [
                 "- State commands and evidence expected from expert before handoff return.",
@@ -212,6 +237,7 @@ for expert in expert_list:
     closeout = render_doc(
         closeout_tpl,
         frontmatter={
+            "schema_version": "2",
             "task_id": task_id,
             "from": expert,
             "to": owner,
@@ -222,6 +248,8 @@ for expert in expert_list:
             "runtime_path": f"workspace/state/{task_id}/runtime.json",
             "verified_steps": [f"./scripts/test-workflow.sh --task-id {task_id}"],
             "verified_files": [f"workspace/contracts/{task_id}.md"],
+            "quality_review_status": "pending",
+            "quality_findings_summary": ["Awaiting quality anchor review after execution evidence is written."],
             "open_risks": ["None at bootstrap time."],
             "next_actions": ["Update with execution evidence before handing back to lead."],
         },
@@ -238,6 +266,8 @@ for expert in expert_list:
                 "- `runtime_path`",
                 "- `verified_steps`",
                 "- `verified_files`",
+                "- `quality_review_status`",
+                "- `quality_findings_summary`",
                 "- `open_risks`",
                 "- `next_actions`",
             ],
@@ -246,6 +276,9 @@ for expert in expert_list:
             ],
             "Verification": [
                 "- Add exact commands and pass/fail evidence before handoff return.",
+            ],
+            "Quality Review": [
+                "- Record the quality anchor judgment, concrete findings, and suggested fixes before final integration.",
             ],
             "Open Questions": [
                 "- List unresolved integration questions for lead review.",

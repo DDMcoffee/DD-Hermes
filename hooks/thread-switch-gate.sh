@@ -93,6 +93,17 @@ if target == "execution" and lease_status == "paused":
     reasons.append(f"lease is paused (reason: {lease.get('pause_reason', 'unknown')}); resume before dispatching")
 
 if target == "execution":
+    product = state.get("product", {}) if isinstance(state.get("product"), dict) else {}
+    goal = product.get("goal", "").strip()
+    goal_status = product.get("goal_status", "")
+    drift_flags = product.get("goal_drift_flags", [])
+    if not goal:
+        reasons.append("product.goal is missing; define product anchor intent before entering implementation mode")
+    if goal_status in {"drifted", "blocked"}:
+        reasons.append(f"product.goal_status is {goal_status}; resolve product drift before entering implementation mode")
+    if drift_flags:
+        reasons.append(f"product.goal_drift_flags present: {', '.join(drift_flags)}")
+
     team = state.get("team", {}) if isinstance(state.get("team"), dict) else {}
     executors = [e for e in team.get("executors", []) if isinstance(e, str) and e.strip()]
     if not executors:

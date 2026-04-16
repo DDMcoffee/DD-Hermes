@@ -54,6 +54,22 @@ def default_skeptics(owner, supervisors, executors):
     return executors[-1:] if executors else []
 
 
+def default_product_anchors(owner, supervisors):
+    anchors = normalize_people(supervisors)
+    owner = owner.strip() if isinstance(owner, str) else ""
+    if owner and owner not in anchors:
+        anchors.insert(0, owner)
+    return anchors or ([owner] if owner else [])
+
+
+def default_quality_anchors(owner, supervisors, skeptics, executors):
+    anchors = normalize_people(skeptics)
+    if anchors:
+        return anchors
+    fallback = default_skeptics(owner, supervisors, executors)
+    return normalize_people(fallback)
+
+
 def analyze_role_integrity(supervisors, executors, skeptics):
     supervisors = normalize_people(supervisors)
     executors = normalize_people(executors)

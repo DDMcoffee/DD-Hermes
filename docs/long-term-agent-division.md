@@ -1,4 +1,4 @@
-# DD Hermes: 长期三 Agent 分工（含监督扩容）
+# DD Hermes: 长期锚点 + 执行分工
 
 ## 哲学立场
 
@@ -12,15 +12,16 @@
 
 | 职能位 | 最小人数 | 核心问题 | 主要产物 |
 | --- | --- | --- | --- |
-| 监督位 `Supervisor` | 至少 1 | 现在该做什么、算不算完成 | state 推进、验收裁决、风险升级 |
+| 监督位 `Supervisor` / `Product Anchor` | 至少 1 | 现在该做什么、这件事是否还服务用户价值 | state 推进、产品校准、验收裁决、风险升级 |
 | 执行位 `Executor` | 至少 1 | 怎么把目标做出来 | execution commit、expert handoff、验证证据 |
-| 质疑位 `Skeptic` | 至少 1 | 这个方案在哪些条件下会失败 | 反例、回归补充、验收挑战清单 |
+| 质疑位 `Skeptic` / `Quality Anchor` | 至少 1 | 这个方案在哪些条件下会失败、质量上哪里不够 | 反例、回归补充、验收挑战清单、改进建议 |
 
 ## 各职能边界
 
 ### 1. 监督位 `Supervisor`（必须有，默认 1）
 
 - 负责维护 `contract + state + context + acceptance`。
+- 作为 `Product Anchor` 时，还要持续维护 `product_goal / user_value / non_goals / drift_risk`。
 - 唯一拥有“完成态裁决权”（`execution slice done` / `task done` / `phase done`）。
 - 必须要求每轮都有可审计证据，而不是口头结论。
 - 默认配置：`1` 位监督。
@@ -35,7 +36,8 @@
 
 - 对执行结果做反证，不参与主实现，避免角色污染。
 - 重点查三类问题：边界条件、回归风险、证据缺口。
-- 输出必须是可执行检查项（命令、断言、失败样例），不能只给观点。
+- 作为 `Quality Anchor` 时，固定关注：架构一致性、命名规范、错误处理完整性、性能隐患、安全漏洞。
+- 输出必须是可执行检查项（命令、断言、失败样例），不能只给观点；每条意见都应附带改进建议与参考范例。
 
 ## 监督扩容规则（你要求的“可根据情况多加”）
 
@@ -91,15 +93,16 @@
 每个推进轮次固定 4 步：
 
 1. `Supervisor` 定义本轮目标、完成条件、阻塞条件。
+   - 同时完成产品锚点校准，确认当前切片没有偏离用户价值和非目标边界。
 2. `Executor` 实现并提交 execution commit，回写 handoff + verification。
-3. `Skeptic` 提交反证结果（失败样例或通过证据）。
+3. `Skeptic` 提交反证结果（失败样例或通过证据），并给出质量改进建议。
 4. `Supervisor` 依据证据更新 state，并决定进入下一轮或收口。
 
 ## 与当前仓库工件的映射
 
-- `Supervisor`：`workspace/contracts/`、`workspace/state/`、`openspec/`
+- `Supervisor / Product Anchor`：`workspace/contracts/`、`workspace/state/`、`openspec/`
 - `Executor`：`.worktrees/`、execution commit、`workspace/handoffs/`
-- `Skeptic`：`tests/`、`scripts/verify-loop.sh`、回归挑战记录
+- `Skeptic / Quality Anchor`：`tests/`、`scripts/verify-loop.sh`、回归挑战记录、质量审查结论
 
 ## 派发行为
 

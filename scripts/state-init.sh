@@ -50,7 +50,13 @@ script_dir = Path(sys.argv[9]).resolve()
 sys.path.insert(0, str(script_dir))
 timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
-from team_governance import default_skeptics, normalize_people, scale_out_analysis
+from team_governance import (
+    default_product_anchors,
+    default_quality_anchors,
+    default_skeptics,
+    normalize_people,
+    scale_out_analysis,
+)
 
 state_dir = repo / "workspace" / "state" / task_id
 state_dir.mkdir(parents=True, exist_ok=True)
@@ -149,6 +155,12 @@ def parse_frontmatter(path: Path):
 contract_frontmatter = parse_frontmatter(contract_path)
 memory_reads = contract_frontmatter.get("memory_reads", [])
 memory_writes = contract_frontmatter.get("memory_writes", [])
+schema_version = str(contract_frontmatter.get("schema_version", "1")).strip() or "1"
+product_goal = contract_frontmatter.get("product_goal", "")
+user_value = contract_frontmatter.get("user_value", "")
+non_goals = contract_frontmatter.get("non_goals", [])
+product_acceptance = contract_frontmatter.get("product_acceptance", [])
+drift_risk = contract_frontmatter.get("drift_risk", "")
 experts = normalize_people(experts_csv.split(","))
 if not experts:
     experts = normalize_people(contract_frontmatter.get("experts", []))
@@ -161,7 +173,7 @@ if state_path.exists():
 else:
     resolved_discussion_policy = infer_discussion_policy(discussion_policy)
     state = {
-        "state_version": 1,
+        "state_version": 2,
         "created_at": timestamp,
         "git": {
             "baseline_commit": "",
@@ -208,6 +220,24 @@ else:
             "writes": [],
             "last_selected_ids": [],
         },
+        "product": {
+            "anchor": "",
+            "goal": "",
+            "user_value": "",
+            "non_goals": [],
+            "product_acceptance": [],
+            "drift_risk": "",
+            "goal_status": "missing",
+            "goal_drift_flags": [],
+            "last_product_review_at": "",
+        },
+        "quality": {
+            "anchor": "",
+            "review_status": "pending",
+            "review_findings": [],
+            "review_examples": [],
+            "last_review_at": "",
+        },
         "textbook": {
             "last_entry_path": "",
             "last_summary_path": "",
@@ -234,6 +264,12 @@ executors = normalize_people(existing_team.get("executors", [])) or experts
 skeptics = normalize_people(existing_team.get("skeptics", []))
 if not skeptics:
     skeptics = default_skeptics(resolved_owner, supervisors, executors)
+product_anchors = normalize_people(existing_team.get("product_anchors", []))
+if not product_anchors:
+    product_anchors = default_product_anchors(resolved_owner, supervisors)
+quality_anchors = normalize_people(existing_team.get("quality_anchors", []))
+if not quality_anchors:
+    quality_anchors = default_quality_anchors(resolved_owner, supervisors, skeptics, executors)
 high_risk_mode = bool(existing_team.get("high_risk_mode", False))
 integration_pressure = bool(existing_team.get("integration_pressure", False))
 scale_out = scale_out_analysis(
@@ -246,6 +282,7 @@ scale_out = scale_out_analysis(
 )
 
 state.update({
+    "state_version": 2 if schema_version == "2" else state.get("state_version", 1),
     "task_id": task_id,
     "status": state.get("status", status) if not created else status,
     "mode": state.get("mode", mode) if not created else mode,
@@ -266,6 +303,13 @@ state.update({
         "supervisors": supervisors,
         "executors": executors,
         "skeptics": skeptics,
+        "product_anchors": product_anchors,
+        "quality_anchors": quality_anchors,
+        "anchor_policy": {
+            "product_anchor_role": "supervisor",
+            "quality_anchor_role": "skeptic",
+            "constant_anchor_seats": True,
+        },
         "high_risk_mode": high_risk_mode,
         "integration_pressure": integration_pressure,
         "scale_out_recommended": scale_out["scale_out_recommended"],
@@ -276,6 +320,26 @@ state.update({
 })
 state["memory"]["reads"] = memory_reads
 state["memory"]["writes"] = memory_writes
+state.setdefault("product", {})
+state["product"].update({
+    "anchor": product_anchors[0] if product_anchors else resolved_owner,
+    "goal": product_goal,
+    "user_value": user_value,
+    "non_goals": non_goals,
+    "product_acceptance": product_acceptance,
+    "drift_risk": drift_risk,
+    "goal_status": "defined" if product_goal else "missing",
+    "goal_drift_flags": state.get("product", {}).get("goal_drift_flags", []),
+    "last_product_review_at": timestamp if product_goal else state.get("product", {}).get("last_product_review_at", ""),
+})
+state.setdefault("quality", {})
+state["quality"].update({
+    "anchor": quality_anchors[0] if quality_anchors else "",
+    "review_status": state.get("quality", {}).get("review_status", "pending"),
+    "review_findings": state.get("quality", {}).get("review_findings", []),
+    "review_examples": state.get("quality", {}).get("review_examples", []),
+    "last_review_at": state.get("quality", {}).get("last_review_at", ""),
+})
 
 state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 event = {

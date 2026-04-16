@@ -1,4 +1,4 @@
-# DD Hermes Artifact Schemas (v1)
+# DD Hermes Artifact Schemas (v2)
 
 本文档定义执行线程必须可校验的工件字段，不依赖口头约定。
 
@@ -13,6 +13,13 @@
   - `blocked_if`
   - `memory_reads`
   - `memory_writes`
+- Frontmatter additionally required when `schema_version: 2`:
+  - `schema_version`
+  - `product_goal`
+  - `user_value`
+  - `non_goals`
+  - `product_acceptance`
+  - `drift_risk`
 - Sections required:
   - `## Context`
   - `## Scope`
@@ -20,6 +27,8 @@
   - `## Acceptance`
   - `## Verification`
   - `## Open Questions`
+- Sections additionally required when `schema_version: 2`:
+  - `## Product Gate`
 
 ## 2) Handoff (Lead/Expert)
 
@@ -34,12 +43,19 @@
   - `decisions`
   - `risks`
   - `next_checks`
+- Frontmatter additionally required when `schema_version: 2`:
+  - `schema_version`
+  - `product_rationale`
+  - `goal_drift_risk`
+  - `user_visible_outcome`
 - Sections required:
   - `## Context`
   - `## Required Fields`
   - `## Acceptance`
   - `## Verification`
   - `## Open Questions`
+- Sections additionally required when `schema_version: 2`:
+  - `## Product Check`
 
 ## 3) Task State
 
@@ -56,6 +72,9 @@
   - `memory`
   - `team`
   - `updated_at`
+- Required top-level keys when `state_version >= 2`:
+  - `product`
+  - `quality`
 - Required team keys:
   - `supervisors`
   - `executors`
@@ -63,11 +82,31 @@
   - `scale_out_recommended`
   - `scale_out_triggers`
   - `role_integrity`
+- Required team keys when `state_version >= 2`:
+  - `product_anchors`
+  - `quality_anchors`
+  - `anchor_policy`
 - Required `team.role_integrity` keys:
   - `independent_skeptic`
   - `degraded`
   - `role_conflicts`
   - `role_overlap`
+- Required `product` keys when `state_version >= 2`:
+  - `anchor`
+  - `goal`
+  - `user_value`
+  - `non_goals`
+  - `product_acceptance`
+  - `drift_risk`
+  - `goal_status`
+  - `goal_drift_flags`
+  - `last_product_review_at`
+- Required `quality` keys when `state_version >= 2`:
+  - `anchor`
+  - `review_status`
+  - `review_findings`
+  - `review_examples`
+  - `last_review_at`
 
 ## 4) Execution Closeout
 
@@ -85,12 +124,18 @@
   - `verified_files`
   - `open_risks`
   - `next_actions`
+- Frontmatter additionally required when `schema_version: 2`:
+  - `schema_version`
+  - `quality_review_status`
+  - `quality_findings_summary`
 - Sections required:
   - `## Context`
   - `## Required Fields`
   - `## Completion`
   - `## Verification`
   - `## Open Questions`
+- Sections additionally required when `schema_version: 2`:
+  - `## Quality Review`
 
 ## 5) State Events (`events.jsonl`)
 

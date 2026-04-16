@@ -35,7 +35,13 @@ sys.path.insert(0, str(script_dir))
 state_path = repo / "workspace" / "state" / task_id / "state.json"
 events_path = repo / "workspace" / "state" / task_id / "events.jsonl"
 
-from team_governance import default_skeptics, normalize_people, scale_out_analysis
+from team_governance import (
+    default_product_anchors,
+    default_quality_anchors,
+    default_skeptics,
+    normalize_people,
+    scale_out_analysis,
+)
 
 if not state_path.exists():
     print(json.dumps({"error": "state not found", "task_id": task_id}, ensure_ascii=False))
@@ -85,9 +91,23 @@ allowed = {
     "memory_reads",
     "memory_writes",
     "last_selected_memory_ids",
+    "product_goal",
+    "user_value",
+    "non_goals",
+    "product_acceptance",
+    "drift_risk",
+    "product_goal_status",
+    "goal_drift_flags",
+    "last_product_review_at",
+    "quality_review_status",
+    "quality_review_findings",
+    "quality_review_examples",
+    "quality_last_review_at",
     "supervisors",
     "executors",
     "skeptics",
+    "product_anchors",
+    "quality_anchors",
     "high_risk_mode",
     "integration_pressure",
     "note",
@@ -217,6 +237,34 @@ state["memory"].setdefault("last_selected_ids", [])
 if "last_selected_memory_ids" in data:
     state["memory"]["last_selected_ids"] = data["last_selected_memory_ids"]
 
+state.setdefault("product", {})
+if "product_goal" in data:
+    state["product"]["goal"] = data["product_goal"]
+if "user_value" in data:
+    state["product"]["user_value"] = data["user_value"]
+if "non_goals" in data:
+    state["product"]["non_goals"] = data["non_goals"]
+if "product_acceptance" in data:
+    state["product"]["product_acceptance"] = data["product_acceptance"]
+if "drift_risk" in data:
+    state["product"]["drift_risk"] = data["drift_risk"]
+if "product_goal_status" in data:
+    state["product"]["goal_status"] = data["product_goal_status"]
+if "goal_drift_flags" in data:
+    state["product"]["goal_drift_flags"] = data["goal_drift_flags"]
+if "last_product_review_at" in data:
+    state["product"]["last_product_review_at"] = data["last_product_review_at"]
+
+state.setdefault("quality", {})
+if "quality_review_status" in data:
+    state["quality"]["review_status"] = data["quality_review_status"]
+if "quality_review_findings" in data:
+    state["quality"]["review_findings"] = data["quality_review_findings"]
+if "quality_review_examples" in data:
+    state["quality"]["review_examples"] = data["quality_review_examples"]
+if "quality_last_review_at" in data:
+    state["quality"]["last_review_at"] = data["quality_last_review_at"]
+
 state.setdefault("team", {})
 team = state["team"] if isinstance(state["team"], dict) else {}
 state["team"] = team
@@ -232,6 +280,12 @@ try:
     skeptics = normalize_people(team.get("skeptics", []), "team.skeptics", require_list=True) if "skeptics" in team else []
     if not skeptics:
         skeptics = default_skeptics(owner, supervisors, executors)
+    product_anchors = normalize_people(team.get("product_anchors", []), "team.product_anchors", require_list=True) if "product_anchors" in team else []
+    if not product_anchors:
+        product_anchors = default_product_anchors(owner, supervisors)
+    quality_anchors = normalize_people(team.get("quality_anchors", []), "team.quality_anchors", require_list=True) if "quality_anchors" in team else []
+    if not quality_anchors:
+        quality_anchors = default_quality_anchors(owner, supervisors, skeptics, executors)
     high_risk_mode = bool(team.get("high_risk_mode", False))
     integration_pressure = bool(team.get("integration_pressure", False))
 
@@ -241,6 +295,10 @@ try:
         executors = normalize_people(data["executors"], "executors", require_list=True)
     if "skeptics" in data:
         skeptics = normalize_people(data["skeptics"], "skeptics", require_list=True)
+    if "product_anchors" in data:
+        product_anchors = normalize_people(data["product_anchors"], "product_anchors", require_list=True)
+    if "quality_anchors" in data:
+        quality_anchors = normalize_people(data["quality_anchors"], "quality_anchors", require_list=True)
     if "high_risk_mode" in data:
         high_risk_mode = bool(data["high_risk_mode"])
     if "integration_pressure" in data:
@@ -269,12 +327,37 @@ team.update({
     "supervisors": supervisors,
     "executors": executors,
     "skeptics": skeptics,
+    "product_anchors": product_anchors,
+    "quality_anchors": quality_anchors,
+    "anchor_policy": {
+        "product_anchor_role": "supervisor",
+        "quality_anchor_role": "skeptic",
+        "constant_anchor_seats": True,
+    },
     "high_risk_mode": high_risk_mode,
     "integration_pressure": integration_pressure,
     "scale_out_recommended": scale_out["scale_out_recommended"],
     "scale_out_triggers": scale_out["scale_out_triggers"],
     "role_integrity": scale_out["role_integrity"],
 })
+
+state["product"].setdefault("anchor", product_anchors[0] if product_anchors else owner)
+state["product"].setdefault("goal", "")
+state["product"].setdefault("user_value", "")
+state["product"].setdefault("non_goals", [])
+state["product"].setdefault("product_acceptance", [])
+state["product"].setdefault("drift_risk", "")
+state["product"].setdefault("goal_status", "defined" if state["product"].get("goal") else "missing")
+state["product"].setdefault("goal_drift_flags", [])
+state["product"].setdefault("last_product_review_at", "")
+state["product"]["anchor"] = product_anchors[0] if product_anchors else owner
+
+state["quality"].setdefault("anchor", quality_anchors[0] if quality_anchors else "")
+state["quality"].setdefault("review_status", "pending")
+state["quality"].setdefault("review_findings", [])
+state["quality"].setdefault("review_examples", [])
+state["quality"].setdefault("last_review_at", "")
+state["quality"]["anchor"] = quality_anchors[0] if quality_anchors else ""
 
 state.setdefault("notes", [])
 if data.get("note"):

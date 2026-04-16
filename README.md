@@ -15,6 +15,7 @@ DD Hermes 是一个 workspace-first 的 Hermes agent harness，用来在 Codex I
 - 默认工作模式是仓库内工作流优先；后续接 Hermes 外部实例时仍沿用相同协议。
 - 默认在同一线程内推进：
   - `Lead / Explorer / Executor / Skeptic / Judge` 是逻辑角色，不是默认分裂出来的聊天线程。
+  - 其中有两个恒定锚点：`Product Anchor` 默认映射到 `Supervisor`，`Quality Anchor` 默认映射到 `Skeptic`。
   - 隔离 worktree 仍然保留，但它表示代码隔离，不表示必须切到另一个聊天线程。
 
 ## Out Of Scope
@@ -38,6 +39,7 @@ DD Hermes 是一个 workspace-first 的 Hermes agent harness，用来在 Codex I
 - `docs/textbook-agent.md`: 教材记录 agent 的职责和每日总结结构。
 - `指挥文档/`: 给指挥线程和项目负责人看的中文目标、终点和执行收尾文档。
   - 当前新增 `06-一期PhaseDone审计.md` 和 `07-体验入口任务说明.md`，分别用于 phase 裁决和下一条主线任务定义。
+  - `08-恒定锚点策略.md` 用来固定产品锚点与质量锚点的职责、触发点和降级规则。
   - `./scripts/demo-entry.sh` 会把它们收成一个只读体验入口。
 - `memory/`: 记忆卡、journal 和人类可读视图。
 - `openspec/`: proposal/design/task/archive 生命周期目录和模板。
@@ -47,9 +49,9 @@ DD Hermes 是一个 workspace-first 的 Hermes agent harness，用来在 Codex I
 ## Core Workflows
 
 1. 用 `scripts/sprint-init.sh` 初始化一次 Sprint。
-2. 用 `scripts/state-read.sh` / `scripts/state-update.sh` 推进任务级短期状态，而不是污染长期记忆。
+2. 用 `scripts/state-read.sh` / `scripts/state-update.sh` 推进任务级短期状态，而不是污染长期记忆；其中 `product` 与 `quality` 字段是恒定锚点的真实落盘位置。
 3. 用 `scripts/context-build.sh` 生成任务 context packet，供当前线程进入实现阶段前消费。
-4. 用 `scripts/dispatch-create.sh` 把 `Supervisor` / `Executor` / `Skeptic` 角色物化为实际 assignment，并为 executor 建立或确认隔离 worktree；若 `Skeptic` 不独立，输出必须显式标记降级。
+4. 用 `scripts/dispatch-create.sh` 把 `Supervisor` / `Executor` / `Skeptic` 角色物化为实际 assignment，并把 `Product Anchor / Quality Anchor` 作为常驻席位暴露出来；若 `Skeptic` 不独立，输出必须显式标记降级。
 5. 用 `scripts/coordination-endpoint.sh` 统一调用 `state.read/state.update/context.build/dispatch.create/closeout.check`，避免在编排层直接分散拼接子脚本。
 6. 在实现前运行 `scripts/spec-first.sh` 确认是否必须先写 spec。
 7. 用 `scripts/memory-write.sh` / `scripts/memory-manage.sh` 维护记忆卡和 journal，并用 `scripts/memory-refresh-views.sh` 刷新视图。
@@ -80,6 +82,9 @@ DD Hermes 是一个 workspace-first 的 Hermes agent harness，用来在 Codex I
 ## Thread Model
 
 - 当前主线程同时承担规划、实现、复核和验收，但通过 `Lead / Explorer / Executor / Skeptic / Judge` 的角色切换保持职责分离。
+- 两个恒定锚点不靠长寿命子 agent 维持，而靠 `contract + state + context + gate` 四层显式工件维持：
+  - `Product Anchor` 负责目标、用户价值、非目标和漂移校准。
+  - `Quality Anchor` 负责架构一致性、错误处理、性能、安全和证据缺口的最终审查。
 - 隔离 worktree 是数据面隔离，不是聊天线程隔离；代码改动仍优先发生在 worktree 中。
 - 多 agent 并行不是靠聊天历史隐式维持，而是靠 `contract + state + context + worktree` 这四类显式工件维持。
 - 长任务通过 `state.lease` 建模：目标、运行窗口、暂停原因、恢复时间点都写进 state，而不是塞进聊天历史。

@@ -77,6 +77,10 @@ team = state.get("team", {}) if isinstance(state.get("team"), dict) else {}
 supervisors = normalize_people(team.get("supervisors", []))
 executors = normalize_people(team.get("executors", []))
 skeptics = normalize_people(team.get("skeptics", []))
+product_anchors = normalize_people(team.get("product_anchors", []))
+quality_anchors = normalize_people(team.get("quality_anchors", []))
+product = state.get("product", {}) if isinstance(state.get("product"), dict) else {}
+quality = state.get("quality", {}) if isinstance(state.get("quality"), dict) else {}
 role_analysis = scale_out_analysis(
     owner=state.get("owner", "lead"),
     supervisors=supervisors,
@@ -96,6 +100,12 @@ if not executors:
 if not skeptics:
     print(json.dumps({"error": "dispatch requires at least one skeptic", "blocked": True}, ensure_ascii=False))
     raise SystemExit(2)
+if not product.get("goal", "").strip():
+    print(json.dumps({"error": "dispatch requires product.goal before implementation", "blocked": True}, ensure_ascii=False))
+    raise SystemExit(2)
+if product.get("goal_status") in {"drifted", "blocked"}:
+    print(json.dumps({"error": f"dispatch blocked by product.goal_status={product.get('goal_status')}", "blocked": True}, ensure_ascii=False))
+    raise SystemExit(2)
 
 assignments = []
 created_worktrees = []
@@ -105,6 +115,7 @@ for agent_id in supervisors:
     assignments.append({
         "agent_id": agent_id,
         "role": "supervisor",
+        "anchor_role": "product_anchor" if agent_id in product_anchors else "",
         "status": "ready",
         "worktree_required": False,
         "worktree_path": "",
@@ -138,6 +149,7 @@ for agent_id in executors:
     assignments.append({
         "agent_id": agent_id,
         "role": "executor",
+        "anchor_role": "",
         "status": status,
         "worktree_required": True,
         "worktree_path": str(expected_worktree),
@@ -160,6 +172,7 @@ for agent_id in skeptics:
     assignments.append({
         "agent_id": agent_id,
         "role": "skeptic",
+        "anchor_role": "quality_anchor" if agent_id in quality_anchors else "",
         "status": "ready",
         "worktree_required": False,
         "worktree_path": "",
@@ -184,6 +197,13 @@ print(json.dumps({
     "state_path": state_path,
     "context_path": context_path,
     "runtime_path": runtime_path,
+    "anchors": {
+        "product_anchors": product_anchors,
+        "quality_anchors": quality_anchors,
+        "product_goal": product.get("goal", ""),
+        "product_goal_status": product.get("goal_status", ""),
+        "quality_review_status": quality.get("review_status", ""),
+    },
     "independent_skeptic": role_analysis["role_integrity"]["independent_skeptic"],
     "degraded": role_analysis["role_integrity"]["degraded"],
     "role_conflicts": role_analysis["role_integrity"]["role_conflicts"],

@@ -21,7 +21,9 @@
 - MCP 或本地事实源优先，避免凭记忆猜仓库状态。
 - 先规划再编码；探索模式和开发模式必须显式切换。
 - Lead 负责规划、拆分、验收、记忆升降级决策。
+- `Product Anchor` 是恒定席位，默认映射到 `Supervisor`：负责把模糊需求压成清晰任务，持续校准 `product_goal / user_value / non_goals`，防止开发任务偏离 DD Hermes 北极星。
 - Expert 负责在独立 worktree 中实现，不在主工作区直接混写。
+- `Quality Anchor` 是恒定席位，默认映射到 `Skeptic`：负责架构一致性、命名、错误处理、性能、安全和证据缺口的最后审查，并给出改进建议与参考范例。
 - 默认不再拆成两个聊天线程；由当前线程统一维护 `contract + state + context`，并在同一线程内切换 `Lead / Explorer / Executor / Skeptic` 角色推进实现与验收。
 - `state` 只保存短期控制面，`memory` 只保存跨会话知识；两者不能互相替代。
 - 架构性问题默认先走 `3-explorer-then-execute`，先收三份不同视角结论，再由主线程归并裁决。
@@ -36,6 +38,7 @@
 
 - 每个 Sprint 必须绑定一个 contract、至少一个 handoff 和至少一个 exploration log。
 - 每个活跃任务还必须有一个 `workspace/state/<task_id>/state.json`，由指挥线程推进。
+- 每个新任务默认都要声明 `product_goal / user_value / non_goals / drift_risk`，并把产品锚点与质量锚点写进 state。
 - `BLOCKED` 是有效探索结果，不视为失败。
 - handoff 必须写清 scope、已决策事项、风险和下一步检查。
 - workspace 产物只做运行时协作，不替代长期知识库。
@@ -46,8 +49,9 @@
 - `T0 单线程治理`：只用于治理、裁决、归档、状态回填、文档修订、trace 收口这类不产生 execution slice 的任务。
 - `T1 单线程探查`：用于事实不明、需要先核对仓库真相的任务；角色为 `Lead + Explorer`，但仍在同一线程内推进。
 - `T2 单线程实现`：用于单一、边界清晰、写集可控的实现切片；前提是 `contract + state + context + handoff + worktree` 已齐备。
-- `T3 单线程强校验`：用于架构、策略、控制面、线程模型、权限/安全边界、状态机和高回归风险任务；顺序为 `Lead -> Explorer -> Executor -> Skeptic -> Judge`。
+- `T3 单线程强校验`：用于架构、策略、控制面、线程模型、权限/安全边界、状态机和高回归风险任务；顺序为 `Product Anchor -> Explorer -> Executor -> Quality Anchor -> Judge`。
 - `T4 双证据档`：用于需要两条独立证据链才能证明正确性的任务，例如公共 schema / protocol、并发状态机、跨切片集成、上线前关键路径。
+- `Product Anchor` 与 `Quality Anchor` 是恒定席位，不要求长期运行两个子 agent；它们必须作为协议层常驻角色在每轮任务里出现。
 - 若 `discussion.policy == 3-explorer-then-execute`，任何执行形态都必须先有 `synthesis_path`，否则不得进入实现阶段。
 - 若 `state.team.role_integrity.independent_skeptic == false`，必须显式标记为 `degraded`，不得宣称“已完成独立监督”。
 - 若任务只是收口已有能力的 task-bound traceability，优先由当前线程单线程完成，不为文档回填额外开新聊天线程。

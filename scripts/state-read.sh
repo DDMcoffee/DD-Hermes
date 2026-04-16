@@ -50,6 +50,8 @@ team = state.get("team", {}) if isinstance(state.get("team"), dict) else {}
 supervisors = [item for item in team.get("supervisors", []) if isinstance(item, str) and item.strip()]
 executors = [item for item in team.get("executors", []) if isinstance(item, str) and item.strip()]
 skeptics = [item for item in team.get("skeptics", []) if isinstance(item, str) and item.strip()]
+product_anchors = [item for item in team.get("product_anchors", []) if isinstance(item, str) and item.strip()]
+quality_anchors = [item for item in team.get("quality_anchors", []) if isinstance(item, str) and item.strip()]
 role_analysis = scale_out_analysis(
     owner=state.get("owner", "lead"),
     supervisors=supervisors,
@@ -81,6 +83,12 @@ summary = {
     "supervisor_count": len(supervisors),
     "executor_count": len(executors),
     "skeptic_count": len(skeptics),
+    "product_anchor_count": len(product_anchors),
+    "quality_anchor_count": len(quality_anchors),
+    "product_goal_ready": bool(state.get("product", {}).get("goal", "")),
+    "product_goal_status": state.get("product", {}).get("goal_status", ""),
+    "goal_drift_flags": state.get("product", {}).get("goal_drift_flags", []),
+    "quality_review_status": state.get("quality", {}).get("review_status", ""),
     "independent_skeptic": role_integrity["independent_skeptic"],
     "role_integrity_degraded": role_integrity["degraded"],
     "role_conflicts": role_integrity["role_conflicts"],

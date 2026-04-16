@@ -63,7 +63,7 @@ def parse_frontmatter(text):
 def check_markdown(path, required_frontmatter, required_sections, label):
     if not path.exists():
         errors.append(f"{label} missing: {path}")
-        return
+        return {}
     text = path.read_text(encoding="utf-8")
     frontmatter = parse_frontmatter(text)
     missing_keys = [key for key in required_frontmatter if key not in frontmatter]
@@ -73,32 +73,49 @@ def check_markdown(path, required_frontmatter, required_sections, label):
         if section not in text:
             errors.append(f"{label} missing section '{section}': {path}")
     checked.append(str(path))
+    return frontmatter
+
+
+def schema_v2(frontmatter):
+    return str(frontmatter.get("schema_version", "")).strip() == "2"
 
 
 contract_path = repo / "workspace" / "contracts" / f"{task_id}.md"
-check_markdown(
+contract_frontmatter = check_markdown(
     contract_path,
     required_frontmatter=("task_id", "owner", "experts", "acceptance", "blocked_if", "memory_reads", "memory_writes"),
     required_sections=("## Context", "## Scope", "## Required Fields", "## Acceptance", "## Verification", "## Open Questions"),
     label="contract",
 )
+if schema_v2(contract_frontmatter):
+    missing = [key for key in ("schema_version", "product_goal", "user_value", "non_goals", "product_acceptance", "drift_risk") if key not in contract_frontmatter]
+    if missing:
+        errors.append(f"contract missing v2 frontmatter keys {missing}: {contract_path}")
+    if "## Product Gate" not in contract_path.read_text(encoding="utf-8"):
+        errors.append(f"contract missing section '## Product Gate': {contract_path}")
 
 handoff_paths = sorted((repo / "workspace" / "handoffs").glob(f"{task_id}-*.md"))
 if not handoff_paths:
     errors.append(f"handoff missing for task {task_id}")
 for handoff_path in handoff_paths:
-    check_markdown(
+    handoff_frontmatter = check_markdown(
         handoff_path,
         required_frontmatter=("from", "to", "scope", "files", "decisions", "risks", "next_checks"),
         required_sections=("## Context", "## Required Fields", "## Acceptance", "## Verification", "## Open Questions"),
         label="handoff",
     )
+    if schema_v2(handoff_frontmatter):
+        missing = [key for key in ("schema_version", "product_rationale", "goal_drift_risk", "user_visible_outcome") if key not in handoff_frontmatter]
+        if missing:
+            errors.append(f"handoff missing v2 frontmatter keys {missing}: {handoff_path}")
+        if "## Product Check" not in handoff_path.read_text(encoding="utf-8"):
+            errors.append(f"handoff missing section '## Product Check': {handoff_path}")
 
 closeout_paths = sorted((repo / "workspace" / "closeouts").glob(f"{task_id}-*.md"))
 if not closeout_paths:
     errors.append(f"closeout missing for task {task_id}")
 for closeout_path in closeout_paths:
-    check_markdown(
+    closeout_frontmatter = check_markdown(
         closeout_path,
         required_frontmatter=(
             "task_id",
@@ -117,6 +134,12 @@ for closeout_path in closeout_paths:
         required_sections=("## Context", "## Required Fields", "## Completion", "## Verification", "## Open Questions"),
         label="closeout",
     )
+    if schema_v2(closeout_frontmatter):
+        missing = [key for key in ("schema_version", "quality_review_status", "quality_findings_summary") if key not in closeout_frontmatter]
+        if missing:
+            errors.append(f"closeout missing v2 frontmatter keys {missing}: {closeout_path}")
+        if "## Quality Review" not in closeout_path.read_text(encoding="utf-8"):
+            errors.append(f"closeout missing section '## Quality Review': {closeout_path}")
 
 state_path = repo / "workspace" / "state" / task_id / "state.json"
 if not state_path.exists():
@@ -137,6 +160,21 @@ else:
     missing_integrity = [key for key in required_integrity_keys if key not in integrity]
     if missing_integrity:
         errors.append(f"state.team.role_integrity missing keys {missing_integrity}: {state_path}")
+    if int(state.get("state_version", 1) or 1) >= 2:
+        required_team_v2 = ("product_anchors", "quality_anchors", "anchor_policy")
+        missing_team_v2 = [key for key in required_team_v2 if key not in team]
+        if missing_team_v2:
+            errors.append(f"state.team missing v2 keys {missing_team_v2}: {state_path}")
+        product = state.get("product", {}) if isinstance(state.get("product"), dict) else {}
+        required_product = ("anchor", "goal", "user_value", "non_goals", "product_acceptance", "drift_risk", "goal_status", "goal_drift_flags", "last_product_review_at")
+        missing_product = [key for key in required_product if key not in product]
+        if missing_product:
+            errors.append(f"state.product missing keys {missing_product}: {state_path}")
+        quality = state.get("quality", {}) if isinstance(state.get("quality"), dict) else {}
+        required_quality = ("anchor", "review_status", "review_findings", "review_examples", "last_review_at")
+        missing_quality = [key for key in required_quality if key not in quality]
+        if missing_quality:
+            errors.append(f"state.quality missing keys {missing_quality}: {state_path}")
     checked.append(str(state_path))
 
 result = {
