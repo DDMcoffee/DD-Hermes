@@ -70,6 +70,7 @@ DD Hermes 是一个 workspace-first 的 Hermes agent harness，用来在 Codex I
 
 - `docs/context-runtime-state-memory.md`
 - `docs/git-management.md`
+- `docs/long-term-agent-division.md`
 - `memory 哲学二.md`
 - `openspec/README.md`
 - `.codex/skills/*/SKILL.md`
