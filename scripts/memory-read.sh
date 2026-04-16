@@ -30,8 +30,10 @@ repo=$(repo_root)
 payload=$(python3 - <<'PY' "$repo" "$task_context" "$kind" "$limit"
 import json
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
+now = datetime.now(timezone.utc)
 repo = Path(sys.argv[1])
 task_context = sys.argv[2].lower()
 kind = sys.argv[3]
@@ -60,12 +62,39 @@ for root in roots:
             key, value = line.split(":", 1)
             frontmatter[key.strip()] = value.strip().strip('"')
         haystack = f"{frontmatter.get('content','')} {frontmatter.get('scope','')}".lower()
-        score = sum(1 for token in tokens if token in haystack)
-        if score:
+        token_score = sum(1 for token in tokens if token in haystack)
+        if token_score:
+            constraint_bonus = 100 if frontmatter.get("type") == "constraint" else 0
+            confidence = 0.0
+            try:
+                confidence = float(frontmatter.get("confidence", "0"))
+            except (ValueError, TypeError):
+                pass
+            confidence_bonus = confidence * 10
+
+            recency_bonus = 0.0
+            validated_at = frontmatter.get("last_validated_at", "")
+            created_at = frontmatter.get("created_at", "")
+            ref_date = validated_at or created_at
+            if ref_date:
+                try:
+                    ref_dt = datetime.fromisoformat(ref_date.replace("Z", "+00:00"))
+                    age_days = (now - ref_dt).days
+                    if age_days <= 7:
+                        recency_bonus = 5.0
+                    elif age_days <= 30:
+                        recency_bonus = 2.0
+                except (ValueError, TypeError):
+                    pass
+
+            score = token_score + constraint_bonus + confidence_bonus + recency_bonus
             matches.append({
                 "memory_id": frontmatter.get("id"),
                 "path": str(path),
-                "score": score + (100 if frontmatter.get("type") == "constraint" else 0),
+                "score": score,
+                "token_score": token_score,
+                "confidence": confidence,
+                "recency_bonus": recency_bonus,
                 "type": frontmatter.get("type"),
                 "status": frontmatter.get("status"),
             })
@@ -87,7 +116,7 @@ print(json.dumps({
     "scored_candidates": matches,
     "conflicts": journal_conflicts,
     "expired": [item for item in selected if item.get("status") == "expired"],
-    "explanation": "task-constraint-first lexical match over content and scope",
+    "explanation": "constraint-first lexical match weighted by confidence and recency",
 }, ensure_ascii=False))
 PY
 )
