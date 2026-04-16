@@ -3,25 +3,36 @@ task_id: dd-hermes-demo-entry-v1
 from: expert-a
 to: lead
 scope: dd-hermes-demo-entry-v1 execution slice closeout
-execution_commit: 
+execution_commit: cae67bf0f02098ef340fd4c79741fb3ec1771d35
 state_path: workspace/state/dd-hermes-demo-entry-v1/state.json
 context_path: workspace/state/dd-hermes-demo-entry-v1/context.json
 runtime_path: workspace/state/dd-hermes-demo-entry-v1/runtime.json
 verified_steps:
-  - ./scripts/test-workflow.sh --task-id dd-hermes-demo-entry-v1
+  - ./scripts/spec-first.sh --changed-files AGENTS.md,docs/context-runtime-state-memory.md,scripts/demo-entry.sh,scripts/execution-thread-prompt.sh,README.md,指挥文档/README.md,指挥文档/03-执行线程干到底说明.md,指挥文档/04-任务重校准与线程策略.md,指挥文档/06-一期PhaseDone审计.md,指挥文档/07-体验入口任务说明.md --spec-path openspec/proposals/dd-hermes-demo-entry-v1.md --task-id dd-hermes-demo-entry-v1
+  - bash -n scripts/demo-entry.sh scripts/execution-thread-prompt.sh
+  - ./scripts/demo-entry.sh
 verified_files:
-  - workspace/contracts/dd-hermes-demo-entry-v1.md
+  - AGENTS.md
+  - docs/context-runtime-state-memory.md
+  - scripts/demo-entry.sh
+  - scripts/execution-thread-prompt.sh
+  - README.md
+  - 指挥文档/README.md
+  - 指挥文档/03-执行线程干到底说明.md
+  - 指挥文档/04-任务重校准与线程策略.md
+  - 指挥文档/06-一期PhaseDone审计.md
+  - 指挥文档/07-体验入口任务说明.md
 open_risks:
-  - None at bootstrap time.
+  - The current control plane still reports `independent_skeptic=false` for this task because lead is temporarily doubling as skeptic.
 next_actions:
-  - Update with execution evidence before handing back to lead.
+  - Fill in the execution commit after `git-commit-task.sh`.
 ---
 
 # Execution Closeout
 
 ## Context
 
-Execution closeout placeholder for expert-a on task dd-hermes-demo-entry-v1.
+Execution closeout for the single-thread user-visible experience entry slice on task dd-hermes-demo-entry-v1.
 
 ## Required Fields
 
@@ -40,12 +51,14 @@ Execution closeout placeholder for expert-a on task dd-hermes-demo-entry-v1.
 
 ## Completion
 
-- Replace this placeholder with completed outcomes for the execution slice.
+- The slice is complete when the read-only entry script, the single-thread wording updates, and the commander-doc alignment are verified and committed from the isolated worktree.
 
 ## Verification
 
-- Add exact commands and pass/fail evidence before handoff return.
+- `./scripts/spec-first.sh --changed-files AGENTS.md,docs/context-runtime-state-memory.md,scripts/demo-entry.sh,scripts/execution-thread-prompt.sh,README.md,指挥文档/README.md,指挥文档/03-执行线程干到底说明.md,指挥文档/04-任务重校准与线程策略.md,指挥文档/06-一期PhaseDone审计.md,指挥文档/07-体验入口任务说明.md --spec-path openspec/proposals/dd-hermes-demo-entry-v1.md --task-id dd-hermes-demo-entry-v1`
+- `bash -n scripts/demo-entry.sh scripts/execution-thread-prompt.sh`
+- `./scripts/demo-entry.sh`
 
 ## Open Questions
 
-- List unresolved integration questions for lead review.
+- Should this task landing immediately trigger a final phase-closeout decision?

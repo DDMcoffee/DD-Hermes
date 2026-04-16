@@ -32,13 +32,14 @@ import sys
 task_id, expert, context_path, handoff_path, worktree_path = sys.argv[1:]
 prompt = "\n".join([
     f"Task ID: {task_id}",
-    f"Role: execution thread for {expert}",
+    f"Role: implementation mode for {expert} in the current thread",
     f"Worktree: {worktree_path}",
     f"Context packet: {context_path}",
     f"Handoff: {handoff_path}",
     "",
     "Instructions:",
     "- Read the context packet and handoff first.",
+    "- Stay in the current thread; do not treat this as a request to open a separate chat thread.",
     "- Work only inside the assigned worktree.",
     "- Do not change policy or commander-side files unless explicitly required by the handoff.",
     "- After coding, write back verification evidence and handoff updates.",
