@@ -53,6 +53,41 @@ for line in match.group(1).splitlines():
 PY
 }
 
+read_state_field() {
+  local state_path="$1"
+  local dotted="$2"
+  python3 - <<'PY' "$state_path" "$dotted"
+from pathlib import Path
+import json
+import sys
+
+path = Path(sys.argv[1])
+if not path.exists():
+    print("")
+    raise SystemExit(0)
+try:
+    data = json.loads(path.read_text(encoding="utf-8"))
+except json.JSONDecodeError:
+    print("")
+    raise SystemExit(0)
+
+value = data
+for part in sys.argv[2].split("."):
+    if isinstance(value, dict):
+        value = value.get(part, "")
+    else:
+        value = ""
+        break
+
+if isinstance(value, str):
+    print(value)
+elif value in (None, []):
+    print("")
+else:
+    print(str(value))
+PY
+}
+
 phase_summary=$(read_frontmatter_field phase_status)
 proof_task=$(read_frontmatter_field latest_proof_task_id)
 archive_rel=$(read_frontmatter_field latest_proof_archive)
@@ -62,7 +97,11 @@ gap_1=$(read_frontmatter_field current_gap_1)
 gap_2=$(read_frontmatter_field current_gap_2)
 archive_doc="$repo/$archive_rel"
 task_doc="$repo/$task_doc_rel"
+proof_state_path="$repo/workspace/state/$proof_task/state.json"
 mainline_state_json=$("$repo/scripts/state-read.sh" --task-id "$next_task" 2>/dev/null || true)
+proof_latest_commit=$(read_state_field "$proof_state_path" "git.latest_commit")
+proof_status=$(read_state_field "$proof_state_path" "status")
+proof_mode=$(read_state_field "$proof_state_path" "mode")
 
 missing=()
 for path in "$archive_doc" "$task_doc"; do
@@ -81,6 +120,13 @@ fi
 
 execution_commit=$(find_commit "feat(${proof_task}):")
 integration_commit=$(find_commit "integrate(${proof_task}):")
+if [[ -z "$execution_commit" && -n "$proof_latest_commit" ]]; then
+  execution_commit="$proof_latest_commit"
+fi
+integration_commit_display=$(short_sha "$integration_commit")
+if [[ -z "$integration_commit" && "$proof_status" == "done" && "$proof_mode" == "archive" ]]; then
+  integration_commit_display="不单独存在"
+fi
 entry_task_commit=$(latest_touch_commit "$task_doc_rel")
 mainline_summary=$(STATE_JSON="$mainline_state_json" python3 - <<'PY'
 import json
@@ -135,7 +181,7 @@ DD Hermes 体验入口
 最近一次真实 end-to-end 证明
 - task_id：$proof_task
 - execution commit：$(short_sha "$execution_commit")
-- integration commit：$(short_sha "$integration_commit")
+- integration commit：$integration_commit_display
 - archive：$archive_rel
 
 当前 phase-2 主线
