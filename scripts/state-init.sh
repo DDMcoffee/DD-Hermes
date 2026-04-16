@@ -222,6 +222,7 @@ state["memory"]["writes"] = memory_writes
 state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 event = {
     "event_id": f"{task_id}:{timestamp}:{'state-init' if created else 'state-refresh'}",
+    "source": "state",
     "task_id": task_id,
     "op": "state_init" if created else "state_refresh",
     "timestamp": timestamp,

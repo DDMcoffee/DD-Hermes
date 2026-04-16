@@ -29,8 +29,10 @@ if [[ ! -f "$state_path" ]]; then
   exit 3
 fi
 
-result=$(python3 - <<'PY' "$state_path"
+caller=${CALLER_EXPERT:-""}
+result=$(CALLER_EXPERT="$caller" python3 - <<'PY' "$state_path"
 import json
+import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -38,6 +40,7 @@ from pathlib import Path
 state = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
 lease = state.get("lease", {})
 now = datetime.now(timezone.utc)
+caller_expert = os.environ.get("CALLER_EXPERT", "")
 
 deadline_str = lease.get("deadline_at", "")
 started_str = lease.get("started_at", "")
@@ -69,6 +72,13 @@ if not exceeded and duration_hours and started_str and elapsed_minutes >= 0:
         exceeded = True
         remaining_minutes = round(duration_hours * 60 - elapsed_minutes, 1)
 
+active_expert = state.get("active_expert", "")
+lease_conflict = False
+lease_conflict_reason = ""
+if caller_expert and active_expert and caller_expert != active_expert and status == "running":
+    lease_conflict = True
+    lease_conflict_reason = f"lease held by {active_expert}, caller is {caller_expert}"
+
 print(json.dumps({
     "task_id": state.get("task_id", ""),
     "lease_status": status,
@@ -79,6 +89,9 @@ print(json.dumps({
     "remaining_minutes": remaining_minutes,
     "exceeded": exceeded,
     "should_pause": exceeded and status == "running",
+    "active_expert": active_expert,
+    "lease_conflict": lease_conflict,
+    "lease_conflict_reason": lease_conflict_reason,
 }, ensure_ascii=False))
 PY
 )

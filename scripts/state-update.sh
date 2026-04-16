@@ -285,6 +285,7 @@ state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2) + "\n", en
 
 event = {
     "event_id": f"{task_id}:{timestamp}:state-update",
+    "source": "state",
     "task_id": task_id,
     "op": "state_update",
     "timestamp": timestamp,

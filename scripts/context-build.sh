@@ -148,6 +148,8 @@ packet = {
         "resume_checkpoint": state.get("lease", {}).get("resume_checkpoint", ""),
         "discussion_policy": state.get("discussion", {}).get("policy", ""),
         "decision_id": state.get("discussion", {}).get("decision_id", ""),
+        "runtime_generated_at": timestamp,
+        "runtime_stale_warning": "",
         "supervisor_count": len(state.get("team", {}).get("supervisors", [])) if isinstance(state.get("team"), dict) else 0,
         "independent_skeptic": False,
         "role_integrity_degraded": False,
@@ -171,6 +173,20 @@ packet["context_summary"]["role_integrity_degraded"] = role_analysis["role_integ
 packet["context_summary"]["role_conflicts"] = role_analysis["role_integrity"]["role_conflicts"]
 packet["context_summary"]["scale_out_triggers"] = merge_triggers(team.get("scale_out_triggers", []), role_analysis["scale_out_triggers"])
 packet["context_summary"]["scale_out_recommended"] = bool(team.get("scale_out_recommended", False)) or bool(packet["context_summary"]["scale_out_triggers"])
+
+if runtime_path.exists():
+    try:
+        prev_runtime = json.loads(runtime_path.read_text(encoding="utf-8"))
+        prev_ts = prev_runtime.get("generated_at", "")
+        if prev_ts:
+            prev_dt = datetime.fromisoformat(prev_ts.replace("Z", "+00:00"))
+            now_dt = datetime.now(timezone.utc)
+            age_minutes = (now_dt - prev_dt).total_seconds() / 60
+            if age_minutes > 60:
+                packet["context_summary"]["runtime_stale_warning"] = f"previous runtime snapshot is {int(age_minutes)} minutes old"
+    except (json.JSONDecodeError, ValueError, KeyError):
+        pass
+
 context_path.write_text(json.dumps(packet, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 state.setdefault("runtime", {})
@@ -183,6 +199,7 @@ state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2) + "\n", en
 
 event = {
     "event_id": f"{task_id}:{timestamp}:context-build",
+    "source": "state",
     "task_id": task_id,
     "op": "context_build",
     "timestamp": timestamp,
