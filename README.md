@@ -17,6 +17,7 @@ DD Hermes 是一个 workspace-first 的 Hermes agent harness，用来在 Codex I
   - `Lead / Explorer / Executor / Skeptic / Judge` 是逻辑角色，不是默认分裂出来的聊天线程。
   - 其中有两个恒定锚点：`Product Anchor` 默认映射到 `Supervisor`，`Quality Anchor` 默认映射到 `Skeptic`。
   - 隔离 worktree 仍然保留，但它表示代码隔离，不表示必须切到另一个聊天线程。
+  - 当前线程是唯一默认对话面；其他聊天线程只作为系统内部执行面或历史来源，由系统自行管理。
 
 ## Out Of Scope
 
