@@ -28,6 +28,7 @@ DD Hermes 是一个 workspace-first 的 Hermes agent harness，用来在 Codex I
 - `docs/decision-discussion.md`: 3-explorer 决策讨论协议。
 - `docs/git-management.md`: baseline commit、worktree 生命周期和提交边界。
 - `docs/textbook-agent.md`: 教材记录 agent 的职责和每日总结结构。
+- `指挥文档/`: 给指挥线程和项目负责人看的中文目标、终点和执行收尾文档。
 - `memory/`: 记忆卡、journal 和人类可读视图。
 - `openspec/`: proposal/design/task/archive 生命周期目录和模板。
 - `scripts/`: worktree、context/runtime/state、记忆读写、spec 检查、验证编排。
