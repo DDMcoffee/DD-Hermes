@@ -1,0 +1,10 @@
+.DS_Store
+.worktrees/
+workspace/logs/*.log
+workspace/logs/*.jsonl
+workspace/state/*/context.json
+workspace/state/*/runtime.json
+workspace/state/*/state.json
+workspace/state/*/events.jsonl
+memory/journal/*.jsonl
+tmp/
