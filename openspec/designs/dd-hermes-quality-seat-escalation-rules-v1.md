@@ -18,14 +18,14 @@ links:
 
 ## Summary
 
-Introduce task-class-based escalation rules on top of the already-landed `quality seat` truth so DD Hermes can answer not just “is this task degraded or independent,” but also “is degraded supervision acceptable for this class of work.”
+Introduce task-class-based escalation rules on top of the already-landed `quality seat` truth so DD Hermes can answer not just “is this task degraded or independent,” but also “does this task class allow degraded supervision at all.”
 
 ## Interfaces
 
 - `workspace/contracts/<task_id>.md`
-  - Carry explicit task-class language for the new mainline and later execution slices.
+  - Carry explicit `task_class`, `quality_requirement`, and `task_class_rationale` for the new mainline and later execution slices.
 - `scripts/team_governance.py`
-  - Extend shared governance analysis with a task-class-aware escalation rule that can say `degraded-allowed` or `requires-independent`.
+  - Extend shared governance analysis with a T0-T4-aware escalation rule that can say `degraded-allowed` or `requires-independent`.
 - `scripts/state-init.sh` / `scripts/state-update.sh`
   - Carry the minimum metadata needed to express task class and required quality-seat policy.
 - `scripts/state-read.sh` / `scripts/context-build.sh` / `scripts/dispatch-create.sh`
@@ -36,21 +36,22 @@ Introduce task-class-based escalation rules on top of the already-landed `qualit
 ## Data Flow
 
 1. A task declares or derives its task class.
-2. Shared governance analysis maps that class to a required quality-seat policy.
+2. Shared governance analysis maps `T0/T1/T2` to `degraded-allowed` and `T3/T4` to `requires-independent`, while still allowing bounded manual escalation from `T2`.
 3. State/context/dispatch expose both the current seat truth and the required policy truth.
 4. Execution and completion gates compare the two and block when the class requires independence but the task is only degraded.
 
 ## Edge Cases
 
-- Low-risk or bounded documentation-oriented tasks may remain explicitly degraded.
-- Architecture/control-plane/security-sensitive tasks should default to `requires-independent`.
+- `T0/T1` stay in no-execution territory and should not force a fake independent seat.
+- `T2` may remain degraded, but maintainers can explicitly escalate it to `requires-independent`.
+- `T3/T4` should block if only degraded supervision is available.
 - Tasks with ambiguous class should stop in planning rather than silently defaulting to degraded.
 
 ## Acceptance
 
 - DD Hermes can express at least one task class that may stay degraded and one that must require an independent quality seat.
 - The new policy reuses existing control-plane truth instead of adding a second role model.
-- The first implementation boundary remains inside shared governance scripts, docs, and tests.
+- The first implementation boundary remains inside shared governance scripts, docs, and tests, and covers one allowed path plus one blocked path.
 
 ## Verification
 

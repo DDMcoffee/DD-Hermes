@@ -31,6 +31,11 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
   - `summary.has_context`
   - `summary.has_runtime_report`
   - `summary.has_supervisor`
+  - `summary.task_class`
+  - `summary.task_class_bucket`
+  - `summary.quality_requirement`
+  - `summary.quality_requirement_ready`
+  - `summary.quality_requirement_reasons`
   - `summary.independent_skeptic`
   - `summary.quality_seat_mode`
   - `summary.quality_seat_status`
@@ -63,6 +68,9 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
   - `memory_count`
   - `context_summary.product_gate_ready`
   - `context_summary.quality_anchor_ready`
+  - `context_summary.task_class`
+  - `context_summary.quality_requirement`
+  - `context_summary.quality_requirement_ready`
   - `context_summary.quality_seat_mode`
   - `context_summary.quality_seat_status`
   - `context_summary.degraded_ack_ready`
@@ -75,6 +83,7 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
 - Response required fields:
   - `task_id`, `state_path`, `context_path`, `runtime_path`
   - `independent_skeptic`, `degraded`, `degraded_ack_ready`, `role_conflicts`
+  - `task_class`, `task_class_bucket`, `quality_requirement`, `task_policy_reasons`
   - `quality_seat_mode`, `quality_seat_status`, `quality_seat_reasons`
   - `summary.supervisor_count`, `summary.executor_count`, `summary.skeptic_count`
   - `assignments`
@@ -114,7 +123,9 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
   - `state.team.executors` 不能为空
   - `product gate` 必须完整，不能缺少 `user_value / non_goals / product_acceptance / drift_risk`
   - `quality anchor` 必须已分配
+  - `task_class / quality_requirement` 必须完整，不能把执行任务留在未分类状态
   - 若 `role_integrity.degraded == true`，必须先有显式 `degraded ack`
+  - 若 `quality_requirement == requires-independent`，则 `quality_seat_mode` 必须是 `independent`
 - Response required fields:
   - `pass`, `target_thread`, `blocked_reason`
 
@@ -163,6 +174,8 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
 
 - 若 `summary.independent_skeptic == false`，不得宣称“独立质疑位已覆盖”，应标注为 degraded。
 - 若 `summary.quality_seat_status == blocked`，不得进入 execution，也不得宣称质量位已经可用。
+- 若 `summary.quality_requirement_ready == false`，不得进入 execution。
 - 若 `degraded_ack_ready == false`，不得进入 execution。
+- 若 `summary.quality_requirement == requires-independent` 且 `summary.independent_skeptic == false`，不得进入 execution。
 - 若 closeout 结构不完整或 `ready_for_execution_slice_done == false`，不得判定 `execution slice done`。
 - 若 state 未写入 commit 锚点和 verification 证据，不得判定 `task done`。

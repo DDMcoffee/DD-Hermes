@@ -147,6 +147,8 @@ lines = [
     f"- Product Anchor：{summary.get('product_anchor_name', '未设置')} ({summary.get('product_anchor_role', '未设置')})",
     f"- Product Goal：{summary.get('goal', '未设置')}",
     f"- User Value：{summary.get('product_user_value', '未设置')}",
+    f"- Task Class：{summary.get('task_class', '未设置')} ({summary.get('task_class_bucket', 'unknown')})",
+    f"- Quality Requirement：{summary.get('quality_requirement', '未设置')}",
 ]
 non_goals = summary.get("product_non_goals", [])
 if non_goals:

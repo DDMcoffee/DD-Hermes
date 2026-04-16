@@ -60,6 +60,7 @@ from team_governance import (
     quality_anchor_analysis,
     quality_review_analysis,
     scale_out_analysis,
+    task_class_analysis,
 )
 
 state_dir = repo / "workspace" / "state" / task_id
@@ -165,6 +166,9 @@ user_value = contract_frontmatter.get("user_value", "")
 non_goals = contract_frontmatter.get("non_goals", [])
 product_acceptance = contract_frontmatter.get("product_acceptance", [])
 drift_risk = contract_frontmatter.get("drift_risk", "")
+task_class = contract_frontmatter.get("task_class", "")
+quality_requirement = contract_frontmatter.get("quality_requirement", "")
+task_class_rationale = contract_frontmatter.get("task_class_rationale", "")
 experts = normalize_people(experts_csv.split(","))
 if not experts:
     experts = normalize_people(contract_frontmatter.get("experts", []))
@@ -338,10 +342,18 @@ state["product"].update({
     "non_goals": non_goals,
     "product_acceptance": product_acceptance,
     "drift_risk": drift_risk,
+    "task_class": task_class or state.get("product", {}).get("task_class", ""),
+    "quality_requirement": quality_requirement or state.get("product", {}).get("quality_requirement", ""),
+    "task_class_rationale": task_class_rationale or state.get("product", {}).get("task_class_rationale", ""),
     "goal_status": "defined" if product_goal else "missing",
     "goal_drift_flags": state.get("product", {}).get("goal_drift_flags", []),
     "last_product_review_at": timestamp if product_goal else state.get("product", {}).get("last_product_review_at", ""),
 })
+task_policy = task_class_analysis(state.get("product", {}))
+if not str(state["product"].get("quality_requirement", "")).strip() and task_policy.get("quality_requirement"):
+    state["product"]["quality_requirement"] = task_policy["quality_requirement"]
+if not str(state["product"].get("task_class_rationale", "")).strip() and task_policy.get("rationale"):
+    state["product"]["task_class_rationale"] = task_policy["rationale"]
 lease_goal = state.get("lease", {}).get("goal", "")
 if not isinstance(lease_goal, str) or not lease_goal.strip():
     state.setdefault("lease", {})

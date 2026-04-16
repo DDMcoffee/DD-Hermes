@@ -28,7 +28,7 @@ script_dir = Path(sys.argv[1]).resolve()
 sys.path.insert(0, str(script_dir))
 
 from artifact_semantics import closeout_semantic_analysis, parse_frontmatter
-from team_governance import degraded_ack_analysis, product_gate_analysis, quality_review_analysis, quality_seat_analysis
+from team_governance import degraded_ack_analysis, product_gate_analysis, quality_review_analysis, quality_seat_analysis, task_class_analysis
 
 data = json.loads(os.environ.get("INPUT_JSON", "{}"))
 state_path = os.environ.get("STATE_PATH", "")
@@ -57,7 +57,8 @@ role_integrity = team.get("role_integrity", {}) if isinstance(team.get("role_int
 product_gate = product_gate_analysis(data.get("product", {}), team.get("product_anchors", []), team.get("anchor_policy", {}))
 quality_review = quality_review_analysis(data.get("quality", {}), team.get("quality_anchors", []), team.get("anchor_policy", {}))
 degraded_ack = degraded_ack_analysis(role_integrity)
-quality_seat = quality_seat_analysis(role_integrity, {"ready": True, "reasons": []}, degraded_ack, quality_review)
+task_policy = task_class_analysis(data.get("product", {}))
+quality_seat = quality_seat_analysis(role_integrity, {"ready": True, "reasons": []}, degraded_ack, quality_review, task_policy)
 
 missing = []
 uncovered = []
@@ -76,6 +77,8 @@ if changed_code:
             missing.append("verified_files")
 if changed_code and (product_goal_status in ("missing", "drifted", "blocked", "unknown") or not product_gate["ready"]):
     missing.append("product_gate")
+if changed_code and not task_policy["ready"]:
+    missing.append("task_class_policy")
 if changed_code and not degraded_ack["ready"]:
     missing.append("degraded_ack")
 if changed_code and (quality_review_status not in ("approved", "degraded-approved") or not quality_review["ready"]):
@@ -115,6 +118,9 @@ result = {
     "missing_verification": missing,
     "uncovered_files": uncovered,
     "product_gate_reasons": product_gate["reasons"],
+    "task_class": task_policy["task_class"],
+    "quality_requirement": task_policy["quality_requirement"],
+    "task_policy_reasons": task_policy["reasons"],
     "degraded_ack_reasons": degraded_ack["reasons"],
     "quality_review_reasons": quality_review["reasons"],
     "quality_seat_mode": quality_seat["mode"],

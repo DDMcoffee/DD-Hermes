@@ -19,7 +19,7 @@ links:
 
 ## What
 
-Define the next phase-2 DD Hermes mainline: classify which task classes may proceed under explicit degraded acknowledgement and which must require an independent quality seat before execution or completion.
+Define the next phase-2 DD Hermes mainline: land the initial `T0/T1/T2 => degraded-allowed` and `T3/T4 => requires-independent` matrix so a maintainer can tell, before execution or completion, whether degraded supervision is acceptable.
 
 ## Why
 
@@ -33,9 +33,9 @@ Define the next phase-2 DD Hermes mainline: classify which task classes may proc
 
 ## Acceptance
 
-- The planning package names initial DD Hermes task classes and their default quality-seat requirement.
+- The planning package names the initial T0-T4 matrix and marks the current task itself as `T3`.
 - Decision synthesis states the exact control-plane landing points for a first implementation slice.
-- The task remains bounded to shared governance scripts, docs, and tests.
+- The task remains bounded to shared governance scripts, docs, and tests, and proves one allowed path plus one blocked path.
 
 ## Verification
 

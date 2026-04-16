@@ -2,10 +2,10 @@
 schema_version: 2
 from: lead
 to: expert-a
-scope: dd-hermes-quality-seat-escalation-rules-v1 planning and escalation-boundary definition
+scope: dd-hermes-quality-seat-escalation-rules-v1 first execution slice for task-class escalation rules
 product_rationale: This slice should tell a DD Hermes maintainer when degraded supervision is acceptable and when an independent quality seat is mandatory.
 goal_drift_risk: The slice could drift into generic governance theory if it stops reducing ambiguity for real DD Hermes task classes.
-user_visible_outcome: A maintainer can see not only the current seat truth, but also whether the current task class is allowed to stay degraded.
+user_visible_outcome: A maintainer can see not only the current seat truth, but also the task class, the required quality-seat policy, and whether degraded supervision is allowed.
 files:
   - workspace/contracts/dd-hermes-quality-seat-escalation-rules-v1.md
   - openspec/proposals/dd-hermes-quality-seat-escalation-rules-v1.md
@@ -16,21 +16,22 @@ files:
 decisions:
   - Archive the previous proof task instead of adding another slice to it.
   - Keep the new mainline at the task-class escalation layer before any broader governance changes.
+  - Freeze the initial matrix as `T0/T1/T2 => degraded-allowed` and `T3/T4 => requires-independent`.
   - Reuse the existing quality-seat truth already exposed across state/context/dispatch/gates.
 risks:
   - Do not change policy through memory writes.
   - Do not reopen `dd-hermes-independent-quality-seat-v1` with new implementation work.
   - Do not expand into runtime/provider/scheduler or generic documentation churn.
 next_checks:
-  - Run workflow/context verification for the planning package.
-  - Write back the accepted escalation boundary before any new execution slice begins.
+  - Run workflow/context/dispatch/gate verification for the execution slice.
+  - Prove one degraded-allowed path and one requires-independent blocked path before handing back to lead.
 ---
 
 # Lead Handoff
 
 ## Context
 
-Expert expert-a owns the planning slice that turns “quality seat escalation rules” into a bounded next mainline rather than an abstract policy placeholder.
+Expert expert-a owns the first execution slice that turns the agreed T0-T4 matrix into observable control-plane truth.
 
 ## Required Fields
 
@@ -47,11 +48,11 @@ Expert expert-a owns the planning slice that turns “quality seat escalation ru
 
 ## Acceptance
 
-- Keep the planning artifacts task-bound, product-explicit, and ready for a later first execution slice.
+- Keep the slice task-bound, product-explicit, and prove the matrix through real gate behavior.
 
 ## Product Check
 
-- Confirm the slice names real DD Hermes task classes and keeps the next boundary inside shared governance scripts, docs, and tests.
+- Confirm the slice keeps the next boundary inside shared governance scripts, docs, and tests, and that the current task itself stays `T3`.
 
 ## Verification
 
@@ -60,4 +61,4 @@ Expert expert-a owns the planning slice that turns “quality seat escalation ru
 
 ## Open Questions
 
-- Which task classes should DD Hermes initially treat as `requires-independent`, and which are acceptable as `degraded-allowed`?
+- Which concrete `T2` scenarios should later be promoted to explicit `requires-independent` overrides?

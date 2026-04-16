@@ -45,6 +45,7 @@ from team_governance import (
     quality_anchor_analysis,
     quality_review_analysis,
     scale_out_analysis,
+    task_class_analysis,
 )
 
 if not state_path.exists():
@@ -100,6 +101,9 @@ allowed = {
     "non_goals",
     "product_acceptance",
     "drift_risk",
+    "task_class",
+    "quality_requirement",
+    "task_class_rationale",
     "product_goal_status",
     "goal_drift_flags",
     "last_product_review_at",
@@ -259,6 +263,12 @@ if "product_acceptance" in data:
     state["product"]["product_acceptance"] = data["product_acceptance"]
 if "drift_risk" in data:
     state["product"]["drift_risk"] = data["drift_risk"]
+if "task_class" in data:
+    state["product"]["task_class"] = data["task_class"]
+if "quality_requirement" in data:
+    state["product"]["quality_requirement"] = data["quality_requirement"]
+if "task_class_rationale" in data:
+    state["product"]["task_class_rationale"] = data["task_class_rationale"]
 if "product_goal_status" in data:
     state["product"]["goal_status"] = data["product_goal_status"]
 if "goal_drift_flags" in data:
@@ -367,7 +377,15 @@ state["product"].setdefault("drift_risk", "")
 state["product"].setdefault("goal_status", "defined" if state["product"].get("goal") else "missing")
 state["product"].setdefault("goal_drift_flags", [])
 state["product"].setdefault("last_product_review_at", "")
+state["product"].setdefault("task_class", "")
+state["product"].setdefault("quality_requirement", "")
+state["product"].setdefault("task_class_rationale", "")
 state["product"]["anchor"] = product_anchors[0] if product_anchors else owner
+task_policy = task_class_analysis(state["product"])
+if not str(state["product"].get("quality_requirement", "")).strip() and task_policy.get("quality_requirement"):
+    state["product"]["quality_requirement"] = task_policy["quality_requirement"]
+if not str(state["product"].get("task_class_rationale", "")).strip() and task_policy.get("rationale"):
+    state["product"]["task_class_rationale"] = task_policy["rationale"]
 
 state["quality"].setdefault("anchor", quality_anchors[0] if quality_anchors else "")
 state["quality"].setdefault("review_status", "pending")

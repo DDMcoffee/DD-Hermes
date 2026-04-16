@@ -6,6 +6,9 @@ experts:
   - expert-a
 product_goal: Make DD Hermes expose and enforce whether the quality seat is independent or degraded, so maintainers can trust quality-review truth before execution and completion.
 user_value: Let a DD Hermes maintainer tell, before execution and completion, whether the quality seat is truly independent or explicitly degraded.
+task_class: T2
+quality_requirement: degraded-allowed
+task_class_rationale: This archived proof slice predates the frozen T0-T4 escalation matrix and is preserved as a bounded quality-seat proof task accepted under explicit degraded supervision.
 non_goals:
   - Do not add a new runtime, provider, gateway, or scheduler layer.
   - Do not reintroduce multiple long-lived chat threads as the main control model.
@@ -47,6 +50,9 @@ Turn the post-archive phase-2 question into a real planning task: DD Hermes now 
 - `experts`
 - `product_goal`
 - `user_value`
+- `task_class`
+- `quality_requirement`
+- `task_class_rationale`
 - `non_goals`
 - `product_acceptance`
 - `drift_risk`
@@ -64,6 +70,7 @@ Turn the post-archive phase-2 question into a real planning task: DD Hermes now 
 ## Product Gate
 
 - The task must help a maintainer answer one question quickly: is the quality seat independent, or is it degraded with an explicit reason.
+- This archived proof slice is treated as a pre-matrix `T2` bounded execution task rather than a post-matrix `T3` enforcement task.
 - If the slice starts adding theory, runtime machinery, or document churn without improving that answer, stop and recalibrate.
 
 ## Verification

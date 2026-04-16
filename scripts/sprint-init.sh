@@ -10,6 +10,9 @@ owner="lead"
 experts=""
 current_focus="bootstrap"
 discussion_policy="auto"
+task_class="T2"
+quality_requirement=""
+task_class_rationale=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --task-id) task_id="$2"; shift 2 ;;
@@ -17,6 +20,9 @@ while [[ $# -gt 0 ]]; do
     --experts) experts="$2"; shift 2 ;;
     --current-focus) current_focus="$2"; shift 2 ;;
     --discussion-policy) discussion_policy="$2"; shift 2 ;;
+    --task-class) task_class="$2"; shift 2 ;;
+    --quality-requirement) quality_requirement="$2"; shift 2 ;;
+    --task-class-rationale) task_class_rationale="$2"; shift 2 ;;
     --stdin|--json) shift ;;
     *) shift ;;
   esac
@@ -43,6 +49,9 @@ handoff_json=$(python3 - \
   "$task_id" \
   "$owner" \
   "$experts" \
+  "$task_class" \
+  "$quality_requirement" \
+  "$task_class_rationale" \
   "$contract_path" \
   "$exploration_path" \
   "$proposal_path" \
@@ -59,16 +68,31 @@ repo = Path(sys.argv[1]).resolve()
 task_id = sys.argv[2]
 owner = sys.argv[3]
 experts_csv = sys.argv[4]
-contract_path = Path(sys.argv[5])
-exploration_path = Path(sys.argv[6])
-proposal_path = Path(sys.argv[7])
-contract_template = Path(sys.argv[8])
-handoff_template = Path(sys.argv[9])
-closeout_template = Path(sys.argv[10])
-exploration_template = Path(sys.argv[11])
-proposal_template = Path(sys.argv[12])
+task_class = sys.argv[5]
+quality_requirement = sys.argv[6]
+task_class_rationale = sys.argv[7]
+contract_path = Path(sys.argv[8])
+exploration_path = Path(sys.argv[9])
+proposal_path = Path(sys.argv[10])
+contract_template = Path(sys.argv[11])
+handoff_template = Path(sys.argv[12])
+closeout_template = Path(sys.argv[13])
+exploration_template = Path(sys.argv[14])
+proposal_template = Path(sys.argv[15])
 
 expert_list = [item.strip() for item in experts_csv.split(",") if item.strip()]
+task_class_defaults = {
+    "T0": ("degraded-allowed", "治理/裁决/归档/trace 收口任务，不进入 execution slice。"),
+    "T1": ("degraded-allowed", "单线程探查任务，只核对事实，不进入实现面。"),
+    "T2": ("degraded-allowed", "边界清晰、低风险写集的实现切片，允许 degraded 但必须显式确认。"),
+    "T3": ("requires-independent", "控制面、架构、策略或高回归风险任务，默认要求独立质量位。"),
+    "T4": ("requires-independent", "需要双证据链的 schema/protocol/并发/集成任务，默认要求独立质量位。"),
+}
+default_requirement, default_rationale = task_class_defaults.get(task_class, ("", ""))
+if not quality_requirement:
+    quality_requirement = default_requirement
+if not task_class_rationale:
+    task_class_rationale = default_rationale
 
 
 def load_template(path: Path):
@@ -125,6 +149,9 @@ contract = render_doc(
         "experts": expert_list,
         "product_goal": f"Advance DD Hermes through task {task_id} without drifting from the current product focus.",
         "user_value": "Keep the next DD Hermes slice connected to a user-visible or operator-visible outcome instead of generic busywork.",
+        "task_class": task_class,
+        "quality_requirement": quality_requirement,
+        "task_class_rationale": task_class_rationale,
         "non_goals": ["Do not expand into unrelated runtime, provider, or gateway work."],
         "product_acceptance": ["The task remains traceable to one clear product outcome and one explicit non-goal boundary."],
         "drift_risk": "This task could drift into generic infrastructure cleanup if the product outcome stops being explicit.",
@@ -145,6 +172,9 @@ contract = render_doc(
             "- `experts`",
             "- `product_goal`",
             "- `user_value`",
+            "- `task_class`",
+            "- `quality_requirement`",
+            "- `task_class_rationale`",
             "- `non_goals`",
             "- `product_acceptance`",
             "- `drift_risk`",
@@ -156,6 +186,7 @@ contract = render_doc(
         "Acceptance": ["- All artifacts exist and are linked by task id."],
         "Product Gate": [
             "- The task must remain tied to one clear DD Hermes product outcome.",
+            f"- This bootstrap defaults to `{task_class}` with `{quality_requirement}` so later gates know the intended quality-seat bar.",
             "- If the slice starts expanding beyond the declared non-goals, stop and recalibrate before implementation.",
         ],
         "Verification": [

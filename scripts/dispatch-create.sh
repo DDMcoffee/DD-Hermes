@@ -57,6 +57,7 @@ from team_governance import (
     merge_triggers,
     normalize_people,
     product_gate_analysis,
+    task_class_analysis,
     quality_anchor_analysis,
     quality_seat_analysis,
     scale_out_analysis,
@@ -89,6 +90,7 @@ product_anchors = normalize_people(team.get("product_anchors", []))
 quality_anchors = normalize_people(team.get("quality_anchors", []))
 product = state.get("product", {}) if isinstance(state.get("product"), dict) else {}
 quality = state.get("quality", {}) if isinstance(state.get("quality"), dict) else {}
+task_policy = task_class_analysis(product)
 role_analysis = scale_out_analysis(
     owner=state.get("owner", "lead"),
     supervisors=supervisors,
@@ -107,7 +109,7 @@ role_integrity = {
 product_gate = product_gate_analysis(product, product_anchors, team.get("anchor_policy", {}))
 quality_anchor = quality_anchor_analysis(quality, quality_anchors, team.get("anchor_policy", {}))
 degraded_ack = degraded_ack_analysis(role_integrity)
-quality_seat = quality_seat_analysis(role_integrity, quality_anchor, degraded_ack)
+quality_seat = quality_seat_analysis(role_integrity, quality_anchor, degraded_ack, None, task_policy)
 
 if not supervisors:
     print(json.dumps({"error": "dispatch requires at least one supervisor", "blocked": True}, ensure_ascii=False))
@@ -123,6 +125,15 @@ if not product_gate["ready"]:
         "error": f"dispatch blocked by product gate: {', '.join(product_gate['reasons'])}",
         "blocked": True,
         "product_gate_reasons": product_gate["reasons"],
+    }, ensure_ascii=False))
+    raise SystemExit(2)
+if not task_policy["ready"]:
+    print(json.dumps({
+        "error": f"dispatch blocked by task classification: {', '.join(task_policy['reasons'])}",
+        "blocked": True,
+        "task_class": task_policy["task_class"],
+        "quality_requirement": task_policy["quality_requirement"],
+        "task_policy_reasons": task_policy["reasons"],
     }, ensure_ascii=False))
     raise SystemExit(2)
 if product.get("goal_status") in {"drifted", "blocked"}:
@@ -143,6 +154,18 @@ if not degraded_ack["ready"]:
         "error": f"dispatch blocked by degraded supervision: {', '.join(degraded_ack['reasons'])}",
         "blocked": True,
         "degraded_ack_reasons": degraded_ack["reasons"],
+        "quality_seat_mode": quality_seat["mode"],
+        "quality_seat_status": quality_seat["execution_status"],
+        "quality_seat_reasons": quality_seat["execution_reasons"],
+    }, ensure_ascii=False))
+    raise SystemExit(2)
+if not quality_seat["execution_ready"]:
+    print(json.dumps({
+        "error": f"dispatch blocked by quality seat policy: {', '.join(quality_seat['execution_reasons'])}",
+        "blocked": True,
+        "task_class": task_policy["task_class"],
+        "quality_requirement": task_policy["quality_requirement"],
+        "task_policy_reasons": task_policy["reasons"],
         "quality_seat_mode": quality_seat["mode"],
         "quality_seat_status": quality_seat["execution_status"],
         "quality_seat_reasons": quality_seat["execution_reasons"],
@@ -244,6 +267,12 @@ print(json.dumps({
         "quality_anchors": quality_anchors,
         "product_goal": product.get("goal", ""),
         "product_goal_status": product.get("goal_status", ""),
+        "task_class": task_policy["task_class"],
+        "task_class_bucket": task_policy["bucket"],
+        "task_class_rationale": product.get("task_class_rationale", "") or task_policy["rationale"],
+        "quality_requirement": task_policy["quality_requirement"],
+        "quality_requirement_source": task_policy["quality_requirement_source"],
+        "task_policy_reasons": task_policy["reasons"],
         "product_gate_ready": product_gate["ready"],
         "product_gate_reasons": product_gate["reasons"],
         "product_user_value": product.get("user_value", ""),
@@ -264,6 +293,11 @@ print(json.dumps({
     "quality_seat_ready": quality_seat["execution_ready"],
     "quality_seat_status": quality_seat["execution_status"],
     "quality_seat_reasons": quality_seat["execution_reasons"],
+    "task_class": task_policy["task_class"],
+    "task_class_bucket": task_policy["bucket"],
+    "quality_requirement": task_policy["quality_requirement"],
+    "quality_requirement_source": task_policy["quality_requirement_source"],
+    "task_policy_reasons": task_policy["reasons"],
     "scale_out_recommended": bool(team.get("scale_out_recommended", False)) or bool(scale_out_triggers),
     "scale_out_triggers": scale_out_triggers,
     "summary": {

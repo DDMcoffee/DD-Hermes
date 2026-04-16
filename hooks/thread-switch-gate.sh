@@ -36,7 +36,7 @@ target = sys.argv[2]
 script_dir = Path(sys.argv[3]).resolve()
 sys.path.insert(0, str(script_dir))
 
-from team_governance import degraded_ack_analysis, product_gate_analysis, quality_anchor_analysis, quality_seat_analysis
+from team_governance import degraded_ack_analysis, product_gate_analysis, quality_anchor_analysis, quality_seat_analysis, task_class_analysis
 
 if not state_path.exists():
     print(json.dumps({
@@ -104,7 +104,8 @@ if target == "execution":
     product_gate = product_gate_analysis(product, team.get("product_anchors", []), team.get("anchor_policy", {}))
     quality_anchor = quality_anchor_analysis(quality, team.get("quality_anchors", []), team.get("anchor_policy", {}))
     degraded_ack = degraded_ack_analysis(role_integrity)
-    quality_seat = quality_seat_analysis(role_integrity, quality_anchor, degraded_ack)
+    task_policy = task_class_analysis(product)
+    quality_seat = quality_seat_analysis(role_integrity, quality_anchor, degraded_ack, None, task_policy)
     goal = product.get("goal", "").strip()
     goal_status = product.get("goal_status", "")
     drift_flags = product.get("goal_drift_flags", [])
@@ -116,6 +117,8 @@ if target == "execution":
         reasons.append(f"product.goal_drift_flags present: {', '.join(drift_flags)}")
     if not product_gate["ready"]:
         reasons.append(f"product gate not ready: {', '.join(product_gate['reasons'])}")
+    if not task_policy["ready"]:
+        reasons.append(f"task classification not ready: {', '.join(task_policy['reasons'])}")
     if not quality_seat["execution_ready"]:
         reasons.append(f"quality seat not ready ({quality_seat['mode']}): {', '.join(quality_seat['execution_reasons'])}")
 

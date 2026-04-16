@@ -1,6 +1,51 @@
 from __future__ import annotations
 
 
+TASK_CLASS_RULES = {
+    "T0": {
+        "bucket": "no-execution",
+        "quality_requirement": "degraded-allowed",
+        "description": "治理、裁决、归档、trace 收口这类不产生 execution slice 的任务。",
+    },
+    "T1": {
+        "bucket": "no-execution",
+        "quality_requirement": "degraded-allowed",
+        "description": "事实核对和探索任务，仍停留在单线程探查，不进入实现面。",
+    },
+    "T2": {
+        "bucket": "bounded-execution",
+        "quality_requirement": "degraded-allowed",
+        "description": "单一、边界清晰、低风险写集的实现切片；必要时可以显式升级为独立质量位。",
+    },
+    "T3": {
+        "bucket": "strict-execution",
+        "quality_requirement": "requires-independent",
+        "description": "架构、控制面、线程模型、状态机、安全边界和高回归风险任务，默认要求独立质量位。",
+    },
+    "T4": {
+        "bucket": "strict-execution",
+        "quality_requirement": "requires-independent",
+        "description": "需要双证据链证明正确性的公共 schema / protocol / 并发 / 集成任务，默认要求独立质量位。",
+    },
+}
+
+TASK_CLASS_ALIASES = {
+    "t0": "T0",
+    "t1": "T1",
+    "t2": "T2",
+    "t3": "T3",
+    "t4": "T4",
+    "no-execution": "T0",
+    "bounded-execution": "T2",
+    "strict-execution": "T3",
+}
+
+ALLOWED_QUALITY_REQUIREMENTS = {
+    "degraded-allowed",
+    "requires-independent",
+}
+
+
 def normalize_people(items, field_name="items", require_list=False):
     if items is None:
         items = []
@@ -60,6 +105,69 @@ def _clean_list(items):
         if value:
             result.append(value)
     return result
+
+
+def normalize_task_class(value):
+    text = _clean_text(value).lower().replace("_", "-")
+    if not text:
+        return ""
+    return TASK_CLASS_ALIASES.get(text, "")
+
+
+def task_class_analysis(product):
+    product = product if isinstance(product, dict) else {}
+
+    raw_task_class = _clean_text(product.get("task_class", ""))
+    raw_requirement = _clean_text(product.get("quality_requirement", ""))
+    rationale = _clean_text(product.get("task_class_rationale", ""))
+
+    task_class = normalize_task_class(raw_task_class)
+    reasons = []
+    if not raw_task_class:
+        reasons.append("task_class_missing")
+    elif not task_class:
+        reasons.append("task_class_invalid")
+
+    rule = TASK_CLASS_RULES.get(task_class, {})
+    bucket = rule.get("bucket", "")
+    default_requirement = rule.get("quality_requirement", "")
+    description = rule.get("description", "")
+
+    quality_requirement = default_requirement
+    source = "task_class_default" if default_requirement else ""
+    if raw_requirement:
+        if raw_requirement not in ALLOWED_QUALITY_REQUIREMENTS:
+            reasons.append("quality_requirement_invalid")
+        elif not default_requirement:
+            quality_requirement = raw_requirement
+            source = "explicit"
+        elif raw_requirement == default_requirement:
+            quality_requirement = raw_requirement
+            source = "task_class_default"
+        elif default_requirement == "degraded-allowed" and raw_requirement == "requires-independent":
+            quality_requirement = raw_requirement
+            source = "explicit_escalation"
+        else:
+            reasons.append("quality_requirement_cannot_downgrade_task_class")
+            quality_requirement = default_requirement
+            source = "task_class_default"
+
+    if quality_requirement and quality_requirement not in ALLOWED_QUALITY_REQUIREMENTS:
+        reasons.append("quality_requirement_invalid")
+
+    return {
+        "task_class": task_class,
+        "bucket": bucket,
+        "description": description,
+        "rationale": rationale or description,
+        "default_quality_requirement": default_requirement,
+        "quality_requirement": quality_requirement,
+        "quality_requirement_source": source,
+        "degraded_allowed": quality_requirement == "degraded-allowed",
+        "requires_independent": quality_requirement == "requires-independent",
+        "ready": not reasons,
+        "reasons": reasons,
+    }
 
 
 def default_skeptics(owner, supervisors, executors):
@@ -215,7 +323,7 @@ def degraded_ack_analysis(role_integrity):
     }
 
 
-def quality_seat_analysis(role_integrity, quality_anchor=None, degraded_ack=None, quality_review=None):
+def quality_seat_analysis(role_integrity, quality_anchor=None, degraded_ack=None, quality_review=None, task_policy=None):
     role_integrity = role_integrity if isinstance(role_integrity, dict) else {}
     quality_anchor = quality_anchor if isinstance(quality_anchor, dict) else {"ready": True, "reasons": []}
     degraded_ack = degraded_ack if isinstance(degraded_ack, dict) else {
@@ -224,6 +332,7 @@ def quality_seat_analysis(role_integrity, quality_anchor=None, degraded_ack=None
         "reasons": [],
     }
     quality_review = quality_review if isinstance(quality_review, dict) else {"ready": True, "reasons": []}
+    task_policy = task_policy if isinstance(task_policy, dict) else {"ready": True, "reasons": []}
 
     has_role_truth = "independent_skeptic" in role_integrity or "degraded" in role_integrity
     if bool(role_integrity.get("independent_skeptic", False)) and not bool(role_integrity.get("degraded", False)):
@@ -238,9 +347,11 @@ def quality_seat_analysis(role_integrity, quality_anchor=None, degraded_ack=None
     execution_reasons = []
     if mode == "unknown":
         execution_reasons.append("quality_seat_unknown")
-    execution_reasons = merge_triggers(execution_reasons, quality_anchor.get("reasons", []))
+    execution_reasons = merge_triggers(execution_reasons, quality_anchor.get("reasons", []), task_policy.get("reasons", []))
     if mode == "degraded" and degraded_ack.get("required", False) and not degraded_ack.get("ready", False):
         execution_reasons = merge_triggers(execution_reasons, degraded_ack.get("reasons", []))
+    if task_policy.get("requires_independent", False) and mode != "independent":
+        execution_reasons = merge_triggers(execution_reasons, ["quality_requirement_requires_independent"])
 
     completion_reasons = merge_triggers(execution_reasons, quality_review.get("reasons", []))
 

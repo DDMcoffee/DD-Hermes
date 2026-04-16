@@ -104,6 +104,9 @@
       "The phase-2 mainline exists as a task-bound package with contract, state, proposal, handoff, decision synthesis, and verification evidence."
     ],
     "drift_risk": "This task could drift into generic control-plane cleanup if it stops improving the maintainer-facing phase-2 anchor-governance workflow.",
+    "task_class": "T2",
+    "quality_requirement": "degraded-allowed",
+    "task_class_rationale": "This archived proof slice predates the frozen T0-T4 escalation matrix and is preserved as a bounded governance proof task accepted under explicit degraded supervision.",
     "goal_status": "validated",
     "goal_drift_flags": [],
     "last_product_review_at": "2026-04-17T00:10:00Z"

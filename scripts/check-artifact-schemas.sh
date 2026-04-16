@@ -63,7 +63,7 @@ contract_frontmatter = check_markdown(
     label="contract",
 )
 if schema_v2(contract_frontmatter):
-    missing = [key for key in ("schema_version", "product_goal", "user_value", "non_goals", "product_acceptance", "drift_risk") if key not in contract_frontmatter]
+    missing = [key for key in ("schema_version", "product_goal", "user_value", "task_class", "quality_requirement", "task_class_rationale", "non_goals", "product_acceptance", "drift_risk") if key not in contract_frontmatter]
     if missing:
         errors.append(f"contract missing v2 frontmatter keys {missing}: {contract_path}")
     if "## Product Gate" not in contract_path.read_text(encoding="utf-8"):
@@ -153,7 +153,7 @@ else:
         if missing_anchor_policy:
             errors.append(f"state.team.anchor_policy missing keys {missing_anchor_policy}: {state_path}")
         product = state.get("product", {}) if isinstance(state.get("product"), dict) else {}
-        required_product = ("anchor", "goal", "user_value", "non_goals", "product_acceptance", "drift_risk", "goal_status", "goal_drift_flags", "last_product_review_at")
+        required_product = ("anchor", "goal", "user_value", "task_class", "quality_requirement", "task_class_rationale", "non_goals", "product_acceptance", "drift_risk", "goal_status", "goal_drift_flags", "last_product_review_at")
         missing_product = [key for key in required_product if key not in product]
         if missing_product:
             errors.append(f"state.product missing keys {missing_product}: {state_path}")

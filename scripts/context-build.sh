@@ -72,6 +72,7 @@ from team_governance import (
     quality_seat_analysis,
     quality_review_analysis,
     scale_out_analysis,
+    task_class_analysis,
 )
 
 
@@ -198,7 +199,8 @@ product_gate = product_gate_analysis(state.get("product", {}), product_anchors, 
 quality_anchor = quality_anchor_analysis(state.get("quality", {}), quality_anchors, team.get("anchor_policy", {}))
 quality_review = quality_review_analysis(state.get("quality", {}), quality_anchors, team.get("anchor_policy", {}))
 degraded_ack = degraded_ack_analysis(role_integrity)
-quality_seat = quality_seat_analysis(role_integrity, quality_anchor, degraded_ack, quality_review)
+task_policy = task_class_analysis(state.get("product", {}))
+quality_seat = quality_seat_analysis(role_integrity, quality_anchor, degraded_ack, quality_review, task_policy)
 packet["context_summary"]["independent_skeptic"] = role_integrity["independent_skeptic"]
 packet["context_summary"]["role_integrity_degraded"] = role_integrity["degraded"]
 packet["context_summary"]["degraded_ack_required"] = degraded_ack["required"]
@@ -212,6 +214,13 @@ packet["context_summary"]["product_user_value"] = state.get("product", {}).get("
 packet["context_summary"]["product_non_goals"] = state.get("product", {}).get("non_goals", [])
 packet["context_summary"]["product_acceptance"] = state.get("product", {}).get("product_acceptance", [])
 packet["context_summary"]["product_drift_risk"] = state.get("product", {}).get("drift_risk", "")
+packet["context_summary"]["task_class"] = task_policy["task_class"]
+packet["context_summary"]["task_class_bucket"] = task_policy["bucket"]
+packet["context_summary"]["task_class_rationale"] = state.get("product", {}).get("task_class_rationale", "") or task_policy["rationale"]
+packet["context_summary"]["quality_requirement"] = task_policy["quality_requirement"]
+packet["context_summary"]["quality_requirement_source"] = task_policy["quality_requirement_source"]
+packet["context_summary"]["quality_requirement_ready"] = task_policy["ready"]
+packet["context_summary"]["quality_requirement_reasons"] = task_policy["reasons"]
 packet["context_summary"]["product_gate_ready"] = product_gate["ready"]
 packet["context_summary"]["product_gate_reasons"] = product_gate["reasons"]
 packet["context_summary"]["quality_anchor_ready"] = quality_anchor["ready"]

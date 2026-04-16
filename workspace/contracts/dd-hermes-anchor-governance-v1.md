@@ -6,6 +6,9 @@ experts:
   - expert-a
 product_goal: Advance DD Hermes through task dd-hermes-anchor-governance-v1 without drifting from the current product focus.
 user_value: Let a DD Hermes maintainer start a phase-2 task and have the system block execution or completion when product intent or quality review is missing.
+task_class: T2
+quality_requirement: degraded-allowed
+task_class_rationale: This archived proof slice predates the frozen T0-T4 escalation matrix and is preserved as a bounded governance proof task accepted under explicit degraded supervision.
 non_goals:
   - Do not expand into unrelated runtime, provider, or gateway work.
 product_acceptance:
@@ -43,6 +46,9 @@ Turn phase-2 anchor governance from a route-level idea into a real DD Hermes tas
 - `experts`
 - `product_goal`
 - `user_value`
+- `task_class`
+- `quality_requirement`
+- `task_class_rationale`
 - `non_goals`
 - `product_acceptance`
 - `drift_risk`
@@ -62,6 +68,7 @@ Turn phase-2 anchor governance from a route-level idea into a real DD Hermes tas
 ## Product Gate
 
 - The task must improve the maintainer-facing experience of DD Hermes phase-2, not just add more fields.
+- This archived proof slice is treated as a pre-matrix `T2` bounded execution task rather than a post-matrix `T3` enforcement task.
 - If the work stops helping the system say "this task has a real product goal and a real quality review", stop and recalibrate.
 
 ## Verification

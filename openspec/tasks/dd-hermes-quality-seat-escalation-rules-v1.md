@@ -16,10 +16,10 @@ links:
 
 ## Steps
 
-1. Define the initial DD Hermes task classes relevant to quality-seat escalation.
-2. Decide which classes may proceed under explicit degraded acknowledgement and which must require an independent quality seat.
-3. Name the minimum control-plane surfaces the first execution slice may change.
-4. Prove the planning package through workflow/context generation before entering implementation.
+1. Freeze the initial matrix: `T0/T1/T2 => degraded-allowed`, `T3/T4 => requires-independent`.
+2. Add `task_class / quality_requirement / task_class_rationale` to the shared governance truth.
+3. Land the minimum control-plane surfaces the first execution slice may change.
+4. Prove one degraded-allowed path and one requires-independent blocked path through workflow/context/dispatch/gates.
 
 ## Dependencies
 
@@ -29,14 +29,14 @@ links:
 
 ## Done Definition
 
-- DD Hermes has a named escalation-rules mainline with one accepted path and one bounded next execution slice.
+- DD Hermes has a named escalation-rules mainline with one concrete matrix and one bounded execution slice.
 - The repo can explain why the previous proof task was archived and what new user-visible ambiguity this task is resolving.
-- The planning package is ready to enter a first implementation slice without reopening the archived proof task.
+- The execution slice is ready without reopening the archived proof task.
 
 ## Acceptance
 
 - The task remains bounded to shared governance scripts, docs, and tests.
-- The accepted path identifies at least one `degraded-allowed` class and one `requires-independent` class.
+- The accepted path identifies the T0-T4 matrix and shows it in shared control-plane outputs.
 - The next slice is explicitly about escalation rules, not re-implementing quality-seat visibility.
 
 ## Verification

@@ -17,6 +17,9 @@
   - `schema_version`
   - `product_goal`
   - `user_value`
+  - `task_class`
+  - `quality_requirement`
+  - `task_class_rationale`
   - `non_goals`
   - `product_acceptance`
   - `drift_risk`
@@ -97,6 +100,9 @@
   - `anchor`
   - `goal`
   - `user_value`
+  - `task_class`
+  - `quality_requirement`
+  - `task_class_rationale`
   - `non_goals`
   - `product_acceptance`
   - `drift_risk`
@@ -162,6 +168,8 @@
 - Key fields in `context_summary`:
   - `runtime_generated_at` — ISO timestamp of when the context was built
   - `runtime_stale_warning` — non-empty string if previous runtime snapshot was >60 min old
+  - `task_class`, `task_class_bucket`, `task_class_rationale`
+  - `quality_requirement`, `quality_requirement_source`, `quality_requirement_ready`, `quality_requirement_reasons`
   - `quality_seat_mode`, `quality_seat_status`, `quality_seat_reasons`
   - `independent_skeptic`, `role_integrity_degraded`, `degraded_ack_required`, `degraded_ack_ready`, `role_conflicts`
   - `scale_out_recommended`, `scale_out_triggers`

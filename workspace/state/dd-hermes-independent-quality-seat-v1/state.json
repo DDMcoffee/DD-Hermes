@@ -1,0 +1,302 @@
+{
+  "state_version": 2,
+  "created_at": "2026-04-16T17:11:24Z",
+  "git": {
+    "baseline_commit": "",
+    "latest_commit": "bfe1739f92ff2ef1ff30b1c0d16547b1e4c43cd6",
+    "latest_branch": "main",
+    "latest_upstream": "",
+    "latest_remote_urls": {}
+  },
+  "discussion": {
+    "policy": "3-explorer-then-execute",
+    "decision_id": "independent-quality-seat-routing",
+    "explorer_queue": [
+      "architecture",
+      "delivery",
+      "curriculum"
+    ],
+    "explorer_findings": [
+      "/Volumes/Coding/Hermes agent for mine/workspace/decisions/independent-quality-seat-routing/architecture.md",
+      "/Volumes/Coding/Hermes agent for mine/workspace/decisions/independent-quality-seat-routing/delivery.md",
+      "/Volumes/Coding/Hermes agent for mine/workspace/decisions/independent-quality-seat-routing/curriculum.md"
+    ],
+    "synthesis_path": "/Volumes/Coding/Hermes agent for mine/workspace/decisions/independent-quality-seat-routing/synthesis.md",
+    "current_executor": ""
+  },
+  "verification": {
+    "last_pass": true,
+    "last_run_at": "2026-04-16T18:07:22Z",
+    "verified_steps": [
+      "./scripts/test-workflow.sh --task-id dd-hermes-independent-quality-seat-v1",
+      "./scripts/context-build.sh --task-id dd-hermes-independent-quality-seat-v1 --agent-role commander",
+      "./scripts/check-artifact-schemas.sh --task-id dd-hermes-independent-quality-seat-v1",
+      "./scripts/demo-entry.sh",
+      "python3 -m py_compile scripts/team_governance.py",
+      "bash -n scripts/state-read.sh scripts/context-build.sh scripts/dispatch-create.sh hooks/thread-switch-gate.sh hooks/quality-gate.sh scripts/demo-entry.sh tests/smoke.sh",
+      "bash tests/smoke.sh dispatch",
+      "bash tests/smoke.sh context",
+      "bash tests/smoke.sh hooks",
+      "bash tests/smoke.sh schema",
+      "bash tests/smoke.sh all",
+      "./scripts/state-read.sh --task-id dd-hermes-independent-quality-seat-v1",
+      "./scripts/dispatch-create.sh --task-id dd-hermes-independent-quality-seat-v1",
+      "./hooks/thread-switch-gate.sh --task-id dd-hermes-independent-quality-seat-v1 --target execution",
+      "./hooks/quality-gate.sh --event Stop --state workspace/state/dd-hermes-independent-quality-seat-v1/state.json"
+    ],
+    "verified_files": [
+      "workspace/contracts/dd-hermes-independent-quality-seat-v1.md",
+      "openspec/proposals/dd-hermes-independent-quality-seat-v1.md",
+      "workspace/handoffs/dd-hermes-independent-quality-seat-v1-lead-to-expert-a.md",
+      "workspace/exploration/exploration-lead-dd-hermes-independent-quality-seat-v1.md",
+      "workspace/decisions/independent-quality-seat-routing/architecture.md",
+      "workspace/decisions/independent-quality-seat-routing/delivery.md",
+      "workspace/decisions/independent-quality-seat-routing/curriculum.md",
+      "workspace/decisions/independent-quality-seat-routing/synthesis.md",
+      "README.md",
+      "scripts/demo-entry.sh",
+      "指挥文档/04-任务重校准与线程策略.md",
+      "指挥文档/06-一期PhaseDone审计.md",
+      "指挥文档/08-恒定锚点策略.md",
+      "scripts/team_governance.py",
+      "scripts/state-read.sh",
+      "scripts/context-build.sh",
+      "scripts/dispatch-create.sh",
+      "hooks/thread-switch-gate.sh",
+      "hooks/quality-gate.sh",
+      "tests/smoke.sh",
+      "docs/coordination-endpoints.md",
+      "docs/artifact-schemas.md",
+      "openspec/designs/dd-hermes-independent-quality-seat-v1.md",
+      "openspec/tasks/dd-hermes-independent-quality-seat-v1.md",
+      "workspace/state/dd-hermes-independent-quality-seat-v1/state.json",
+      "workspace/closeouts/dd-hermes-independent-quality-seat-v1-expert-a.md",
+      "workspace/handoffs/dd-hermes-independent-quality-seat-v1-expert-a-to-lead.md",
+      "openspec/archive/dd-hermes-independent-quality-seat-v1.md"
+    ]
+  },
+  "runtime": {
+    "preferred_surface": "repo-first",
+    "worktree_strategy": "isolated",
+    "last_context_path": "/Volumes/Coding/Hermes agent for mine/workspace/state/dd-hermes-independent-quality-seat-v1/context.json",
+    "last_runtime_report_path": "/Volumes/Coding/Hermes agent for mine/workspace/state/dd-hermes-independent-quality-seat-v1/runtime.json",
+    "last_worktree_path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-independent-quality-seat-v1-expert-a"
+  },
+  "lease": {
+    "goal": "Make DD Hermes expose and enforce whether the quality seat is independent or degraded, so maintainers can trust quality-review truth before execution and completion.",
+    "status": "idle",
+    "duration_hours": 0,
+    "started_at": "",
+    "deadline_at": "",
+    "paused_at": "",
+    "pause_reason": "",
+    "resume_after": "",
+    "resume_checkpoint": "",
+    "dispatch_cursor": ""
+  },
+  "memory": {
+    "reads": [
+      "memory/world/no-destruction-without-confirmation.md"
+    ],
+    "writes": [
+      "memory/task/dd-hermes-independent-quality-seat-v1.md"
+    ],
+    "last_selected_ids": [
+      "no-destruction-without-confirmation",
+      "user-pref-no-manual-generator-commands",
+      "dd-hermes-multi-agent-dispatch",
+      "dd-hermes-demo-entry-v1",
+      "dd-hermes-experience-demo-v1",
+      "dd-hermes-endpoint-router-v1",
+      "worktree-first",
+      "tool-selection-drift"
+    ]
+  },
+  "product": {
+    "anchor": "lead",
+    "goal": "Make DD Hermes expose and enforce whether the quality seat is independent or degraded, so maintainers can trust quality-review truth before execution and completion.",
+    "user_value": "Let a DD Hermes maintainer tell, before execution and completion, whether the quality seat is truly independent or explicitly degraded.",
+    "non_goals": [
+      "Do not add a new runtime, provider, gateway, or scheduler layer.",
+      "Do not reintroduce multiple long-lived chat threads as the main control model.",
+      "Do not treat generic document cleanup as independent quality-seat delivery."
+    ],
+    "product_acceptance": [
+      "State, dispatch, context summary, and gates can all explain whether the quality seat is independent or degraded.",
+      "The planning package defines one narrow execution boundary for a first implementation slice.",
+      "The task stays within shared governance scripts, schemas, and tests."
+    ],
+    "drift_risk": "This task could drift into generic governance cleanup or role-theory prose if it stops improving maintainer-visible quality-seat truth.",
+    "task_class": "T2",
+    "quality_requirement": "degraded-allowed",
+    "task_class_rationale": "This archived proof slice predates the frozen T0-T4 escalation matrix and is preserved as a bounded quality-seat proof task accepted under explicit degraded supervision.",
+    "goal_status": "validated",
+    "goal_drift_flags": [],
+    "last_product_review_at": "2026-04-17T00:30:00Z"
+  },
+  "quality": {
+    "anchor": "lead",
+    "review_status": "degraded-approved",
+    "review_findings": [
+      "Independent skeptic is still unavailable because lead overlaps supervisor and skeptic for this phase-2 task.",
+      "The first quality-seat slice is accepted under explicit degraded acknowledgement instead of pretending an independent quality seat exists.",
+      "Shared governance surfaces now expose one consistent quality-seat truth across state, context, dispatch, gates, and demo entry."
+    ],
+    "review_examples": [
+      "state-read/context-build/dispatch-create now agree on quality_seat_mode, quality_seat_status, and quality_seat_reasons.",
+      "quality-gate and closeout semantics now separate degraded supervision from independent review and block placeholder-only completion claims."
+    ],
+    "last_review_at": "2026-04-16T17:48:51Z"
+  },
+  "textbook": {
+    "last_entry_path": "",
+    "last_summary_path": "",
+    "last_summary_at": ""
+  },
+  "notes": [
+    {
+      "timestamp": "2026-04-16T17:11:24Z",
+      "text": "anchor governance initialized",
+      "product_gate_ready": true,
+      "quality_anchor_ready": true,
+      "quality_review_ready": false,
+      "degraded_ack_ready": false
+    },
+    {
+      "timestamp": "2026-04-16T17:17:02Z",
+      "text": "promoted independent quality seat to the next phase-2 planning mainline after archiving anchor governance",
+      "product_gate_ready": true,
+      "quality_anchor_ready": true,
+      "quality_review_ready": false,
+      "degraded_ack_ready": false
+    },
+    {
+      "timestamp": "2026-04-16T17:17:54Z",
+      "text": "validated the independent quality seat planning package, context packet, and demo entry after promoting it to the next phase-2 mainline",
+      "product_gate_ready": true,
+      "quality_anchor_ready": true,
+      "quality_review_ready": false,
+      "degraded_ack_ready": false
+    },
+    {
+      "timestamp": "2026-04-16T17:19:39Z",
+      "text": "recorded planning-mainline commit after bootstrapping independent quality seat",
+      "product_gate_ready": true,
+      "quality_anchor_ready": true,
+      "quality_review_ready": false,
+      "degraded_ack_ready": false
+    },
+    {
+      "timestamp": "2026-04-16T17:34:01Z",
+      "text": "landed the first independent-quality-seat execution slice across state, context, dispatch, gates, demo entry, and smoke coverage",
+      "product_gate_ready": true,
+      "quality_anchor_ready": true,
+      "quality_review_ready": false,
+      "degraded_ack_ready": false
+    },
+    {
+      "timestamp": "2026-04-16T17:34:51Z",
+      "text": "recorded the first quality-seat execution-slice commit on main",
+      "product_gate_ready": true,
+      "quality_anchor_ready": true,
+      "quality_review_ready": false,
+      "degraded_ack_ready": false
+    },
+    {
+      "timestamp": "2026-04-16T17:48:51Z",
+      "text": "recorded degraded acknowledgement and quality review for the first independent-quality-seat execution slice",
+      "product_gate_ready": true,
+      "quality_anchor_ready": true,
+      "quality_review_ready": true,
+      "degraded_ack_ready": true
+    },
+    {
+      "timestamp": "2026-04-16T17:53:36Z",
+      "text": "closed semantic execution evidence for the first independent-quality-seat slice and moved the task back to follow-up planning",
+      "product_gate_ready": true,
+      "quality_anchor_ready": true,
+      "quality_review_ready": true,
+      "degraded_ack_ready": true
+    },
+    {
+      "timestamp": "2026-04-16T18:07:22Z",
+      "text": "archived the first quality-seat proof task and moved the remaining policy work to dd-hermes-quality-seat-escalation-rules-v1",
+      "product_gate_ready": true,
+      "quality_anchor_ready": true,
+      "quality_review_ready": true,
+      "degraded_ack_ready": true
+    }
+  ],
+  "task_id": "dd-hermes-independent-quality-seat-v1",
+  "status": "done",
+  "mode": "archive",
+  "current_focus": "archived after the first quality-seat proof slice reached semantic closeout and handed off the next problem to escalation rules",
+  "owner": "lead",
+  "experts": [
+    "expert-a"
+  ],
+  "active_expert": "",
+  "blocked_reason": "",
+  "contract_path": "/Volumes/Coding/Hermes agent for mine/workspace/contracts/dd-hermes-independent-quality-seat-v1.md",
+  "handoff_paths": [
+    "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-independent-quality-seat-v1-lead-to-expert-a.md"
+  ],
+  "exploration_paths": [
+    "/Volumes/Coding/Hermes agent for mine/workspace/exploration/exploration-lead-dd-hermes-independent-quality-seat-v1.md"
+  ],
+  "openspec": {
+    "stage": "archive",
+    "proposal_path": "/Volumes/Coding/Hermes agent for mine/openspec/proposals/dd-hermes-independent-quality-seat-v1.md",
+    "design_path": "/Volumes/Coding/Hermes agent for mine/openspec/designs/dd-hermes-independent-quality-seat-v1.md",
+    "task_path": "/Volumes/Coding/Hermes agent for mine/openspec/tasks/dd-hermes-independent-quality-seat-v1.md",
+    "archive_path": "/Volumes/Coding/Hermes agent for mine/openspec/archive/dd-hermes-independent-quality-seat-v1.md"
+  },
+  "team": {
+    "supervisor_min_count": 1,
+    "supervisors": [
+      "lead"
+    ],
+    "executors": [
+      "expert-a"
+    ],
+    "skeptics": [
+      "lead"
+    ],
+    "product_anchors": [
+      "lead"
+    ],
+    "quality_anchors": [
+      "lead"
+    ],
+    "anchor_policy": {
+      "product_anchor_role": "supervisor",
+      "quality_anchor_role": "skeptic",
+      "constant_anchor_seats": true
+    },
+    "high_risk_mode": true,
+    "integration_pressure": false,
+    "scale_out_recommended": true,
+    "scale_out_triggers": [
+      "high_risk_mode",
+      "independent_skeptic_unavailable",
+      "skeptic_supervisor_overlap"
+    ],
+    "role_integrity": {
+      "independent_skeptic": false,
+      "degraded": true,
+      "role_conflicts": [
+        "supervisor_skeptic_overlap:lead"
+      ],
+      "role_overlap": {
+        "supervisor_executor_overlap": [],
+        "supervisor_skeptic_overlap": [
+          "lead"
+        ],
+        "executor_skeptic_overlap": []
+      },
+      "degraded_ack_by": "lead",
+      "degraded_ack_at": "2026-04-16T17:48:51Z"
+    }
+  },
+  "updated_at": "2026-04-16T18:07:22Z"
+}

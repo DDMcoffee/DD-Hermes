@@ -40,6 +40,7 @@ from team_governance import (
     quality_seat_analysis,
     quality_review_analysis,
     scale_out_analysis,
+    task_class_analysis,
 )
 
 if not state_path.exists():
@@ -77,7 +78,8 @@ product_gate = product_gate_analysis(state.get("product", {}), product_anchors, 
 quality_anchor = quality_anchor_analysis(state.get("quality", {}), quality_anchors, team.get("anchor_policy", {}))
 quality_review = quality_review_analysis(state.get("quality", {}), quality_anchors, team.get("anchor_policy", {}))
 degraded_ack = degraded_ack_analysis(role_integrity)
-quality_seat = quality_seat_analysis(role_integrity, quality_anchor, degraded_ack, quality_review)
+task_policy = task_class_analysis(state.get("product", {}))
+quality_seat = quality_seat_analysis(role_integrity, quality_anchor, degraded_ack, quality_review, task_policy)
 summary = {
     "blocked": bool(state.get("blocked_reason")) or state.get("status") == "blocked",
     "paused": state.get("lease", {}).get("status") == "paused",
@@ -110,6 +112,13 @@ summary = {
     "product_user_value": state.get("product", {}).get("user_value", ""),
     "product_non_goals": state.get("product", {}).get("non_goals", []),
     "product_acceptance": state.get("product", {}).get("product_acceptance", []),
+    "task_class": task_policy["task_class"],
+    "task_class_bucket": task_policy["bucket"],
+    "task_class_rationale": state.get("product", {}).get("task_class_rationale", "") or task_policy["rationale"],
+    "quality_requirement": task_policy["quality_requirement"],
+    "quality_requirement_source": task_policy["quality_requirement_source"],
+    "quality_requirement_ready": task_policy["ready"],
+    "quality_requirement_reasons": task_policy["reasons"],
     "product_user_value_ready": bool(state.get("product", {}).get("user_value", "")),
     "product_non_goal_count": len(state.get("product", {}).get("non_goals", [])),
     "product_acceptance_count": len(state.get("product", {}).get("product_acceptance", [])),

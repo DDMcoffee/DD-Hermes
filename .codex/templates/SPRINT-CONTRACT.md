@@ -6,6 +6,9 @@ experts:
   - expert-a
 product_goal: Define the concrete DD Hermes improvement this sprint must deliver.
 user_value: Explain why a maintainer or operator should care about this sprint.
+task_class: T2
+quality_requirement: degraded-allowed
+task_class_rationale: Explain why this sprint belongs to the chosen DD Hermes task class.
 non_goals:
   - List explicit non-goals here.
 product_acceptance:
@@ -39,6 +42,9 @@ Describe the task boundary, expected outcome, and why this sprint exists.
 - `experts`
 - `product_goal`
 - `user_value`
+- `task_class`
+- `quality_requirement`
+- `task_class_rationale`
 - `non_goals`
 - `product_acceptance`
 - `drift_risk`
