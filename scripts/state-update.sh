@@ -20,7 +20,7 @@ if [[ -z "$task_id" ]]; then
 fi
 
 input_json=$(read_stdin_json)
-repo=$(repo_root)
+repo=$(shared_repo_root)
 payload=$(INPUT_JSON="$input_json" python3 - <<'PY' "$repo" "$task_id"
 import json
 import os

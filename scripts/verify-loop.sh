@@ -21,7 +21,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 input_json=$(read_stdin_json)
-repo=$(repo_root)
+repo=$(shared_repo_root)
 mkdir -p "$repo/workspace/logs"
 
 result=$(INPUT_JSON="$input_json" CHECKS="$checks" USER_GATE="$user_gate" MAX_ROUNDS="$max_rounds" python3 - <<'PY'

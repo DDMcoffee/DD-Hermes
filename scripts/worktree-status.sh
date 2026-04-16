@@ -16,8 +16,8 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-repo=$(repo_root)
-worktree=${worktree:-"$repo"}
+repo=$(shared_repo_root)
+worktree=${worktree:-$(repo_root)}
 contract="$repo/workspace/contracts/$task_id.md"
 handoff=$(find "$repo/workspace/handoffs" -maxdepth 1 -type f -name "$task_id-*.md" | head -n 1 || true)
 dirty=$(git -C "$worktree" status --porcelain 2>/dev/null || true)
@@ -37,4 +37,3 @@ print(json.dumps({
 PY
 )
 json_out "$payload"
-

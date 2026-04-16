@@ -158,9 +158,17 @@ run_workflow() {
 
   "$ROOT/scripts/sprint-init.sh" --task-id smoke-sprint --owner lead --experts expert-a,expert-b,expert-c >/dev/null
   [[ -f "$ROOT/workspace/contracts/smoke-sprint.md" ]]
+  grep -q "## Required Fields" "$ROOT/workspace/contracts/smoke-sprint.md"
+  grep -q "## Open Questions" "$ROOT/workspace/contracts/smoke-sprint.md"
+  ! grep -q "sprint-000" "$ROOT/workspace/contracts/smoke-sprint.md"
   [[ -f "$ROOT/workspace/exploration/exploration-lead-smoke-sprint.md" ]]
+  grep -q "## Evidence" "$ROOT/workspace/exploration/exploration-lead-smoke-sprint.md"
   [[ -f "$ROOT/openspec/proposals/smoke-sprint.md" ]]
+  grep -q "## Verification" "$ROOT/openspec/proposals/smoke-sprint.md"
   [[ -f "$ROOT/workspace/state/smoke-sprint/state.json" ]]
+  grep -q "## Acceptance" "$ROOT/workspace/handoffs/smoke-sprint-lead-to-expert-a.md"
+  ! grep -q "subsystem-or-slice" "$ROOT/workspace/handoffs/smoke-sprint-lead-to-expert-a.md"
+  ! grep -q "TBD" "$ROOT/workspace/handoffs/smoke-sprint-lead-to-expert-a.md"
 
   "$ROOT/scripts/spec-first.sh" --task-id smoke-sprint --changed-files a,b,c >/dev/null
   "$ROOT/scripts/openspec-init.sh" --task-id smoke-sprint --stage design >/dev/null
@@ -173,6 +181,10 @@ run_workflow() {
   local status_out
   status_out=$("$ROOT/scripts/worktree-status.sh" --task-id smoke-sprint)
   assert_json_field "$status_out" "'smoke-sprint.md' in data['linked_contract'] and 'smoke-sprint' in data['linked_handoff']"
+
+  local status_from_worktree
+  status_from_worktree=$(cd "$ROOT/.worktrees/smoke-sprint-expert-a" && ./scripts/worktree-status.sh --task-id smoke-sprint)
+  assert_json_field "$status_from_worktree" "'smoke-sprint.md' in data['linked_contract'] and data['clean'] is True"
 }
 
 run_git_management() {
@@ -186,7 +198,7 @@ run_git_management() {
 
   printf 'hello\n' > "$ROOT/.worktrees/smoke-sprint-expert-a/NOTE.txt"
   local task_commit
-  task_commit=$("$ROOT/scripts/git-commit-task.sh" --task-id smoke-sprint --worktree "$ROOT/.worktrees/smoke-sprint-expert-a" --message "task(smoke-sprint): expert-a slice")
+  task_commit=$(cd "$ROOT/.worktrees/smoke-sprint-expert-a" && ./scripts/git-commit-task.sh --task-id smoke-sprint --message "task(smoke-sprint): expert-a slice")
   assert_json_field "$task_commit" "data['task_id'] == 'smoke-sprint' and len(data['commit_sha']) == 40"
 
   local state_after_commit
@@ -229,6 +241,10 @@ PY
 }
 
 run_context_state() {
+  if [[ ! -d "$ROOT/.worktrees/smoke-sprint-expert-a" ]]; then
+    "$ROOT/scripts/worktree-create.sh" --task-id smoke-sprint --expert expert-a >/dev/null
+  fi
+
   local runtime
   runtime=$("$ROOT/scripts/runtime-report.sh" --task-id smoke-sprint --agent-role commander)
   assert_json_field "$runtime" "'PreToolUse' in data['hooks']['events'] and data['task_surfaces']['state_path'].endswith('state.json')"
@@ -241,6 +257,10 @@ run_context_state() {
   state=$("$ROOT/scripts/state-read.sh" --task-id smoke-sprint)
   assert_json_field "$state" "data['summary']['has_context'] is True and data['summary']['has_runtime_report'] is True"
 
+  local state_from_worktree
+  state_from_worktree=$(cd "$ROOT/.worktrees/smoke-sprint-expert-a" && ./scripts/state-read.sh --task-id smoke-sprint)
+  assert_json_field "$state_from_worktree" "data['summary']['has_context'] is True and data['summary']['active_expert'] == ''"
+
   "$ROOT/scripts/state-update.sh" --task-id smoke-sprint <<'EOF' >/dev/null
 {"mode":"execution","current_focus":"implement hooks","active_expert":"expert-a","goal":"drive smoke sprint to verification","lease_status":"running","run_duration_hours":5,"note":"execution thread accepted handoff"}
 EOF
@@ -248,6 +268,16 @@ EOF
   local updated
   updated=$("$ROOT/scripts/state-read.sh" --task-id smoke-sprint)
   assert_json_field "$updated" "data['state']['mode'] == 'execution' and data['state']['active_expert'] == 'expert-a' and data['state']['lease']['status'] == 'running'"
+
+  (
+    cd "$ROOT/.worktrees/smoke-sprint-expert-a" && ./scripts/state-update.sh --task-id smoke-sprint <<'EOF' >/dev/null
+{"append_verified_steps":["state-update-from-worktree"],"note":"worktree state update"}
+EOF
+  )
+
+  local updated_from_worktree
+  updated_from_worktree=$("$ROOT/scripts/state-read.sh" --task-id smoke-sprint)
+  assert_json_field "$updated_from_worktree" "'state-update-from-worktree' in data['state']['verification']['verified_steps']"
 
   "$ROOT/scripts/state-update.sh" --task-id smoke-sprint <<'EOF' >/dev/null
 {"lease_status":"paused","paused_at":"2026-04-16T10:00:00Z","pause_reason":"codex_quota","resume_after":"2026-04-16T11:00:00Z","resume_checkpoint":"expert-a:after-hooks","dispatch_cursor":"expert-a","note":"quota pause"}

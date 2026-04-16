@@ -25,14 +25,14 @@ if [[ -z "$task_id" ]]; then
   exit 3
 fi
 
-repo=$(repo_root)
+repo=$(shared_repo_root)
 contract_path="$repo/workspace/contracts/$task_id.md"
 if [[ ! -f "$contract_path" ]]; then
   json_out '{"error":"missing sprint contract","blocked":true}'
   exit 2
 fi
 
-worktree=${worktree:-"$repo"}
+worktree=${worktree:-$(repo_root)}
 if [[ ! -f "$repo/workspace/state/$task_id/state.json" ]]; then
   "$SCRIPT_DIR/state-init.sh" --task-id "$task_id" >/dev/null
 fi
