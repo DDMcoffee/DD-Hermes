@@ -18,8 +18,8 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-repo=$(repo_root)
-worktree=${worktree:-"$repo"}
+repo=$(shared_repo_root)
+worktree=${worktree:-$(repo_root)}
 git_snapshot=$("$SCRIPT_DIR/git-snapshot.sh" --worktree "$worktree")
 payload=$(GIT_SNAPSHOT="$git_snapshot" python3 - <<'PY' "$repo" "$worktree" "$task_id" "$agent_role"
 import json

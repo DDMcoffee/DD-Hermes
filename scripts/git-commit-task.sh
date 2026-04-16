@@ -25,10 +25,10 @@ if [[ -z "$task_id" ]]; then
   exit 3
 fi
 
-repo=$(repo_root)
-worktree=${worktree:-"$repo"}
+repo=$(shared_repo_root)
+worktree=${worktree:-$(repo_root)}
 worktree=$(abs_path "$worktree")
-if [[ "$allow_primary" != "true" && "$worktree" == "$repo" ]]; then
+if [[ "$allow_primary" != "true" && "$worktree" == "$(abs_path "$repo")" ]]; then
   json_out '{"error":"refusing to create execution commit in primary worktree","blocked":true}'
   exit 2
 fi

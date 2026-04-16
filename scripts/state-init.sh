@@ -29,7 +29,7 @@ if [[ -z "$task_id" ]]; then
   exit 3
 fi
 
-repo=$(repo_root)
+repo=$(shared_repo_root)
 payload=$(python3 - <<'PY' "$repo" "$task_id" "$owner" "$experts" "$status" "$mode" "$current_focus"
 import json
 import sys

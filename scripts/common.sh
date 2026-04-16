@@ -18,6 +18,25 @@ repo_root() {
   fi
 }
 
+shared_repo_root() {
+  if [[ -n "${REPO_ROOT:-}" ]]; then
+    printf '%s\n' "$REPO_ROOT"
+    return
+  fi
+
+  local common_dir candidate common_git
+  common_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+  candidate=$(cd "$common_dir/.." && pwd)
+  if common_git=$(git -C "$candidate" rev-parse --git-common-dir 2>/dev/null); then
+    if [[ "$common_git" != /* ]]; then
+      common_git=$(cd "$candidate" && cd "$common_git" && pwd)
+    fi
+    printf '%s\n' "$(cd "$common_git/.." && pwd)"
+  else
+    repo_root
+  fi
+}
+
 timestamp_utc() {
   date -u +"%Y-%m-%dT%H:%M:%SZ"
 }
