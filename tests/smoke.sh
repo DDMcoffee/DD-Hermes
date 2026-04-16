@@ -546,6 +546,37 @@ if not verify_loop["last_pass"]:
 PY
 }
 
+run_endpoint() {
+  "$ROOT/scripts/coordination-endpoint.sh" --task-id smoke-sprint --endpoint state.update <<'EOF' >/dev/null
+{"skeptics":["lead"],"note":"endpoint router degraded skeptic fixture"}
+EOF
+
+  local state
+  state=$("$ROOT/scripts/coordination-endpoint.sh" --task-id smoke-sprint --endpoint state.read)
+  assert_json_field "$state" "'state' in data and 'summary' in data and data['summary']['has_supervisor'] is True"
+  assert_json_field "$state" "data['summary']['independent_skeptic'] is False and 'supervisor_skeptic_overlap:lead' in data['summary']['role_conflicts']"
+
+  local context
+  context=$("$ROOT/scripts/coordination-endpoint.sh" --task-id smoke-sprint --endpoint context.build --agent-role commander --memory-limit 5)
+  assert_json_field "$context" "data['context_path'].endswith('context.json') and data['runtime_path'].endswith('runtime.json') and data['state_path'].endswith('state.json')"
+  assert_json_field "$context" "data['memory_count'] >= 1 and data['handoff_count'] >= 1 and data['exploration_count'] >= 1"
+
+  local dispatch
+  dispatch=$("$ROOT/scripts/coordination-endpoint.sh" --task-id smoke-sprint --endpoint dispatch.create)
+  assert_json_field "$dispatch" "data['task_id'] == 'smoke-sprint' and 'summary' in data and data['summary']['supervisor_count'] >= 1 and data['summary']['executor_count'] >= 2 and data['summary']['skeptic_count'] >= 1"
+  assert_json_field "$dispatch" "data['independent_skeptic'] is False and data['degraded'] is True and 'supervisor_skeptic_overlap:lead' in data['role_conflicts']"
+
+  local closeout
+  closeout=$("$ROOT/scripts/coordination-endpoint.sh" --task-id smoke-sprint --endpoint closeout.check)
+  assert_json_field "$closeout" "data['task_id'] == 'smoke-sprint' and data['valid'] is True and len(data['errors']) == 0"
+
+  set +e
+  "$ROOT/scripts/coordination-endpoint.sh" --task-id smoke-sprint --endpoint unknown >/dev/null
+  local status=$?
+  set -e
+  [[ $status -eq 3 ]]
+}
+
 case "$SECTION" in
   all)
     run_hooks
@@ -555,6 +586,7 @@ case "$SECTION" in
     run_dispatch
     run_context_state
     run_verify
+    run_endpoint
     run_schema
     ;;
   hooks) run_hooks ;;
@@ -575,6 +607,12 @@ case "$SECTION" in
     run_context_state
     ;;
   verify) run_verify ;;
+  endpoint)
+    run_workflow
+    run_dispatch
+    run_context_state
+    run_endpoint
+    ;;
   schema)
     run_workflow
     run_dispatch

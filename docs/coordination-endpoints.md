@@ -17,9 +17,11 @@
 ## Endpoint Surface
 
 DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
+统一入口脚本：`scripts/coordination-endpoint.sh --endpoint <name> --task-id <task_id>`。
 
 ### 1) `state.read`
 
+- Router entry: `scripts/coordination-endpoint.sh --endpoint state.read --task-id <task_id>`
 - Implementation: `scripts/state-read.sh --task-id <task_id>`
 - Purpose: 读取任务控制面与派生摘要。
 - Response required fields:
@@ -34,6 +36,7 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
 
 ### 2) `state.update`
 
+- Router entry: `scripts/coordination-endpoint.sh --endpoint state.update --task-id <task_id> < payload.json`
 - Implementation: `scripts/state-update.sh --task-id <task_id> < payload.json`
 - Purpose: 更新控制面并写入 `events.jsonl`。
 - Request common fields:
@@ -44,6 +47,7 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
 
 ### 3) `context.build`
 
+- Router entry: `scripts/coordination-endpoint.sh --endpoint context.build --task-id <task_id> --agent-role <role>`
 - Implementation: `scripts/context-build.sh --task-id <task_id> --agent-role <role>`
 - Purpose: 组装执行输入包。
 - Response required fields:
@@ -54,6 +58,7 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
 
 ### 4) `dispatch.create`
 
+- Router entry: `scripts/coordination-endpoint.sh --endpoint dispatch.create --task-id <task_id>`
 - Implementation: `scripts/dispatch-create.sh --task-id <task_id>`
 - Purpose: 从 `state.team` 物化 supervisor/executor/skeptic assignment。
 - Response required fields:
@@ -64,6 +69,7 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
 
 ### 5) `closeout.check`
 
+- Router entry: `scripts/coordination-endpoint.sh --endpoint closeout.check --task-id <task_id>`
 - Implementation: `scripts/check-artifact-schemas.sh --task-id <task_id>`
 - Purpose: 校验 `contract/handoff/state/closeout` 必填字段是否完整。
 - Response required fields:

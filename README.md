@@ -39,11 +39,12 @@ DD Hermes 是一个 workspace-first 的 Hermes agent harness，用来在 Codex I
 2. 用 `scripts/state-read.sh` / `scripts/state-update.sh` 推进任务级短期状态，而不是污染长期记忆。
 3. 用 `scripts/context-build.sh` 在指挥线程生成任务 context packet，供执行线程消费。
 4. 用 `scripts/dispatch-create.sh` 把 `Supervisor` / `Executor` / `Skeptic` 角色物化为实际 assignment，并为 executor 建立或确认隔离 worktree；若 `Skeptic` 不独立，输出必须显式标记降级。
-5. 在实现前运行 `scripts/spec-first.sh` 确认是否必须先写 spec。
-6. 用 `scripts/memory-write.sh` / `scripts/memory-manage.sh` 维护记忆卡和 journal，并用 `scripts/memory-refresh-views.sh` 刷新视图。
-7. 用 `scripts/verify-loop.sh` 驱动技术层与用户层验证。
-8. 用 `scripts/check-artifact-schemas.sh` 校验 contract/handoff/state/closeout 必填字段。
-9. 用 `tests/smoke.sh` 验证 hooks、workflow、dispatch、context/state、memory 和 verify gate 的闭环。
+5. 用 `scripts/coordination-endpoint.sh` 统一调用 `state.read/state.update/context.build/dispatch.create/closeout.check`，避免在编排层直接分散拼接子脚本。
+6. 在实现前运行 `scripts/spec-first.sh` 确认是否必须先写 spec。
+7. 用 `scripts/memory-write.sh` / `scripts/memory-manage.sh` 维护记忆卡和 journal，并用 `scripts/memory-refresh-views.sh` 刷新视图。
+8. 用 `scripts/verify-loop.sh` 驱动技术层与用户层验证。
+9. 用 `scripts/check-artifact-schemas.sh` 校验 contract/handoff/state/closeout 必填字段。
+10. 用 `tests/smoke.sh` 验证 hooks、workflow、dispatch、endpoint、context/state、memory 和 verify gate 的闭环。
 
 ## Git Management
 
@@ -66,6 +67,7 @@ DD Hermes 是一个 workspace-first 的 Hermes agent harness，用来在 Codex I
 
 - `tests/smoke.sh`
 - `scripts/test-artifact-schemas.sh`
+- `scripts/test-coordination-endpoint.sh`
 - `scripts/test-hooks.sh`
 - `scripts/test-memory.sh`
 - `scripts/test-workflow.sh`
