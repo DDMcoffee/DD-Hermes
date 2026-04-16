@@ -327,46 +327,133 @@ run_schema() {
   python3 - "$ROOT" <<'PY'
 from pathlib import Path
 import json
+import subprocess
 import sys
 
 root = Path(sys.argv[1])
 required = {"id","type","content","source","scope","confidence","created_at","last_validated_at","decay_policy","status"}
+
+
+def fail(message):
+    raise SystemExit(message)
+
+
 card = root / "memory" / "world" / "no-destruction-without-confirmation.md"
 text = card.read_text(encoding="utf-8")
 frontmatter = text.split("---\n", 2)[1].splitlines()
 fields = {line.split(":", 1)[0].strip() for line in frontmatter if ":" in line}
 if not required.issubset(fields):
-    raise SystemExit(1)
+    fail(f"memory card missing keys: {sorted(required - fields)}")
 
 contract = root / "workspace" / "contracts" / "smoke-sprint.md"
 contract_fields = {line.split(":", 1)[0].strip() for line in contract.read_text(encoding="utf-8").split("---\n", 2)[1].splitlines() if ":" in line}
 required_contract = {"task_id", "owner", "experts", "acceptance", "blocked_if", "memory_reads", "memory_writes"}
 if not required_contract.issubset(contract_fields):
-    raise SystemExit(1)
+    fail(f"contract missing keys: {sorted(required_contract - contract_fields)}")
 
 proposal = root / "openspec" / "proposals" / "smoke-sprint.md"
 proposal_text = proposal.read_text(encoding="utf-8")
 for section in ("## What", "## Why", "## Non-goals", "## Acceptance", "## Verification"):
     if section not in proposal_text:
-        raise SystemExit(1)
+        fail(f"proposal missing section: {section}")
 
-journal_files = list((root / "memory" / "journal").glob("*.jsonl"))
+# Schema smoke can run standalone without run_memory; seed one journal event if needed.
+journal_dir = root / "memory" / "journal"
+journal_files = list(journal_dir.glob("*.jsonl"))
 if not journal_files:
-    raise SystemExit(1)
+    subprocess.run(
+        [str(root / "scripts" / "memory-write.sh"), "--kind", "self", "--id", "schema-smoke-journal-seed"],
+        input=json.dumps(
+            {
+                "type": "belief",
+                "content": "Seed memory journal for schema smoke checks.",
+                "source": "tests/smoke.sh#run_schema",
+                "scope": "schema smoke",
+                "confidence": "0.5",
+                "status": "active",
+            }
+        ),
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    journal_files = list(journal_dir.glob("*.jsonl"))
+
+if not journal_files:
+    fail("memory journal still empty after seed write")
 event = json.loads(journal_files[0].read_text(encoding="utf-8").splitlines()[0])
 for key in ("event_id", "memory_id", "op", "actor", "timestamp", "reason", "source_ref", "scope", "result"):
     if key not in event:
-        raise SystemExit(1)
+        fail(f"memory journal event missing key: {key}")
 
 state = json.loads((root / "workspace" / "state" / "smoke-sprint" / "state.json").read_text(encoding="utf-8"))
 for key in ("task_id", "status", "mode", "owner", "experts", "openspec", "runtime", "lease", "git", "verification", "memory", "updated_at"):
     if key not in state:
-        raise SystemExit(1)
+        fail(f"state missing key: {key}")
 
 context = json.loads((root / "workspace" / "state" / "smoke-sprint" / "context.json").read_text(encoding="utf-8"))
 for key in ("task_id", "runtime", "state", "memory", "continuation", "documents", "context_summary"):
     if key not in context:
-        raise SystemExit(1)
+        fail(f"context missing key: {key}")
+
+
+def run_json(command, cwd=None):
+    result = subprocess.run(
+        command,
+        cwd=str(cwd) if cwd else None,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    return json.loads(result.stdout)
+
+
+def require_keys(payload, required_keys):
+    missing = [key for key in required_keys if key not in payload]
+    if missing:
+        fail(f"payload missing keys: {missing}")
+
+
+runtime_report = run_json([str(root / "scripts" / "runtime-report.sh"), "--task-id", "smoke-sprint", "--agent-role", "commander"])
+require_keys(runtime_report, ("timestamp", "repo_root", "worktree", "git", "hooks", "tests", "task_surfaces"))
+if not runtime_report["task_surfaces"].get("state_path"):
+    fail("runtime-report task_surfaces.state_path is empty")
+
+context_build = run_json([str(root / "scripts" / "context-build.sh"), "--task-id", "smoke-sprint", "--agent-role", "commander", "--memory-limit", "5"])
+require_keys(context_build, ("context_path", "runtime_path", "state_path", "memory_count", "handoff_count", "exploration_count"))
+if context_build["memory_count"] < 1:
+    fail("context-build memory_count < 1")
+
+state_read = run_json([str(root / "scripts" / "state-read.sh"), "--task-id", "smoke-sprint"])
+require_keys(state_read, ("state", "summary"))
+require_keys(state_read["summary"], ("verification_complete", "has_context", "has_runtime_report", "event_count"))
+
+worktree_status = run_json([str(root / "scripts" / "worktree-status.sh"), "--task-id", "smoke-sprint"])
+require_keys(worktree_status, ("clean", "dirty_files", "linked_contract", "linked_handoff"))
+if "smoke-sprint.md" not in worktree_status["linked_contract"]:
+    fail("worktree-status linked_contract does not reference smoke-sprint.md")
+
+expert_worktree = root / ".worktrees" / "smoke-sprint-expert-a"
+if expert_worktree.exists():
+    worktree_status_from_expert = run_json(["./scripts/worktree-status.sh", "--task-id", "smoke-sprint"], cwd=expert_worktree)
+    require_keys(worktree_status_from_expert, ("clean", "dirty_files", "linked_contract", "linked_handoff"))
+    if "smoke-sprint.md" not in worktree_status_from_expert["linked_contract"]:
+        fail("expert worktree-status linked_contract does not reference smoke-sprint.md")
+
+git_status = run_json([str(root / "scripts" / "git-status-report.sh")])
+require_keys(git_status, ("has_head", "branch", "staged_files", "unstaged_files", "untracked_files", "worktrees", "can_create_worktree"))
+if not git_status["has_head"] or not git_status["can_create_worktree"]:
+    fail("git-status-report has_head/can_create_worktree check failed")
+
+git_snapshot = run_json([str(root / "scripts" / "git-snapshot.sh")])
+require_keys(git_snapshot, ("repo_root", "worktree", "has_head", "head", "branch", "known_worktrees", "dirty_files", "remote_urls"))
+if not git_snapshot["has_head"]:
+    fail("git-snapshot has_head is false")
+
+verify_loop = run_json([str(root / "scripts" / "verify-loop.sh"), "--task-id", "smoke-sprint", "--max-rounds", "1", "--checks", "true", "--user-gate", "pass"])
+require_keys(verify_loop, ("rounds_used", "last_pass", "remaining_failures"))
+if not verify_loop["last_pass"]:
+    fail("verify-loop last_pass is false")
 PY
 }
 
