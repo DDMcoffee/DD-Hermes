@@ -343,6 +343,14 @@ EOF
 }
 
 run_discussion_textbook() {
+  local missing_state_gate
+  set +e
+  missing_state_gate=$("$ROOT/hooks/thread-switch-gate.sh" --task-id missing-sprint --target execution)
+  local gate_status=$?
+  set -e
+  [[ $gate_status -eq 2 ]]
+  assert_json_field "$missing_state_gate" "data['pass'] is False and 'state.json is missing' in data['blocked_reason']"
+
   local decision
   decision=$("$ROOT/scripts/decision-init.sh" --task-id smoke-sprint --decision-id decision-smoke)
   assert_json_field "$decision" "len(data['explorer_paths']) == 3 and data['synthesis_path'].endswith('synthesis.md')"
@@ -350,6 +358,87 @@ run_discussion_textbook() {
   local state_after_decision
   state_after_decision=$("$ROOT/scripts/state-read.sh" --task-id smoke-sprint)
   assert_json_field "$state_after_decision" "data['summary']['discussion_policy'] == '3-explorer-then-execute' and data['summary']['decision_id'] == 'decision-smoke'"
+
+  "$ROOT/scripts/sprint-init.sh" --task-id architecture-sprint --owner lead --experts expert-a --current-focus "architecture policy routing" >/dev/null
+  local architecture_state
+  architecture_state=$("$ROOT/scripts/state-read.sh" --task-id architecture-sprint)
+  assert_json_field "$architecture_state" "data['summary']['discussion_policy'] == '3-explorer-then-execute'"
+
+  local architecture_gate
+  set +e
+  architecture_gate=$("$ROOT/hooks/thread-switch-gate.sh" --task-id architecture-sprint --target execution)
+  gate_status=$?
+  set -e
+  [[ $gate_status -eq 2 ]]
+  assert_json_field "$architecture_gate" "data['pass'] is False and 'synthesis_path is empty' in data['blocked_reason']"
+
+  "$ROOT/scripts/decision-init.sh" --task-id architecture-sprint --decision-id architecture-smoke >/dev/null
+  local placeholder_gate
+  set +e
+  placeholder_gate=$("$ROOT/hooks/thread-switch-gate.sh" --task-id architecture-sprint --target execution)
+  gate_status=$?
+  set -e
+  [[ $gate_status -eq 2 ]]
+  assert_json_field "$placeholder_gate" "data['pass'] is False and 'placeholder' in data['blocked_reason']"
+
+python3 - "$ROOT/workspace/decisions/architecture-smoke/synthesis.md" <<'PY'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+path.write_text("""---
+decision_id: architecture-smoke
+task_id: architecture-sprint
+owner: lead
+status: synthesized
+---
+
+# Decision Synthesis
+
+## Goal
+
+Route architecture work through discussion before execution.
+
+## Accepted Path
+
+- Auto-route architecture tasks into `3-explorer-then-execute`.
+
+## Rejected Paths
+
+- Keep architecture tasks on `direct`.
+
+## Execution Boundary
+
+- Execution may modify initialization and gate logic, plus smoke coverage.
+
+## Executor Handoff
+
+- Implement the routing and gate changes, then verify them.
+""", encoding="utf-8")
+PY
+
+  "$ROOT/scripts/dispatch-create.sh" --task-id architecture-sprint >/dev/null
+  local architecture_gate_pass
+  architecture_gate_pass=$("$ROOT/hooks/thread-switch-gate.sh" --task-id architecture-sprint --target execution)
+  assert_json_field "$architecture_gate_pass" "data['pass'] is True"
+
+  "$ROOT/scripts/sprint-init.sh" --task-id delivery-sprint --owner lead --experts expert-a --current-focus "delivery bugfix" >/dev/null
+  local delivery_state
+  delivery_state=$("$ROOT/scripts/state-read.sh" --task-id delivery-sprint)
+  assert_json_field "$delivery_state" "data['summary']['discussion_policy'] == 'direct'"
+
+  local delivery_gate_before_dispatch
+  set +e
+  delivery_gate_before_dispatch=$("$ROOT/hooks/thread-switch-gate.sh" --task-id delivery-sprint --target execution)
+  gate_status=$?
+  set -e
+  [[ $gate_status -eq 2 ]]
+  assert_json_field "$delivery_gate_before_dispatch" "data['pass'] is False and 'context packet is missing' in data['blocked_reason'] and 'execution worktree is missing' in data['blocked_reason']"
+
+  "$ROOT/scripts/dispatch-create.sh" --task-id delivery-sprint >/dev/null
+  local delivery_gate
+  delivery_gate=$("$ROOT/hooks/thread-switch-gate.sh" --task-id delivery-sprint --target execution)
+  assert_json_field "$delivery_gate" "data['pass'] is True and data['discussion_policy'] == 'direct'"
 
   local prompt
   prompt=$("$ROOT/scripts/execution-thread-prompt.sh" --task-id smoke-sprint --expert expert-b)

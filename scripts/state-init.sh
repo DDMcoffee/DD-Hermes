@@ -11,6 +11,7 @@ experts=""
 status="initialized"
 mode="planning"
 current_focus="bootstrap"
+discussion_policy="auto"
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --task-id) task_id="$2"; shift 2 ;;
@@ -19,6 +20,7 @@ while [[ $# -gt 0 ]]; do
     --status) status="$2"; shift 2 ;;
     --mode) mode="$2"; shift 2 ;;
     --current-focus) current_focus="$2"; shift 2 ;;
+    --discussion-policy) discussion_policy="$2"; shift 2 ;;
     --stdin|--json) shift ;;
     *) shift ;;
   esac
@@ -30,7 +32,7 @@ if [[ -z "$task_id" ]]; then
 fi
 
 repo=$(shared_repo_root)
-payload=$(python3 - <<'PY' "$repo" "$task_id" "$owner" "$experts" "$status" "$mode" "$current_focus" "$SCRIPT_DIR"
+payload=$(python3 - <<'PY' "$repo" "$task_id" "$owner" "$experts" "$status" "$mode" "$current_focus" "$discussion_policy" "$SCRIPT_DIR"
 import json
 import sys
 from datetime import datetime, timezone
@@ -43,7 +45,8 @@ experts_csv = sys.argv[4]
 status = sys.argv[5]
 mode = sys.argv[6]
 current_focus = sys.argv[7]
-script_dir = Path(sys.argv[8]).resolve()
+discussion_policy = sys.argv[8]
+script_dir = Path(sys.argv[9]).resolve()
 sys.path.insert(0, str(script_dir))
 timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -63,6 +66,56 @@ openspec = {
     "task_path": str(repo / "openspec" / "tasks" / f"{task_id}.md") if (repo / "openspec" / "tasks" / f"{task_id}.md").exists() else "",
     "archive_path": str(repo / "openspec" / "archive" / f"{task_id}.md") if (repo / "openspec" / "archive" / f"{task_id}.md").exists() else "",
 }
+
+
+def infer_discussion_policy(policy_hint: str):
+    allowed = {"auto", "direct", "3-explorer-then-execute"}
+    if policy_hint not in allowed:
+        raise ValueError(f"unsupported discussion policy: {policy_hint}")
+    if policy_hint != "auto":
+        return policy_hint
+
+    signal_text = "\n".join(
+        part for part in (
+            task_id,
+            current_focus,
+        ) if part
+    ).lower()
+
+    architecture_signals = (
+        "architecture",
+        "control-plane",
+        "control plane",
+        "thread model",
+        "thread-switch",
+        "policy",
+        "strategy",
+        "state",
+        "memory",
+        "coordination",
+        "worktree",
+        "schema",
+        "protocol",
+        "governance",
+        "routing",
+        "gate",
+        "安全",
+        "权限",
+        "架构",
+        "线程",
+        "策略",
+        "控制面",
+        "状态",
+        "记忆",
+        "协调",
+        "协议",
+        "治理",
+        "路由",
+        "gate",
+    )
+    if any(keyword in signal_text for keyword in architecture_signals):
+        return "3-explorer-then-execute"
+    return "direct"
 
 
 def parse_frontmatter(path: Path):
@@ -106,6 +159,7 @@ created = not state_path.exists()
 if state_path.exists():
     state = json.loads(state_path.read_text(encoding="utf-8"))
 else:
+    resolved_discussion_policy = infer_discussion_policy(discussion_policy)
     state = {
         "state_version": 1,
         "created_at": timestamp,
@@ -117,7 +171,7 @@ else:
             "latest_remote_urls": {},
         },
         "discussion": {
-            "policy": "direct",
+            "policy": resolved_discussion_policy,
             "decision_id": "",
             "explorer_queue": [],
             "explorer_findings": [],
@@ -161,6 +215,10 @@ else:
         },
         "notes": [],
     }
+
+if state_path.exists() and discussion_policy != "auto":
+    state.setdefault("discussion", {})
+    state["discussion"]["policy"] = infer_discussion_policy(discussion_policy)
 
 if openspec["archive_path"]:
     openspec["stage"] = "archive"

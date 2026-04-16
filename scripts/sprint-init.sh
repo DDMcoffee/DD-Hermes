@@ -8,11 +8,15 @@ source "$SCRIPT_DIR/common.sh"
 task_id=""
 owner="lead"
 experts=""
+current_focus="bootstrap"
+discussion_policy="auto"
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --task-id) task_id="$2"; shift 2 ;;
     --owner) owner="$2"; shift 2 ;;
     --experts) experts="$2"; shift 2 ;;
+    --current-focus) current_focus="$2"; shift 2 ;;
+    --discussion-policy) discussion_policy="$2"; shift 2 ;;
     --stdin|--json) shift ;;
     *) shift ;;
   esac
@@ -314,7 +318,7 @@ print(json.dumps({
 PY
 )
 
-state_json=$("$SCRIPT_DIR/state-init.sh" --task-id "$task_id" --owner "$owner" --experts "$experts")
+state_json=$("$SCRIPT_DIR/state-init.sh" --task-id "$task_id" --owner "$owner" --experts "$experts" --current-focus "$current_focus" --discussion-policy "$discussion_policy")
 payload=$(python3 - <<'PY' "$contract_path" "$exploration_path" "$proposal_path" "$handoff_json" "$state_json"
 import json
 import sys

@@ -1,6 +1,6 @@
 # DD Hermes: 3-Explorer Decision Discussion
 
-涉及架构、线程模型、长期策略、重大改造时，DD Hermes 默认不直接编码，而是先走 `3-explorer-then-execute`。
+涉及架构、线程模型、长期策略、重大改造时，DD Hermes 默认不直接编码，而是先走 `3-explorer-then-execute`。任务初始化若能从 `task_id`、`current_focus`、contract/proposal 文本里识别出这些信号，就应直接把 state 初始化到讨论模式，而不是依赖人工补切。
 
 ## Roles
 
@@ -42,4 +42,4 @@
 
 ## Thread Switch Rule
 
-如果 `discussion.policy == 3-explorer-then-execute`，且 `discussion.synthesis_path` 为空，就不应切到 execution thread。
+如果 `discussion.policy == 3-explorer-then-execute`，且 `discussion.synthesis_path` 为空，或 synthesis 仍是占位内容，就不应切到 execution thread。

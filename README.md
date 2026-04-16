@@ -47,15 +47,16 @@ DD Hermes 是一个 workspace-first 的 Hermes agent harness，用来在 Codex I
 7. 用 `scripts/memory-write.sh` / `scripts/memory-manage.sh` 维护记忆卡和 journal，并用 `scripts/memory-refresh-views.sh` 刷新视图。
 8. 用 `scripts/verify-loop.sh` 驱动技术层与用户层验证。
 9. 用 `scripts/decision-init.sh` 建立 3-explorer 决策讨论包，再由主线程收敛。
-10. 用 `scripts/execution-thread-prompt.sh` 生成切到代码执行线程时的提示包。
-11. 用 `scripts/textbook-record.sh` 记录教材条目，用 `scripts/textbook-summary.sh` 生成日总结草稿。
-12. 用 `scripts/check-artifact-schemas.sh` 校验 contract/handoff/state/closeout 必填字段。
-13. 用 `scripts/git-integrate-task.sh` 合并执行分支回主分支，含 pre-check（handoff / verification / dirty）和 state 回写。
-14. 用 `scripts/lease-check.sh` 检查任务 lease 是否超时，支持 `--auto-pause` 自动暂停。
-15. 用 `scripts/session-analytics.sh` 分析会话日志，统计工具使用、错误频率、碎片化得分，自动建议 KB 条目。
-16. 用 `scripts/memory-decay-schedule.sh` 扫描超龄记忆卡并执行 confidence 衰减。
-17. 用 `hooks/thread-switch-gate.sh` 在派发执行线程前检查 synthesis 是否完成、lease 是否暂停、executor 是否分配。
-18. 用 `tests/smoke.sh` 验证 hooks、workflow、dispatch、endpoint、discussion、context/state、memory 和 verify gate 的闭环。
+10. 涉及架构/控制面/线程模型的任务，初始化时应优先进入 `3-explorer-then-execute`，不要靠人工补切。
+11. 用 `scripts/execution-thread-prompt.sh` 生成切到代码执行线程时的提示包。
+12. 用 `scripts/textbook-record.sh` 记录教材条目，用 `scripts/textbook-summary.sh` 生成日总结草稿。
+13. 用 `scripts/check-artifact-schemas.sh` 校验 contract/handoff/state/closeout 必填字段。
+14. 用 `scripts/git-integrate-task.sh` 合并执行分支回主分支，含 pre-check（handoff / verification / dirty）和 state 回写。
+15. 用 `scripts/lease-check.sh` 检查任务 lease 是否超时，支持 `--auto-pause` 自动暂停。
+16. 用 `scripts/session-analytics.sh` 分析会话日志，统计工具使用、错误频率、碎片化得分，自动建议 KB 条目。
+17. 用 `scripts/memory-decay-schedule.sh` 扫描超龄记忆卡并执行 confidence 衰减。
+18. 用 `hooks/thread-switch-gate.sh` 在派发执行线程前检查 synthesis 是否完成且具有真实执行边界、lease 是否暂停、executor 是否分配。
+19. 用 `tests/smoke.sh` 验证 hooks、workflow、dispatch、endpoint、discussion、context/state、memory 和 verify gate 的闭环。
 
 ## Git Management
 
