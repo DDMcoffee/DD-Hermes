@@ -108,6 +108,7 @@ if non_goals:
 lines.extend([
     f"- Product Gate：{'ready' if summary.get('product_gate_ready') else 'blocked'}",
     f"- Quality Anchor：{summary.get('quality_anchor_name', '未设置')} ({summary.get('quality_anchor_role', '未设置')})",
+    f"- Quality Seat：{summary.get('quality_seat_mode', 'unknown')} ({summary.get('quality_seat_status', 'blocked')})",
     f"- Independent Skeptic：{'yes' if summary.get('independent_skeptic') else 'no'}",
     f"- Degraded Ack：{'ready' if summary.get('degraded_ack_ready') else 'missing'}",
 ])
@@ -116,6 +117,9 @@ if reasons:
     lines.append(f"- Product Gate Reasons：{', '.join(reasons)}")
 if summary.get("degraded_ack_required") and not summary.get("degraded_ack_ready"):
     lines.append("- Degraded Ack Reasons：degraded supervision requires explicit acknowledgement")
+seat_reasons = summary.get("quality_seat_reasons", [])
+if seat_reasons:
+    lines.append(f"- Quality Seat Reasons：{', '.join(seat_reasons)}")
 print("\n".join(lines))
 PY
 )

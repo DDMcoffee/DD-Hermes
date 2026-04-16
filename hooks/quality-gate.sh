@@ -28,7 +28,7 @@ script_dir = Path(sys.argv[1]).resolve()
 sys.path.insert(0, str(script_dir))
 
 from artifact_semantics import closeout_semantic_analysis, parse_frontmatter
-from team_governance import degraded_ack_analysis, product_gate_analysis, quality_review_analysis
+from team_governance import degraded_ack_analysis, product_gate_analysis, quality_review_analysis, quality_seat_analysis
 
 data = json.loads(os.environ.get("INPUT_JSON", "{}"))
 state_path = os.environ.get("STATE_PATH", "")
@@ -57,6 +57,7 @@ role_integrity = team.get("role_integrity", {}) if isinstance(team.get("role_int
 product_gate = product_gate_analysis(data.get("product", {}), team.get("product_anchors", []), team.get("anchor_policy", {}))
 quality_review = quality_review_analysis(data.get("quality", {}), team.get("quality_anchors", []), team.get("anchor_policy", {}))
 degraded_ack = degraded_ack_analysis(role_integrity)
+quality_seat = quality_seat_analysis(role_integrity, {"ready": True, "reasons": []}, degraded_ack, quality_review)
 
 missing = []
 uncovered = []
@@ -79,6 +80,8 @@ if changed_code and not degraded_ack["ready"]:
     missing.append("degraded_ack")
 if changed_code and (quality_review_status not in ("approved", "degraded-approved") or not quality_review["ready"]):
     missing.append("quality_review")
+if changed_code and not quality_seat["completion_ready"]:
+    missing.append("quality_seat")
 if changed_code and state_path and state_path != "-":
     path = Path(state_path)
     if path.exists():
@@ -114,6 +117,9 @@ result = {
     "product_gate_reasons": product_gate["reasons"],
     "degraded_ack_reasons": degraded_ack["reasons"],
     "quality_review_reasons": quality_review["reasons"],
+    "quality_seat_mode": quality_seat["mode"],
+    "quality_seat_status": quality_seat["completion_status"],
+    "quality_seat_reasons": quality_seat["completion_reasons"],
     "closeout_path": closeout_path,
     "closeout_reasons": closeout_reasons,
     "blocked_reason": "" if passed else "code changed without completed and covering verification",

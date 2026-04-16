@@ -162,6 +162,7 @@
 - Key fields in `context_summary`:
   - `runtime_generated_at` — ISO timestamp of when the context was built
   - `runtime_stale_warning` — non-empty string if previous runtime snapshot was >60 min old
+  - `quality_seat_mode`, `quality_seat_status`, `quality_seat_reasons`
   - `independent_skeptic`, `role_integrity_degraded`, `degraded_ack_required`, `degraded_ack_ready`, `role_conflicts`
   - `scale_out_recommended`, `scale_out_triggers`
 

@@ -37,6 +37,7 @@ from team_governance import (
     merge_triggers,
     product_gate_analysis,
     quality_anchor_analysis,
+    quality_seat_analysis,
     quality_review_analysis,
     scale_out_analysis,
 )
@@ -76,6 +77,7 @@ product_gate = product_gate_analysis(state.get("product", {}), product_anchors, 
 quality_anchor = quality_anchor_analysis(state.get("quality", {}), quality_anchors, team.get("anchor_policy", {}))
 quality_review = quality_review_analysis(state.get("quality", {}), quality_anchors, team.get("anchor_policy", {}))
 degraded_ack = degraded_ack_analysis(role_integrity)
+quality_seat = quality_seat_analysis(role_integrity, quality_anchor, degraded_ack, quality_review)
 summary = {
     "blocked": bool(state.get("blocked_reason")) or state.get("status") == "blocked",
     "paused": state.get("lease", {}).get("status") == "paused",
@@ -122,6 +124,13 @@ summary = {
     "quality_review_recorded": bool(state.get("quality", {}).get("last_review_at", "")),
     "quality_review_ready": quality_review["ready"],
     "quality_review_reasons": quality_review["reasons"],
+    "quality_seat_mode": quality_seat["mode"],
+    "quality_seat_ready": quality_seat["execution_ready"],
+    "quality_seat_status": quality_seat["execution_status"],
+    "quality_seat_reasons": quality_seat["execution_reasons"],
+    "quality_seat_completion_ready": quality_seat["completion_ready"],
+    "quality_seat_completion_status": quality_seat["completion_status"],
+    "quality_seat_completion_reasons": quality_seat["completion_reasons"],
     "anchor_policy_constant_seats": bool(team.get("anchor_policy", {}).get("constant_anchor_seats", False)),
     "independent_skeptic": role_integrity["independent_skeptic"],
     "role_integrity_degraded": role_integrity["degraded"],

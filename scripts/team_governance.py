@@ -215,6 +215,46 @@ def degraded_ack_analysis(role_integrity):
     }
 
 
+def quality_seat_analysis(role_integrity, quality_anchor=None, degraded_ack=None, quality_review=None):
+    role_integrity = role_integrity if isinstance(role_integrity, dict) else {}
+    quality_anchor = quality_anchor if isinstance(quality_anchor, dict) else {"ready": True, "reasons": []}
+    degraded_ack = degraded_ack if isinstance(degraded_ack, dict) else {
+        "required": bool(role_integrity.get("degraded", False)),
+        "ready": not bool(role_integrity.get("degraded", False)),
+        "reasons": [],
+    }
+    quality_review = quality_review if isinstance(quality_review, dict) else {"ready": True, "reasons": []}
+
+    has_role_truth = "independent_skeptic" in role_integrity or "degraded" in role_integrity
+    if bool(role_integrity.get("independent_skeptic", False)) and not bool(role_integrity.get("degraded", False)):
+        mode = "independent"
+    elif bool(role_integrity.get("degraded", False)):
+        mode = "degraded"
+    elif quality_anchor.get("ready", False) and not has_role_truth:
+        mode = "independent"
+    else:
+        mode = "unknown"
+
+    execution_reasons = []
+    if mode == "unknown":
+        execution_reasons.append("quality_seat_unknown")
+    execution_reasons = merge_triggers(execution_reasons, quality_anchor.get("reasons", []))
+    if mode == "degraded" and degraded_ack.get("required", False) and not degraded_ack.get("ready", False):
+        execution_reasons = merge_triggers(execution_reasons, degraded_ack.get("reasons", []))
+
+    completion_reasons = merge_triggers(execution_reasons, quality_review.get("reasons", []))
+
+    return {
+        "mode": mode,
+        "execution_ready": not execution_reasons,
+        "execution_status": "ready" if not execution_reasons else "blocked",
+        "execution_reasons": execution_reasons,
+        "completion_ready": not completion_reasons,
+        "completion_status": "ready" if not completion_reasons else "blocked",
+        "completion_reasons": completion_reasons,
+    }
+
+
 def analyze_role_integrity(supervisors, executors, skeptics):
     supervisors = normalize_people(supervisors)
     executors = normalize_people(executors)

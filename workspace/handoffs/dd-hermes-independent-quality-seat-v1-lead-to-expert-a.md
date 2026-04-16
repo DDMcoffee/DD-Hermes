@@ -9,25 +9,36 @@ user_visible_outcome: A maintainer can quickly tell whether a task has an indepe
 files:
   - workspace/contracts/dd-hermes-independent-quality-seat-v1.md
   - openspec/proposals/dd-hermes-independent-quality-seat-v1.md
+  - openspec/designs/dd-hermes-independent-quality-seat-v1.md
+  - openspec/tasks/dd-hermes-independent-quality-seat-v1.md
   - workspace/state/dd-hermes-independent-quality-seat-v1/state.json
   - workspace/decisions/independent-quality-seat-routing/synthesis.md
+  - scripts/team_governance.py
+  - scripts/state-read.sh
+  - scripts/context-build.sh
+  - scripts/dispatch-create.sh
+  - hooks/thread-switch-gate.sh
+  - hooks/quality-gate.sh
+  - scripts/demo-entry.sh
+  - tests/smoke.sh
 decisions:
   - Use `3-explorer-then-execute`; do not enter implementation without a real synthesis.
   - Keep the first execution slice inside shared governance scripts, schemas, and tests.
+  - Use one shared `quality seat` semantic pair across state/context/dispatch/gates instead of scattered booleans.
 risks:
   - Do not change policy through memory writes.
   - Do not pretend degraded supervision is independent supervision.
   - Do not expand into runtime/provider/scheduler work.
 next_checks:
-  - Refresh decision synthesis before any implementation handoff.
-  - Build commander context and verify planning artifacts before opening an execution slice.
+  - Rebuild commander context after shared-script changes.
+  - Record execution evidence and closeout once the first slice is committed.
 ---
 
 # Lead Handoff
 
 ## Context
 
-Expert expert-a is reserved for the first implementation slice after planning is signed off; this handoff defines the boundary in advance so the task does not sprawl.
+Expert expert-a owns the first bounded implementation slice: expose one consistent `quality seat` truth across state, context, dispatch, gates, and demo entry without expanding the control surface.
 
 ## Required Fields
 
@@ -44,7 +55,7 @@ Expert expert-a is reserved for the first implementation slice after planning is
 
 ## Acceptance
 
-- Keep the planning package task-bound, and make the first implementation slice small enough to verify through shared scripts and tests.
+- Keep the slice task-bound, and make the first implementation small enough to verify through shared scripts and tests.
 
 ## Product Check
 
@@ -52,11 +63,12 @@ Expert expert-a is reserved for the first implementation slice after planning is
 
 ## Verification
 
-- Before execution starts, require:
+- For the first execution slice, require:
   - `./scripts/test-workflow.sh --task-id dd-hermes-independent-quality-seat-v1`
   - `./scripts/context-build.sh --task-id dd-hermes-independent-quality-seat-v1 --agent-role commander`
   - `./scripts/check-artifact-schemas.sh --task-id dd-hermes-independent-quality-seat-v1`
+  - `bash tests/smoke.sh all`
 
 ## Open Questions
 
-- Which concrete gate or summary surface should become the first implementation slice: dispatch output, state/context summary, or gate enforcement text?
+- Which task classes must later require an actually independent quality seat rather than an explicitly degraded fallback?

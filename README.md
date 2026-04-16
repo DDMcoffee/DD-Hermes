@@ -9,7 +9,7 @@ DD Hermes 是一个 workspace-first 的 Hermes agent harness，用来在 Codex I
 - 当前最适合直接阅读的一页：`指挥文档/06-一期PhaseDone审计.md`
 - 当前线程策略与任务拆分：`指挥文档/04-任务重校准与线程策略.md`
 - 下一阶段路线说明：`指挥文档/08-恒定锚点策略.md`
-- 当前 phase-2 规划主线：`dd-hermes-independent-quality-seat-v1`
+- 当前 phase-2 主线：`dd-hermes-independent-quality-seat-v1`
 - 上一条已归档主线：`dd-hermes-anchor-governance-v1`
 - 对应 archive：`openspec/archive/dd-hermes-anchor-governance-v1.md`
 

@@ -58,6 +58,7 @@ from team_governance import (
     normalize_people,
     product_gate_analysis,
     quality_anchor_analysis,
+    quality_seat_analysis,
     scale_out_analysis,
 )
 
@@ -106,6 +107,7 @@ role_integrity = {
 product_gate = product_gate_analysis(product, product_anchors, team.get("anchor_policy", {}))
 quality_anchor = quality_anchor_analysis(quality, quality_anchors, team.get("anchor_policy", {}))
 degraded_ack = degraded_ack_analysis(role_integrity)
+quality_seat = quality_seat_analysis(role_integrity, quality_anchor, degraded_ack)
 
 if not supervisors:
     print(json.dumps({"error": "dispatch requires at least one supervisor", "blocked": True}, ensure_ascii=False))
@@ -131,6 +133,9 @@ if not quality_anchor["ready"]:
         "error": f"dispatch blocked by quality anchor: {', '.join(quality_anchor['reasons'])}",
         "blocked": True,
         "quality_anchor_reasons": quality_anchor["reasons"],
+        "quality_seat_mode": quality_seat["mode"],
+        "quality_seat_status": quality_seat["execution_status"],
+        "quality_seat_reasons": quality_seat["execution_reasons"],
     }, ensure_ascii=False))
     raise SystemExit(2)
 if not degraded_ack["ready"]:
@@ -138,6 +143,9 @@ if not degraded_ack["ready"]:
         "error": f"dispatch blocked by degraded supervision: {', '.join(degraded_ack['reasons'])}",
         "blocked": True,
         "degraded_ack_reasons": degraded_ack["reasons"],
+        "quality_seat_mode": quality_seat["mode"],
+        "quality_seat_status": quality_seat["execution_status"],
+        "quality_seat_reasons": quality_seat["execution_reasons"],
     }, ensure_ascii=False))
     raise SystemExit(2)
 
@@ -252,6 +260,10 @@ print(json.dumps({
     "degraded_ack_at": degraded_ack["ack_at"],
     "role_conflicts": role_integrity["role_conflicts"],
     "role_overlap": role_integrity["role_overlap"],
+    "quality_seat_mode": quality_seat["mode"],
+    "quality_seat_ready": quality_seat["execution_ready"],
+    "quality_seat_status": quality_seat["execution_status"],
+    "quality_seat_reasons": quality_seat["execution_reasons"],
     "scale_out_recommended": bool(team.get("scale_out_recommended", False)) or bool(scale_out_triggers),
     "scale_out_triggers": scale_out_triggers,
     "summary": {
@@ -261,6 +273,9 @@ print(json.dumps({
         "assignment_count": len(assignments),
         "created_worktree_count": len(created_worktrees),
         "existing_worktree_count": len(existing_worktrees),
+        "quality_seat_mode": quality_seat["mode"],
+        "quality_seat_ready": quality_seat["execution_ready"],
+        "quality_seat_status": quality_seat["execution_status"],
     },
     "created_worktrees": created_worktrees,
     "existing_worktrees": existing_worktrees,

@@ -32,6 +32,9 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
   - `summary.has_runtime_report`
   - `summary.has_supervisor`
   - `summary.independent_skeptic`
+  - `summary.quality_seat_mode`
+  - `summary.quality_seat_status`
+  - `summary.quality_seat_reasons`
   - `summary.degraded_ack_ready`
   - `summary.role_conflicts`
   - `summary.product_gate_ready`
@@ -60,6 +63,8 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
   - `memory_count`
   - `context_summary.product_gate_ready`
   - `context_summary.quality_anchor_ready`
+  - `context_summary.quality_seat_mode`
+  - `context_summary.quality_seat_status`
   - `context_summary.degraded_ack_ready`
 
 ### 4) `dispatch.create`
@@ -70,6 +75,7 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
 - Response required fields:
   - `task_id`, `state_path`, `context_path`, `runtime_path`
   - `independent_skeptic`, `degraded`, `degraded_ack_ready`, `role_conflicts`
+  - `quality_seat_mode`, `quality_seat_status`, `quality_seat_reasons`
   - `summary.supervisor_count`, `summary.executor_count`, `summary.skeptic_count`
   - `assignments`
 
@@ -156,6 +162,7 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
 ## Gate Rules
 
 - 若 `summary.independent_skeptic == false`，不得宣称“独立质疑位已覆盖”，应标注为 degraded。
+- 若 `summary.quality_seat_status == blocked`，不得进入 execution，也不得宣称质量位已经可用。
 - 若 `degraded_ack_ready == false`，不得进入 execution。
 - 若 closeout 结构不完整或 `ready_for_execution_slice_done == false`，不得判定 `execution slice done`。
 - 若 state 未写入 commit 锚点和 verification 证据，不得判定 `task done`。

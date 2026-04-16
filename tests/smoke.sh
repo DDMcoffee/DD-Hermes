@@ -205,6 +205,7 @@ EOF
   assert_json_field "$dispatch" "all(item['next_commands'] for item in data['assignments']) and all(item['artifacts']['context_path'].endswith('context.json') for item in data['assignments'])"
   assert_json_field "$dispatch" "all(item['handoff_path'].endswith('.md') for item in data['assignments'] if item['role'] == 'executor') and any(item['status'] in ('created', 'existing') for item in data['assignments'] if item['role'] == 'executor')"
   assert_json_field "$dispatch" "data['independent_skeptic'] is True and data['degraded'] is False and data['role_conflicts'] == []"
+  assert_json_field "$dispatch" "data['quality_seat_mode'] == 'independent' and data['quality_seat_ready'] is True and data['quality_seat_status'] == 'ready'"
   assert_json_field "$dispatch" "data['anchors']['product_goal'] != '' and len(data['anchors']['product_anchors']) >= 1 and len(data['anchors']['quality_anchors']) >= 1"
   assert_json_field "$dispatch" "data['anchors']['product_gate_ready'] is True and data['anchors']['quality_anchor_ready'] is True"
 
@@ -223,6 +224,9 @@ payload = json.loads(open(sys.argv[1], encoding="utf-8").read())
 assert payload["blocked"] is True
 assert "degraded supervision" in payload["error"]
 assert "degraded_ack_by_missing" in payload["degraded_ack_reasons"]
+assert payload["quality_seat_mode"] == "degraded"
+assert payload["quality_seat_status"] == "blocked"
+assert "degraded_ack_by_missing" in payload["quality_seat_reasons"]
 PY
 
   "$ROOT/scripts/state-update.sh" --task-id smoke-sprint <<'EOF' >/dev/null
@@ -232,6 +236,7 @@ EOF
   local degraded_ready
   degraded_ready=$("$ROOT/scripts/dispatch-create.sh" --task-id smoke-sprint)
   assert_json_field "$degraded_ready" "data['independent_skeptic'] is False and data['degraded'] is True and data['degraded_ack_ready'] is True"
+  assert_json_field "$degraded_ready" "data['quality_seat_mode'] == 'degraded' and data['quality_seat_ready'] is True and data['quality_seat_status'] == 'ready'"
   assert_json_field "$degraded_ready" "'supervisor_skeptic_overlap:lead' in data['role_conflicts'] and 'independent_skeptic_unavailable' in data['scale_out_triggers']"
 }
 
@@ -656,12 +661,14 @@ subprocess.run(
 )
 
 dispatch = run_json([str(root / "scripts" / "dispatch-create.sh"), "--task-id", "smoke-sprint"])
-require_keys(dispatch, ("task_id", "contract_path", "state_path", "context_path", "runtime_path", "independent_skeptic", "degraded", "degraded_ack_ready", "role_conflicts", "role_overlap", "scale_out_recommended", "scale_out_triggers", "summary", "assignments"))
-require_keys(dispatch["summary"], ("supervisor_count", "executor_count", "skeptic_count", "assignment_count", "created_worktree_count", "existing_worktree_count"))
+require_keys(dispatch, ("task_id", "contract_path", "state_path", "context_path", "runtime_path", "independent_skeptic", "degraded", "degraded_ack_ready", "role_conflicts", "role_overlap", "quality_seat_mode", "quality_seat_ready", "quality_seat_status", "quality_seat_reasons", "scale_out_recommended", "scale_out_triggers", "summary", "assignments"))
+require_keys(dispatch["summary"], ("supervisor_count", "executor_count", "skeptic_count", "assignment_count", "created_worktree_count", "existing_worktree_count", "quality_seat_mode", "quality_seat_ready", "quality_seat_status"))
 if dispatch["summary"]["supervisor_count"] < 1 or dispatch["summary"]["executor_count"] < 2 or dispatch["summary"]["skeptic_count"] < 1:
     fail("dispatch summary counts are incomplete")
 if dispatch["independent_skeptic"] is not False or dispatch["degraded"] is not True:
     fail("dispatch should report degraded skeptic independence after degraded fixture")
+if dispatch["quality_seat_mode"] != "degraded" or dispatch["quality_seat_ready"] is not True:
+    fail("dispatch quality seat should report degraded but ready after explicit degraded ack")
 if "supervisor_skeptic_overlap:lead" not in dispatch["role_conflicts"]:
     fail("dispatch role_conflicts missing supervisor skeptic overlap")
 
@@ -672,7 +679,9 @@ if context_build["memory_count"] < 1:
 
 state_read = run_json([str(root / "scripts" / "state-read.sh"), "--task-id", "smoke-sprint"])
 require_keys(state_read, ("state", "summary"))
-require_keys(state_read["summary"], ("verification_complete", "has_context", "has_runtime_report", "has_supervisor", "supervisor_count", "product_anchor_count", "quality_anchor_count", "product_anchor_name", "product_anchor_role", "product_goal_ready", "product_goal_status", "quality_review_status", "product_gate_ready", "quality_anchor_ready", "quality_review_ready", "independent_skeptic", "role_integrity_degraded", "degraded_ack_required", "degraded_ack_ready", "role_conflicts", "scale_out_recommended", "scale_out_triggers", "event_count"))
+require_keys(state_read["summary"], ("verification_complete", "has_context", "has_runtime_report", "has_supervisor", "supervisor_count", "product_anchor_count", "quality_anchor_count", "product_anchor_name", "product_anchor_role", "product_goal_ready", "product_goal_status", "quality_review_status", "product_gate_ready", "quality_anchor_ready", "quality_review_ready", "quality_seat_mode", "quality_seat_ready", "quality_seat_status", "quality_seat_reasons", "independent_skeptic", "role_integrity_degraded", "degraded_ack_required", "degraded_ack_ready", "role_conflicts", "scale_out_recommended", "scale_out_triggers", "event_count"))
+if state_read["summary"]["quality_seat_mode"] != "degraded" or state_read["summary"]["quality_seat_status"] != "ready":
+    fail("state-read quality seat summary should expose degraded ready truth")
 
 artifact_check = run_json([str(root / "scripts" / "check-artifact-schemas.sh"), "--task-id", "smoke-sprint"])
 require_keys(artifact_check, ("task_id", "checked", "artifacts", "errors", "valid", "semantic_valid", "ready_for_execution_slice_done"))

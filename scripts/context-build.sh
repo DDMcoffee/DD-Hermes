@@ -69,6 +69,7 @@ from team_governance import (
     merge_triggers,
     product_gate_analysis,
     quality_anchor_analysis,
+    quality_seat_analysis,
     quality_review_analysis,
     scale_out_analysis,
 )
@@ -197,6 +198,7 @@ product_gate = product_gate_analysis(state.get("product", {}), product_anchors, 
 quality_anchor = quality_anchor_analysis(state.get("quality", {}), quality_anchors, team.get("anchor_policy", {}))
 quality_review = quality_review_analysis(state.get("quality", {}), quality_anchors, team.get("anchor_policy", {}))
 degraded_ack = degraded_ack_analysis(role_integrity)
+quality_seat = quality_seat_analysis(role_integrity, quality_anchor, degraded_ack, quality_review)
 packet["context_summary"]["independent_skeptic"] = role_integrity["independent_skeptic"]
 packet["context_summary"]["role_integrity_degraded"] = role_integrity["degraded"]
 packet["context_summary"]["degraded_ack_required"] = degraded_ack["required"]
@@ -216,6 +218,13 @@ packet["context_summary"]["quality_anchor_ready"] = quality_anchor["ready"]
 packet["context_summary"]["quality_anchor_reasons"] = quality_anchor["reasons"]
 packet["context_summary"]["quality_review_ready"] = quality_review["ready"]
 packet["context_summary"]["quality_review_reasons"] = quality_review["reasons"]
+packet["context_summary"]["quality_seat_mode"] = quality_seat["mode"]
+packet["context_summary"]["quality_seat_ready"] = quality_seat["execution_ready"]
+packet["context_summary"]["quality_seat_status"] = quality_seat["execution_status"]
+packet["context_summary"]["quality_seat_reasons"] = quality_seat["execution_reasons"]
+packet["context_summary"]["quality_seat_completion_ready"] = quality_seat["completion_ready"]
+packet["context_summary"]["quality_seat_completion_status"] = quality_seat["completion_status"]
+packet["context_summary"]["quality_seat_completion_reasons"] = quality_seat["completion_reasons"]
 packet["context_summary"]["quality_review_findings"] = state.get("quality", {}).get("review_findings", [])
 packet["context_summary"]["quality_review_examples"] = state.get("quality", {}).get("review_examples", [])
 packet["context_summary"]["anchor_policy"] = team.get("anchor_policy", {})
