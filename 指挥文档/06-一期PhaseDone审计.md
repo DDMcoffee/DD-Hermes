@@ -1,4 +1,17 @@
+---
+phase_status: 一期已经达到“体验版本 v0 已出现”，但还没有达到完整的 `phase done`。
+latest_proof_task_id: dd-hermes-experience-demo-v1
+latest_proof_archive: openspec/archive/dd-hermes-experience-demo-v1.md
+current_mainline_task_id: dd-hermes-demo-entry-v1
+current_mainline_doc: 指挥文档/07-体验入口任务说明.md
+---
+
 # DD Hermes 一期 Phase Done 审计
+
+## 快速入口
+
+- 第一次看当前体验版状态，先运行 `./scripts/demo-entry.sh`。
+- 这页是当前最适合直接阅读的一页：它回答“现在做到哪里了、为什么还没 `phase done`、下一步是什么”。
 
 ## 审计结论
 
@@ -80,6 +93,8 @@
 1. 建立一个单一、真实、用户可见的体验入口。
 2. 把“一期已达到体验版 v0，但尚未 phase done”的裁决固化为仓库事实。
 
+其中第 2 条已经由本页完成；当前唯一剩余的执行 blocker 是第 1 条。
+
 ## 下一条唯一主线任务
 
 下一条唯一主线任务应当是：
@@ -93,7 +108,7 @@
 
 ## 审计后的线程策略
 
-- 这个线程继续作为唯一指挥线程。
-- 下一步只开一个按需 execution thread。
+- 这个线程继续作为唯一主线程。
+- 下一步在当前线程内继续推进实现，不再默认切到新的聊天线程。
 - 不开第二个并跑主线线程。
 - `dd-hermes-demo-entry-v1` 完成后，再决定是否已经达到一期 `phase done`。

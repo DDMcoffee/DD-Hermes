@@ -41,14 +41,14 @@
 
 ## Thread Model
 
-- 指挥线程
-  - 负责规划、拆分、验收、state 推进、context 出包。
-  - 主要工件：`workspace/contracts/`、`workspace/state/`、`openspec/`
-- 执行线程
-  - 负责在 worktree 内实现、验证并回传 handoff / exploration / verification。
-  - 主要工件：`.worktrees/`、`workspace/handoffs/`、`workspace/exploration/`
-- 多 agent 并行
-  - 不是依赖聊天历史，而是依赖显式工件同步。
+- 默认单线程
+  - 由当前线程统一负责规划、拆分、实现、复核、验收和 state 推进。
+  - `Lead / Explorer / Executor / Skeptic / Judge` 是逻辑角色，不再默认映射到不同聊天线程。
+- worktree
+  - 仍然保留为代码隔离手段，用来避免中间态污染主工作区。
+  - `.worktrees/` 代表实现隔离，不再代表外部聊天线程隔离。
+- 显式工件同步
+  - 多 agent 不是依赖聊天历史，而是依赖显式工件同步。
   - 最小同步集合：`contract + state + context + handoff`
 
 ## Lease / Pause / Resume
@@ -65,8 +65,8 @@
   - `resume_after`
   - `resume_checkpoint`
   - `dispatch_cursor`
-- 当宿主报告 Codex 配额命中时，指挥线程只需要把 `lease.status=paused`、`pause_reason=codex_quota`、`resume_after=<next window>` 写回 state。
-- 恢复时重新进入指挥线程，读取 state、重建 context、继续派发执行线程，不需要依赖旧聊天上下文仍然完整存在。
+- 当宿主报告 Codex 配额命中时，当前线程只需要把 `lease.status=paused`、`pause_reason=codex_quota`、`resume_after=<next window>` 写回 state。
+- 恢复时重新进入当前线程，读取 state、重建 context、继续推进实现，不需要依赖旧聊天上下文仍然完整存在。
 
 ## Scripts
 
@@ -79,6 +79,6 @@
 - `scripts/state-update.sh`
   - 更新短期状态并记录 state event。
 - `scripts/context-build.sh`
-  - 组装指挥线程要交给执行线程的 context packet。
+  - 组装实现前要消费的 context packet。
 - `scripts/memory-refresh-views.sh`
   - 刷新长期知识视图。
