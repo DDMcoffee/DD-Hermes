@@ -79,7 +79,9 @@
 - `Skeptic`
   - 默认不需要独立 worktree，但必须获得独立 assignment。
   - 其输入至少包含 `contract + state + context`，输出反证和挑战检查项。
+- 默认回退策略优先选择“不参与实现的人”做 `Skeptic`；如果只能让 `Supervisor` 兼任，系统必须把它标记为降级，而不是假装独立性已经存在。
 - 如果 `state.team.scale_out_recommended = true`，派发结果不应退化成单 executor 单元。
+- 如果 `Skeptic` 与 `Supervisor` 或 `Executor` 重叠，`state/context/dispatch` 必须显式暴露 `role_conflicts`，并触发 `independent_skeptic_unavailable`。
 
 ## 完成定义（分工层面）
 

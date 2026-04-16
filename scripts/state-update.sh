@@ -21,7 +21,7 @@ fi
 
 input_json=$(read_stdin_json)
 repo=$(shared_repo_root)
-payload=$(INPUT_JSON="$input_json" python3 - <<'PY' "$repo" "$task_id"
+payload=$(INPUT_JSON="$input_json" python3 - <<'PY' "$repo" "$task_id" "$SCRIPT_DIR"
 import json
 import os
 import sys
@@ -30,8 +30,12 @@ from pathlib import Path
 
 repo = Path(sys.argv[1]).resolve()
 task_id = sys.argv[2]
+script_dir = Path(sys.argv[3]).resolve()
+sys.path.insert(0, str(script_dir))
 state_path = repo / "workspace" / "state" / task_id / "state.json"
 events_path = repo / "workspace" / "state" / task_id / "events.jsonl"
+
+from team_governance import default_skeptics, normalize_people, scale_out_analysis
 
 if not state_path.exists():
     print(json.dumps({"error": "state not found", "task_id": task_id}, ensure_ascii=False))
@@ -88,23 +92,6 @@ timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 state = json.loads(state_path.read_text(encoding="utf-8"))
 before = json.loads(json.dumps(state, ensure_ascii=False))
 
-
-def normalize_people(items, field_name):
-    if not isinstance(items, list):
-        raise ValueError(f"{field_name} must be a list of agent ids")
-    seen = set()
-    result = []
-    for item in items:
-        if not isinstance(item, str):
-            raise ValueError(f"{field_name} must contain strings")
-        value = item.strip()
-        if not value or value in seen:
-            continue
-        seen.add(value)
-        result.append(value)
-    return result
-
-
 def load_verification_history(path: Path):
     if not path.exists():
         return []
@@ -122,22 +109,6 @@ def load_verification_history(path: Path):
         if isinstance(changes, dict) and "last_pass" in changes:
             history.append(bool(changes["last_pass"]))
     return history
-
-
-def compute_scale_out(owner, supervisors, executors, high_risk_mode, integration_pressure, verification_history):
-    triggers = []
-    recent = verification_history[-2:]
-    if len(executors) >= 2:
-        triggers.append("parallel_execution_slices")
-    if len(recent) == 2 and not any(recent):
-        triggers.append("repeated_verification_failures")
-    if high_risk_mode:
-        triggers.append("high_risk_mode")
-    if integration_pressure:
-        triggers.append("integration_pressure")
-    if owner and owner in executors and len(supervisors) == 1 and supervisors[0] == owner:
-        triggers.append("lead_role_conflict")
-    return triggers
 
 for key in ("status", "mode", "current_focus", "blocked_reason", "active_expert"):
     if key in data:
@@ -221,25 +192,24 @@ state["team"] = team
 
 try:
     owner = state.get("owner", "lead") or "lead"
-    supervisors = normalize_people(team.get("supervisors", []), "team.supervisors") if "supervisors" in team else []
+    supervisors = normalize_people(team.get("supervisors", []), "team.supervisors", require_list=True) if "supervisors" in team else []
     if not supervisors:
         supervisors = [owner]
-    executors = normalize_people(team.get("executors", []), "team.executors") if "executors" in team else []
+    executors = normalize_people(team.get("executors", []), "team.executors", require_list=True) if "executors" in team else []
     if not executors:
-        executors = normalize_people(state.get("experts", []), "state.experts")
-    skeptics = normalize_people(team.get("skeptics", []), "team.skeptics") if "skeptics" in team else []
+        executors = normalize_people(state.get("experts", []), "state.experts", require_list=True)
+    skeptics = normalize_people(team.get("skeptics", []), "team.skeptics", require_list=True) if "skeptics" in team else []
     if not skeptics:
-        fallback_skeptics = executors[1:] if len(executors) > 1 else executors[:1]
-        skeptics = normalize_people(fallback_skeptics, "team.skeptics")
+        skeptics = default_skeptics(owner, supervisors, executors)
     high_risk_mode = bool(team.get("high_risk_mode", False))
     integration_pressure = bool(team.get("integration_pressure", False))
 
     if "supervisors" in data:
-        supervisors = normalize_people(data["supervisors"], "supervisors")
+        supervisors = normalize_people(data["supervisors"], "supervisors", require_list=True)
     if "executors" in data:
-        executors = normalize_people(data["executors"], "executors")
+        executors = normalize_people(data["executors"], "executors", require_list=True)
     if "skeptics" in data:
-        skeptics = normalize_people(data["skeptics"], "skeptics")
+        skeptics = normalize_people(data["skeptics"], "skeptics", require_list=True)
     if "high_risk_mode" in data:
         high_risk_mode = bool(data["high_risk_mode"])
     if "integration_pressure" in data:
@@ -250,10 +220,11 @@ try:
     verification_history = load_verification_history(events_path)
     if "last_pass" in data:
         verification_history.append(bool(data["last_pass"]))
-    scale_out_triggers = compute_scale_out(
+    scale_out = scale_out_analysis(
         owner=owner,
         supervisors=supervisors,
         executors=executors,
+        skeptics=skeptics,
         high_risk_mode=high_risk_mode,
         integration_pressure=integration_pressure,
         verification_history=verification_history,
@@ -269,8 +240,9 @@ team.update({
     "skeptics": skeptics,
     "high_risk_mode": high_risk_mode,
     "integration_pressure": integration_pressure,
-    "scale_out_recommended": bool(scale_out_triggers),
-    "scale_out_triggers": scale_out_triggers,
+    "scale_out_recommended": scale_out["scale_out_recommended"],
+    "scale_out_triggers": scale_out["scale_out_triggers"],
+    "role_integrity": scale_out["role_integrity"],
 })
 
 state.setdefault("notes", [])

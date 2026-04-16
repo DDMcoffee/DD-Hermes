@@ -21,7 +21,7 @@ source = Path(sys.argv[1])
 target = Path(sys.argv[2])
 
 def ignore(path, names):
-    ignored = {".git", ".worktrees"}
+    ignored = {".git", ".worktrees", "__pycache__"}
     current = Path(path)
     if current == source:
         ignored.add("workspace")
@@ -188,12 +188,26 @@ run_workflow() {
 }
 
 run_dispatch() {
+  "$ROOT/scripts/state-update.sh" --task-id smoke-sprint <<'EOF' >/dev/null
+{"supervisors":["lead"],"executors":["expert-a","expert-b"],"skeptics":["expert-c"],"note":"dispatch independent skeptic fixture"}
+EOF
+
   local dispatch
   dispatch=$("$ROOT/scripts/dispatch-create.sh" --task-id smoke-sprint)
   assert_json_field "$dispatch" "data['task_id'] == 'smoke-sprint' and data['summary']['supervisor_count'] >= 1 and data['summary']['executor_count'] >= 2 and data['summary']['skeptic_count'] >= 1"
   assert_json_field "$dispatch" "len([item for item in data['assignments'] if item['role'] == 'supervisor']) >= 1 and len([item for item in data['assignments'] if item['role'] == 'executor']) >= 2 and len([item for item in data['assignments'] if item['role'] == 'skeptic']) >= 1"
   assert_json_field "$dispatch" "all(item['next_commands'] for item in data['assignments']) and all(item['artifacts']['context_path'].endswith('context.json') for item in data['assignments'])"
   assert_json_field "$dispatch" "all(item['handoff_path'].endswith('.md') for item in data['assignments'] if item['role'] == 'executor') and any(item['status'] in ('created', 'existing') for item in data['assignments'] if item['role'] == 'executor')"
+  assert_json_field "$dispatch" "data['independent_skeptic'] is True and data['degraded'] is False and data['role_conflicts'] == []"
+
+  "$ROOT/scripts/state-update.sh" --task-id smoke-sprint <<'EOF' >/dev/null
+{"skeptics":["lead"],"note":"dispatch degraded skeptic fixture"}
+EOF
+
+  local degraded
+  degraded=$("$ROOT/scripts/dispatch-create.sh" --task-id smoke-sprint)
+  assert_json_field "$degraded" "data['independent_skeptic'] is False and data['degraded'] is True"
+  assert_json_field "$degraded" "'supervisor_skeptic_overlap:lead' in data['role_conflicts'] and 'independent_skeptic_unavailable' in data['scale_out_triggers']"
 }
 
 run_git_management() {
@@ -228,7 +242,7 @@ source = Path(sys.argv[1])
 target = Path(sys.argv[2])
 
 def ignore(path, names):
-    ignored = {".git", ".worktrees"}
+    ignored = {".git", ".worktrees", "__pycache__"}
     current = Path(path)
     if current == source:
         ignored.add("workspace")
@@ -276,7 +290,7 @@ EOF
 
   local updated
   updated=$("$ROOT/scripts/state-read.sh" --task-id smoke-sprint)
-  assert_json_field "$updated" "data['state']['mode'] == 'execution' and data['state']['active_expert'] == 'expert-a' and data['state']['lease']['status'] == 'running' and data['summary']['scale_out_recommended'] is True and 'parallel_execution_slices' in data['summary']['scale_out_triggers'] and 'integration_pressure' in data['summary']['scale_out_triggers']"
+  assert_json_field "$updated" "data['state']['mode'] == 'execution' and data['state']['active_expert'] == 'expert-a' and data['state']['lease']['status'] == 'running' and data['summary']['scale_out_recommended'] is True and 'parallel_execution_slices' in data['summary']['scale_out_triggers'] and 'integration_pressure' in data['summary']['scale_out_triggers'] and data['summary']['independent_skeptic'] is True and data['summary']['role_conflicts'] == []"
 
   set +e
   "$ROOT/scripts/state-update.sh" --task-id smoke-sprint <<'EOF' >/dev/null
@@ -318,7 +332,7 @@ print(json.dumps(json.loads(Path(sys.argv[1]).read_text(encoding='utf-8')), ensu
 PY
 )
   assert_json_field "$paused_packet" "data['continuation']['lease']['status'] == 'paused' and data['continuation']['lease']['resume_checkpoint'] == 'expert-a:after-hooks'"
-  assert_json_field "$paused_packet" "data['context_summary']['supervisor_count'] >= 1 and data['context_summary']['scale_out_recommended'] is True and 'parallel_execution_slices' in data['context_summary']['scale_out_triggers']"
+  assert_json_field "$paused_packet" "data['context_summary']['supervisor_count'] >= 1 and data['context_summary']['scale_out_recommended'] is True and 'parallel_execution_slices' in data['context_summary']['scale_out_triggers'] and data['context_summary']['independent_skeptic'] is True"
 
   "$ROOT/scripts/state-update.sh" --task-id smoke-sprint <<'EOF' >/dev/null
 {"lease_status":"running","pause_reason":"","resume_after":"","current_focus":"resume from checkpoint","note":"resume execution"}
@@ -408,12 +422,21 @@ state = json.loads((root / "workspace" / "state" / "smoke-sprint" / "state.json"
 for key in ("task_id", "status", "mode", "owner", "experts", "openspec", "runtime", "lease", "git", "verification", "memory", "team", "updated_at"):
     if key not in state:
         fail(f"state missing key: {key}")
+for key in ("supervisors", "executors", "skeptics", "scale_out_recommended", "scale_out_triggers", "role_integrity"):
+    if key not in state["team"]:
+        fail(f"team missing key: {key}")
+for key in ("independent_skeptic", "degraded", "role_conflicts", "role_overlap"):
+    if key not in state["team"]["role_integrity"]:
+        fail(f"team.role_integrity missing key: {key}")
 
 context = json.loads((root / "workspace" / "state" / "smoke-sprint" / "context.json").read_text(encoding="utf-8"))
 for key in ("task_id", "runtime", "state", "memory", "continuation", "documents", "context_summary"):
     if key not in context:
         fail(f"context missing key: {key}")
 for key in ("supervisor_count", "scale_out_recommended", "scale_out_triggers"):
+    if key not in context["context_summary"]:
+        fail(f"context_summary missing key: {key}")
+for key in ("independent_skeptic", "role_integrity_degraded", "role_conflicts"):
     if key not in context["context_summary"]:
         fail(f"context_summary missing key: {key}")
 
@@ -440,11 +463,23 @@ require_keys(runtime_report, ("timestamp", "repo_root", "worktree", "git", "hook
 if not runtime_report["task_surfaces"].get("state_path"):
     fail("runtime-report task_surfaces.state_path is empty")
 
+subprocess.run(
+    [str(root / "scripts" / "state-update.sh"), "--task-id", "smoke-sprint"],
+    input=json.dumps({"skeptics": ["lead"], "note": "schema degraded skeptic fixture"}),
+    text=True,
+    capture_output=True,
+    check=True,
+)
+
 dispatch = run_json([str(root / "scripts" / "dispatch-create.sh"), "--task-id", "smoke-sprint"])
-require_keys(dispatch, ("task_id", "contract_path", "state_path", "context_path", "runtime_path", "scale_out_recommended", "scale_out_triggers", "summary", "assignments"))
+require_keys(dispatch, ("task_id", "contract_path", "state_path", "context_path", "runtime_path", "independent_skeptic", "degraded", "role_conflicts", "role_overlap", "scale_out_recommended", "scale_out_triggers", "summary", "assignments"))
 require_keys(dispatch["summary"], ("supervisor_count", "executor_count", "skeptic_count", "assignment_count", "created_worktree_count", "existing_worktree_count"))
 if dispatch["summary"]["supervisor_count"] < 1 or dispatch["summary"]["executor_count"] < 2 or dispatch["summary"]["skeptic_count"] < 1:
     fail("dispatch summary counts are incomplete")
+if dispatch["independent_skeptic"] is not False or dispatch["degraded"] is not True:
+    fail("dispatch should report degraded skeptic independence after degraded fixture")
+if "supervisor_skeptic_overlap:lead" not in dispatch["role_conflicts"]:
+    fail("dispatch role_conflicts missing supervisor skeptic overlap")
 
 context_build = run_json([str(root / "scripts" / "context-build.sh"), "--task-id", "smoke-sprint", "--agent-role", "commander", "--memory-limit", "5"])
 require_keys(context_build, ("context_path", "runtime_path", "state_path", "memory_count", "handoff_count", "exploration_count"))
@@ -453,7 +488,7 @@ if context_build["memory_count"] < 1:
 
 state_read = run_json([str(root / "scripts" / "state-read.sh"), "--task-id", "smoke-sprint"])
 require_keys(state_read, ("state", "summary"))
-require_keys(state_read["summary"], ("verification_complete", "has_context", "has_runtime_report", "has_supervisor", "supervisor_count", "scale_out_recommended", "scale_out_triggers", "event_count"))
+require_keys(state_read["summary"], ("verification_complete", "has_context", "has_runtime_report", "has_supervisor", "supervisor_count", "independent_skeptic", "role_integrity_degraded", "role_conflicts", "scale_out_recommended", "scale_out_triggers", "event_count"))
 
 worktree_status = run_json([str(root / "scripts" / "worktree-status.sh"), "--task-id", "smoke-sprint"])
 require_keys(worktree_status, ("clean", "dirty_files", "linked_contract", "linked_handoff"))
@@ -489,8 +524,8 @@ case "$SECTION" in
     run_hooks
     run_memory
     run_workflow
-    run_dispatch
     run_git_management
+    run_dispatch
     run_context_state
     run_verify
     run_schema
@@ -504,8 +539,8 @@ case "$SECTION" in
     ;;
   git)
     run_workflow
-    run_dispatch
     run_git_management
+    run_dispatch
     ;;
   context)
     run_workflow

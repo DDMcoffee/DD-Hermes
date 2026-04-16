@@ -30,7 +30,7 @@ if [[ -z "$task_id" ]]; then
 fi
 
 repo=$(shared_repo_root)
-payload=$(python3 - <<'PY' "$repo" "$task_id" "$owner" "$experts" "$status" "$mode" "$current_focus"
+payload=$(python3 - <<'PY' "$repo" "$task_id" "$owner" "$experts" "$status" "$mode" "$current_focus" "$SCRIPT_DIR"
 import json
 import sys
 from datetime import datetime, timezone
@@ -43,7 +43,11 @@ experts_csv = sys.argv[4]
 status = sys.argv[5]
 mode = sys.argv[6]
 current_focus = sys.argv[7]
+script_dir = Path(sys.argv[8]).resolve()
+sys.path.insert(0, str(script_dir))
 timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+from team_governance import default_skeptics, normalize_people, scale_out_analysis
 
 state_dir = repo / "workspace" / "state" / task_id
 state_dir.mkdir(parents=True, exist_ok=True)
@@ -88,21 +92,6 @@ def parse_frontmatter(path: Path):
             data[key] = []
             current = key
     return data
-
-
-def normalize_people(items):
-    seen = set()
-    result = []
-    for item in items or []:
-        if not isinstance(item, str):
-            continue
-        value = item.strip()
-        if not value or value in seen:
-            continue
-        seen.add(value)
-        result.append(value)
-    return result
-
 
 contract_frontmatter = parse_frontmatter(contract_path)
 memory_reads = contract_frontmatter.get("memory_reads", [])
@@ -173,19 +162,17 @@ supervisors = normalize_people(existing_team.get("supervisors", [])) or normaliz
 executors = normalize_people(existing_team.get("executors", [])) or experts
 skeptics = normalize_people(existing_team.get("skeptics", []))
 if not skeptics:
-    fallback_skeptics = experts[1:] if len(experts) > 1 else experts[:1]
-    skeptics = normalize_people(fallback_skeptics)
+    skeptics = default_skeptics(resolved_owner, supervisors, executors)
 high_risk_mode = bool(existing_team.get("high_risk_mode", False))
 integration_pressure = bool(existing_team.get("integration_pressure", False))
-scale_out_triggers = []
-if len(executors) >= 2:
-    scale_out_triggers.append("parallel_execution_slices")
-if high_risk_mode:
-    scale_out_triggers.append("high_risk_mode")
-if integration_pressure:
-    scale_out_triggers.append("integration_pressure")
-if resolved_owner and resolved_owner in executors and len(supervisors) == 1 and supervisors[0] == resolved_owner:
-    scale_out_triggers.append("lead_role_conflict")
+scale_out = scale_out_analysis(
+    owner=resolved_owner,
+    supervisors=supervisors,
+    executors=executors,
+    skeptics=skeptics,
+    high_risk_mode=high_risk_mode,
+    integration_pressure=integration_pressure,
+)
 
 state.update({
     "task_id": task_id,
@@ -210,8 +197,9 @@ state.update({
         "skeptics": skeptics,
         "high_risk_mode": high_risk_mode,
         "integration_pressure": integration_pressure,
-        "scale_out_recommended": bool(scale_out_triggers),
-        "scale_out_triggers": scale_out_triggers,
+        "scale_out_recommended": scale_out["scale_out_recommended"],
+        "scale_out_triggers": scale_out["scale_out_triggers"],
+        "role_integrity": scale_out["role_integrity"],
     },
     "updated_at": timestamp,
 })

@@ -44,6 +44,7 @@ from pathlib import Path
 repo = Path(sys.argv[1]).resolve()
 task_id = sys.argv[2]
 script_dir = Path(sys.argv[3]).resolve()
+sys.path.insert(0, str(script_dir))
 state_wrapper = json.loads(os.environ["STATE_JSON"])
 context_wrapper = json.loads(os.environ["CONTEXT_JSON"])
 state = state_wrapper["state"]
@@ -51,19 +52,7 @@ context_path = context_wrapper["context_path"]
 runtime_path = context_wrapper["runtime_path"]
 state_path = context_wrapper["state_path"]
 
-
-def normalize_people(items):
-    seen = set()
-    result = []
-    for item in items or []:
-        if not isinstance(item, str):
-            continue
-        value = item.strip()
-        if not value or value in seen:
-            continue
-        seen.add(value)
-        result.append(value)
-    return result
+from team_governance import merge_triggers, normalize_people, scale_out_analysis
 
 
 def handoff_for(agent_id):
@@ -88,6 +77,15 @@ team = state.get("team", {}) if isinstance(state.get("team"), dict) else {}
 supervisors = normalize_people(team.get("supervisors", []))
 executors = normalize_people(team.get("executors", []))
 skeptics = normalize_people(team.get("skeptics", []))
+role_analysis = scale_out_analysis(
+    owner=state.get("owner", "lead"),
+    supervisors=supervisors,
+    executors=executors,
+    skeptics=skeptics,
+    high_risk_mode=bool(team.get("high_risk_mode", False)),
+    integration_pressure=bool(team.get("integration_pressure", False)),
+)
+scale_out_triggers = merge_triggers(team.get("scale_out_triggers", []), role_analysis["scale_out_triggers"])
 
 if not supervisors:
     print(json.dumps({"error": "dispatch requires at least one supervisor", "blocked": True}, ensure_ascii=False))
@@ -186,8 +184,12 @@ print(json.dumps({
     "state_path": state_path,
     "context_path": context_path,
     "runtime_path": runtime_path,
-    "scale_out_recommended": bool(team.get("scale_out_recommended", False)),
-    "scale_out_triggers": team.get("scale_out_triggers", []),
+    "independent_skeptic": role_analysis["role_integrity"]["independent_skeptic"],
+    "degraded": role_analysis["role_integrity"]["degraded"],
+    "role_conflicts": role_analysis["role_integrity"]["role_conflicts"],
+    "role_overlap": role_analysis["role_integrity"]["role_overlap"],
+    "scale_out_recommended": bool(team.get("scale_out_recommended", False)) or bool(scale_out_triggers),
+    "scale_out_triggers": scale_out_triggers,
     "summary": {
         "supervisor_count": len(supervisors),
         "executor_count": len(executors),
