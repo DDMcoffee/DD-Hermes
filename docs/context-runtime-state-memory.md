@@ -12,8 +12,10 @@
   - 当前任务的短期控制面。
   - 例子：当前模式、阻塞原因、最近一次 verification、最新 context packet、最近一次 runtime snapshot。
   - 还应包含角色治理真相，例如 `team.role_integrity`、`independent_skeptic` 是否成立、是否需要扩容。
+  - 还应包含执行门与讨论门会直接消费的控制字段，例如 `discussion.*`、`lease.*`、`contract_path / handoff_paths / exploration_paths / openspec`。
   - 还应显式落盘两个恒定锚点：
     - `product`：产品目标、用户价值、非目标、漂移信号。
+      - 其中 `task_class / quality_requirement / task_class_rationale` 现在也是一等控制面字段。
     - `quality`：质量锚点的审查状态、关键发现和参考示例。
   - 落盘位置：`workspace/state/<task_id>/state.json` 和 `events.jsonl`
   - 特征：可变、任务级、生命周期短于 memory。
@@ -88,3 +90,14 @@
   - 组装实现前要消费的 context packet。
 - `scripts/memory-refresh-views.sh`
   - 刷新长期知识视图。
+
+## 最小继续开发读取
+
+如果已经知道当前 mainline task id，继续开发时最少只需要看这些：
+
+1. `workspace/contracts/<task_id>.md`
+2. `workspace/state/<task_id>/state.json`
+3. `workspace/handoffs/<task_id>-lead-to-<expert>.md`
+4. `workspace/handoffs/<task_id>-expert-to-lead.md`（如果已存在）
+5. `docs/coordination-endpoints.md`
+6. `docs/artifact-schemas.md`

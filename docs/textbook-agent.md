@@ -1,5 +1,7 @@
 # DD Hermes: Textbook Agent
 
+> 说明：这是教材/记录辅助文档，不是继续开发 DD Hermes 的主入口。
+
 教材记录 agent 不是执行代码的 agent，而是长期 `scribe / curriculum` agent。
 
 ## Goal

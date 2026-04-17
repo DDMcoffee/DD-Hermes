@@ -23,8 +23,8 @@ target = Path(sys.argv[2])
 def ignore(path, names):
     ignored = {".git", ".worktrees", "__pycache__"}
     current = Path(path)
-    if current == source:
-        ignored.add("workspace")
+    if current == source / "workspace":
+        ignored.add("logs")
     if current == source / "memory":
         ignored.add("journal")
     return ignored.intersection(names)

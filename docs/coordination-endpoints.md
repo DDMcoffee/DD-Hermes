@@ -61,11 +61,14 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
 - Router entry: `scripts/coordination-endpoint.sh --endpoint context.build --task-id <task_id> --agent-role <role>`
 - Implementation: `scripts/context-build.sh --task-id <task_id> --agent-role <role>`
 - Purpose: 组装执行输入包。
-- Response required fields:
+- Stdout response required fields:
   - `context_path`
   - `runtime_path`
   - `state_path`
   - `memory_count`
+  - `handoff_count`
+  - `exploration_count`
+- `context_summary.*` 不在 stdout 返回值里，而是在生成出来的 `context.json` 内部：
   - `context_summary.product_gate_ready`
   - `context_summary.quality_anchor_ready`
   - `context_summary.task_class`
@@ -129,7 +132,25 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
 - Response required fields:
   - `pass`, `target_thread`, `blocked_reason`
 
-### 8) `git.integrate`
+### 8) `quality.gate`
+
+- Router entry: `scripts/coordination-endpoint.sh --endpoint quality.gate --task-id <task_id> < payload.json`
+- Implementation: `hooks/quality-gate.sh --event Stop --state workspace/state/<task_id>/state.json`
+- Purpose: 完成态门卫，阻止“代码改了但证据不完整”时宣称完成。
+- Checks:
+  - `verified_steps` / `verified_files` 是否覆盖 changed code
+  - `product_gate` 是否 ready
+  - `task_class_policy` 是否完整
+  - `degraded_ack` / `quality_review` / `quality_seat` 是否通过
+  - closeout 语义是否已从占位态升级为真实 execution evidence
+- Response required fields:
+  - `event`, `pass`, `missing_verification`, `uncovered_files`
+  - `task_class`, `quality_requirement`, `task_policy_reasons`
+  - `quality_seat_mode`, `quality_seat_status`, `quality_seat_reasons`
+  - `closeout_path`, `closeout_reasons`
+  - `blocked_reason`, `required_next_step`
+
+### 9) `git.integrate`
 
 - Router entry: `EXPERT=<agent_id> scripts/coordination-endpoint.sh --endpoint git.integrate --task-id <task_id>`
 - Implementation: `scripts/git-integrate-task.sh --task-id <task_id> --expert <agent_id>`
@@ -139,7 +160,7 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
   - `task_id`, `integrated_branch`, `commit_sha`
   - `pre_check_warnings`, `handoff_found`, `verification_pass`
 
-### 9) `session.analytics`
+### 10) `session.analytics`
 
 - Router entry: `scripts/coordination-endpoint.sh --endpoint session.analytics --task-id <any>`
 - Implementation: `scripts/session-analytics.sh --days 7`
@@ -148,7 +169,7 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
   - `session_count`, `tool_usage`, `error_frequency`
   - `fragmentation_score`, `kb_suggestions`
 
-### 10) `memory.decay`
+### 11) `memory.decay`
 
 - Router entry: `scripts/coordination-endpoint.sh --endpoint memory.decay --task-id <any>`
 - Implementation: `scripts/memory-decay-schedule.sh --dry-run`
@@ -156,7 +177,7 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
 - Response required fields:
   - `candidates`, `count`, `max_age_days`
 
-### 11) `journal.compact`
+### 12) `journal.compact`
 
 - Router entry: `scripts/coordination-endpoint.sh --endpoint journal.compact --task-id <any>`
 - Implementation: `scripts/journal-compact.sh --dry-run`
@@ -178,4 +199,5 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
 - 若 `degraded_ack_ready == false`，不得进入 execution。
 - 若 `summary.quality_requirement == requires-independent` 且 `summary.independent_skeptic == false`，不得进入 execution。
 - 若 closeout 结构不完整或 `ready_for_execution_slice_done == false`，不得判定 `execution slice done`。
+- 若 `quality-gate` 未通过，不得宣称 `execution slice done` 或 `task done`。
 - 若 state 未写入 commit 锚点和 verification 证据，不得判定 `task done`。

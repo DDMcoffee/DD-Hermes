@@ -1,19 +1,20 @@
 ---
-phase_status: 一期已经达到完整的 `phase done`；现在就可以使用只读体验入口。
+phase_status: 一期已经达到完整的 `phase done`；现在可以直接使用 DD Hermes harness 的只读入口与任务控制面。
 latest_proof_task_id: dd-hermes-independent-quality-seat-v1
 latest_proof_archive: openspec/archive/dd-hermes-independent-quality-seat-v1.md
 current_mainline_task_id: dd-hermes-quality-seat-escalation-rules-v1
 current_mainline_doc: 指挥文档/04-任务重校准与线程策略.md
-current_gap_1: phase-2 新主线已经启动；下一步要把“哪些任务类必须 independent”压成第一条可执行边界。
-current_gap_2: phase-2 仍需要把升级规则落进 state / dispatch / gate，而不是只停在原则描述里。
+current_gap_1: phase-2 当前主线已经完成第一条 execution slice，但还没有决定 archive 还是继续下一条 override slice。
+current_gap_2: phase-2 还没有把“哪些 T2 bounded slice 必须手动升级为 requires-independent”压成下一条明确边界。
 ---
 
 # DD Hermes 一期 Phase Done 审计
 
-## 快速入口
+## 快速判断
 
-- 第一次看当前体验版状态，先运行 `./scripts/demo-entry.sh`。
-- 这页是当前最适合直接阅读的一页：它回答“现在能不能用、能用到什么程度、一期为什么已经完成、下一步是什么”。
+- 现在就能用 DD Hermes。
+- 当前能用到的程度，是 harness / 控制面级别，而不是新的 runtime 或自动调度器。
+- 如果要继续开发，不要把这页当 task tracker；当前主线与下一步请转到 `04-任务重校准与线程策略.md`。
 
 ## 什么时候能用上 DD Hermes
 
@@ -25,138 +26,73 @@ current_gap_2: phase-2 仍需要把升级规则落进 state / dispatch / gate，
 - 你可以看到最近一次真实 end-to-end 证明
 - 你可以看到当前主线任务和剩余 gap
 
-它还不是一个交互式控制台，也不是自动调度器。
+它还不是一个新的交互式控制台，也不是自动调度器。
 
 ## 审计结论
 
 一期已经达到完整的 `phase done`。
 
-更准确地说：
+更准确地说，一期已经具备下面三类稳定事实：
 
-- `体验版本完成`：是。
-- `一期完全收口`：是。
-
-原因很直接：最后一层“用户可见入口 + phase 级裁决”已经由 `dd-hermes-demo-entry-v1` 收口并合入 `main`，而后续 phase-2 主线也已经能在不破坏一期入口的前提下持续推进。
-
-## 已经完成的事实
-
-1. `dd-hermes-execution-bootstrap` 已归档。
-2. `dd-hermes-endpoint-router-v1` 已完成追溯回填。
-3. `dd-hermes-multi-agent-dispatch` 已完成主线收口。
-4. `dd-hermes-experience-demo-v1` 已经真实跑通：
-   - 有 execution commit
-   - 有 integration commit
-   - 有 archive
-   - 有 task memory
-   - 证明了一次真实的 end-to-end 体验闭环已经成立
-5. `dd-hermes-demo-entry-v1` 已经完成：
-   - 有 execution commit
-   - 有 integration commit
-   - 有 archive
-   - 把体验版真相收成了 `./scripts/demo-entry.sh` 和本页这类单一入口
-6. `dd-hermes-independent-quality-seat-v1` 已经完成并归档：
-   - 有 semantic closeout
-   - 有 degraded ack 和 quality review 证据
-   - 有 archive
-   - 证明了 phase-2 可以先产出 bounded proof，再把后续规则问题切到新主线
-
-所以，DD Hermes 不是“快有体验版”，而是“一期体验版本已经收口完成”。
-
-## 为什么现在算 `phase done`
-
-### 1. 单一用户可见入口已经建立
-
-现在已经有：
-
-- `./scripts/demo-entry.sh`
-- `指挥文档/06-一期PhaseDone审计.md`
-- `openspec/archive/dd-hermes-demo-entry-v1.md`
-
-这说明体验版不仅存在，而且已经有了单一入口和对应的主线收口证据。
-
-### 2. phase 级裁决已经固定成仓库事实
-
-本页 frontmatter 和正文现在明确固定：
-
-- 一期已到 `phase done`
-- 最新证明任务是 `dd-hermes-independent-quality-seat-v1`
-- 下一条主线不再属于一期，而是已经定义好的 `phase-2` 主线
-
-### 3. 历史体验任务已经收口为单一入口
-
-`dd-hermes-demo-entry-v1` 这条任务原本负责把“一次真实演示闭环”变成用户可见入口。
-
-它现在已经完成了自己的职责：
-
-- 历史任务说明已并入本页
-- 当前体验入口脚本直接以本页和 archive 为事实源
-- 用户不需要再分别翻 `路线图 + 入口任务说明 + phase 审计` 三页才能看懂当前状态
-
-## 关于 `独立 Skeptic` 的裁决
-
-当前裁决是：
-
-- `独立 Skeptic` 不应成为所有任务的全局默认。
-- 但它应成为高风险任务的默认：
-  - 架构
-  - 控制面
-  - 状态机
-  - 线程模型
-  - 权限 / 安全边界
-  - 容易误判完成态的任务
-
-低风险、小边界、只读或局部实现切片，仍然可以使用：
-
-- 单线程
-- `Lead + Executor`
-
-只要仓库明确暴露：
-
-- 当前是不是 `independent_skeptic`
-- 若不是，是否 `degraded`
-
-这和 `AGENTS.md` 里的策略矩阵是一致的。
+1. 单一入口已经建立
+   - `./scripts/demo-entry.sh`
+   - `指挥文档/06-一期PhaseDone审计.md`
+2. 项目级协议已经落盘
+   - `AGENTS.md`
+   - `docs/context-runtime-state-memory.md`
+   - `docs/coordination-endpoints.md`
+   - `docs/artifact-schemas.md`
+   - `docs/git-management.md`
+3. phase-2 已经可以在不破坏一期入口的前提下继续推进
+   - 最近归档 proof task：`dd-hermes-independent-quality-seat-v1`
+   - 当前 active mainline：`dd-hermes-quality-seat-escalation-rules-v1`
 
 ## 你现在能用到什么
 
 - `./scripts/demo-entry.sh`
-  - 只读查看当前一期状态、最近一次证明和下一条主线
-- `openspec/archive/dd-hermes-independent-quality-seat-v1.md`
-  - 查看最近一次 phase-2 proof task 的完整证据
-- `指挥文档/08-恒定锚点策略.md`
-  - 查看 phase-2 当前主线到底在补什么
+  - 只读查看当前状态、最近 proof、当前 mainline 和锚点真相
+- `workspace/contracts/<task_id>.md`
+  - 查看当前 mainline 的产品边界和验收范围
+- `workspace/state/<task_id>/state.json`
+  - 查看当前 mainline 的最新控制面真相
+- `workspace/handoffs/` 与 `workspace/closeouts/`
+  - 查看最近一个 execution slice 到底做到哪
 
-## 一期已完成，不代表 phase-2 已开工
+## 当前 phase-2 处于什么位置
 
-当前最重要的事实不是“一期还能不能用”，而是：
+- 最近归档 proof task：`dd-hermes-independent-quality-seat-v1`
+- 当前 active mainline：`dd-hermes-quality-seat-escalation-rules-v1`
+- 当前主线已经完成第一条 execution slice
+- 当前未完成的不是“开始写”，而是“archive 还是继续更窄的下一条 slice”
 
-- 一期已经能用
-- `dd-hermes-independent-quality-seat-v1` 已经完成 proof 并归档
-- phase-2 主线已经切换到 `dd-hermes-quality-seat-escalation-rules-v1`
-- 新主线现在处于 planning 收口阶段，还没有进入第一条 execution slice
+## 一期为什么现在算 `phase done`
 
-## 剩余 gap
+### 1. 用户可见入口已经稳定
+
+- 入口脚本在 `main`
+- 中文入口页在 `main`
+- 不再依赖某条聊天历史解释“现在是什么状态”
+
+### 2. 协议层已经稳定到可继续派发
+
+- `contract + state + context + handoff + worktree` 已经形成稳定协作面
+- `dispatch-create`、`thread-switch-gate`、`quality-gate`、`check-artifact-schemas` 已形成闭环
+- `tests/smoke.sh all` 能回归验证核心流程
+
+### 3. phase-2 可以在一期基线之上继续，而不是重开一期
+
+- 最近 proof 已归档
+- 当前 mainline 已有第一条 execution slice
+- 一期本身不需要再返工
+
+## 当前剩余 gap
 
 - 一期无剩余 blocker。
-- 剩余 gap 全部属于 phase-2：
-  - 把 DD Hermes 任务类的升级规则压成第一条真正可执行的实现边界
-  - 决定 `independent_skeptic=false` 的 degraded 现实在哪些任务类型上必须升级为独立质量位
+- 当前剩余 gap 全部属于 phase-2：
+  - `dd-hermes-quality-seat-escalation-rules-v1` 要决定 archive 还是继续下一条更窄的 override slice
+  - 还没有把“哪些 `T2` bounded slice 必须升级为 `requires-independent`”压成新的 task-bound 边界
 
-## 下一条唯一主线任务
+## 当前线程应该去哪里继续看
 
-下一条唯一主线已经定义为 `dd-hermes-quality-seat-escalation-rules-v1`。
-
-当前正确表述是：
-
-- 一期已经收口。
-- 下一步不是继续补一期，而是把 phase-2 的独立质量位做成真实主线。
-- 重点仍然不是“多开几个 agent”，而是让两个恒定锚点成为任务推进的硬约束。
-- `dd-hermes-independent-quality-seat-v1` 已经证明 `dispatch-create` / `thread-switch-gate` / `quality-gate` / `state-read` / `context-build` 能统一表达 `quality seat` 真相。
-- 当前新主线要解决的不是“如何显示 seat”，而是“何时 degraded 还算合法”。
-
-## 审计后的线程策略
-
-- 这个线程继续作为唯一主线程。
-- 默认仍然是单线程角色切换 + 按需隔离 worktree。
-- 不开第二个并跑主线线程。
-- 下一步先把 `dd-hermes-quality-seat-escalation-rules-v1` 的 planning 包和 accepted path 固定下来，再决定第一条 execution slice 是否需要独立 worktree。
+- 如果只是判断“现在能不能用”，停在本页即可。
+- 如果要继续开发，直接转到 `04-任务重校准与线程策略.md`。
