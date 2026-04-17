@@ -244,6 +244,22 @@ EOF
   assert_json_field "$degraded_ready" "data['quality_seat_mode'] == 'degraded' and data['quality_seat_ready'] is True and data['quality_seat_status'] == 'ready'"
   assert_json_field "$degraded_ready" "data['skeptic_lane_status'] == 'not-required' and data['skeptic_lane_ready'] is True and data['skeptic_lane_reasons'] == []"
   assert_json_field "$degraded_ready" "'supervisor_skeptic_overlap:lead' in data['role_conflicts'] and 'independent_skeptic_unavailable' in data['scale_out_triggers']"
+
+  "$ROOT/scripts/sprint-init.sh" --task-id dispatch-failure-sprint --owner lead --experts expert-a,expert-c >/dev/null
+  "$ROOT/scripts/state-update.sh" --task-id dispatch-failure-sprint <<'EOF' >/dev/null
+{"supervisors":["lead"],"executors":["expert-a"],"skeptics":["expert-c"],"quality_anchors":["expert-c"],"note":"dispatch materialization failure fixture"}
+EOF
+  git -C "$ROOT" branch dispatch-failure-sprint-expert-a HEAD >/dev/null
+
+  local materialization_blocked
+  set +e
+  materialization_blocked=$("$ROOT/scripts/dispatch-create.sh" --task-id dispatch-failure-sprint)
+  status=$?
+  set -e
+  [[ $status -eq 2 ]]
+  assert_json_field "$materialization_blocked" "data['blocked'] is True and data['stage'] == 'worktree_create' and data['role'] == 'executor' and data['agent_id'] == 'expert-a'"
+  assert_json_field "$materialization_blocked" "data['quality_seat_status'] == 'ready' and data['task_class'] == 'T2' and data['quality_requirement'] == 'degraded-allowed'"
+  assert_json_field "$materialization_blocked" "data['child_exit_code'] != 0 and any('dispatch-failure-sprint' in item for item in data['suggested_next_commands'])"
 }
 
 run_git_management() {
