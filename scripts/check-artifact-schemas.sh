@@ -32,7 +32,7 @@ checked = []
 script_dir = (repo / "scripts").resolve()
 sys.path.insert(0, str(script_dir))
 
-from artifact_semantics import closeout_semantic_analysis, closeout_verdict, parse_frontmatter
+from artifact_semantics import closeout_semantic_analysis, closeout_verdict, parse_frontmatter, skeptic_lane_verdict
 
 
 def check_markdown(path, required_frontmatter, required_sections, label):
@@ -144,6 +144,13 @@ else:
         errors.append(f"state.team.role_integrity missing keys {missing_integrity}: {state_path}")
     if int(state.get("state_version", 1) or 1) >= 2:
         verdicts = state.get("verdicts", {}) if isinstance(state.get("verdicts"), dict) else {}
+        if "skeptic_lane" not in verdicts:
+            verdicts["skeptic_lane"] = skeptic_lane_verdict(
+                repo,
+                task_id,
+                state=state,
+                updated_at=state.get("updated_at", ""),
+            )
         required_verdicts = (
             "updated_at",
             "task_policy",
@@ -153,6 +160,7 @@ else:
             "degraded_ack",
             "quality_seat_execution",
             "quality_seat_completion",
+            "skeptic_lane",
             "execution_closeout",
         )
         missing_verdicts = [key for key in required_verdicts if key not in verdicts]
@@ -178,7 +186,7 @@ else:
         if missing_quality:
             errors.append(f"state.quality missing keys {missing_quality}: {state_path}")
         required_verdict_entry = ("status", "ready", "reasons", "updated_at")
-        for verdict_key in ("task_policy", "product_gate", "quality_anchor", "quality_review", "degraded_ack", "quality_seat_execution", "quality_seat_completion", "execution_closeout"):
+        for verdict_key in ("task_policy", "product_gate", "quality_anchor", "quality_review", "degraded_ack", "quality_seat_execution", "quality_seat_completion", "skeptic_lane", "execution_closeout"):
             verdict = verdicts.get(verdict_key, {}) if isinstance(verdicts.get(verdict_key), dict) else {}
             missing_verdict_entry = [key for key in required_verdict_entry if key not in verdict]
             if missing_verdict_entry:
@@ -204,17 +212,20 @@ if state is not None:
         state=state,
         updated_at=state.get("updated_at", ""),
     )
-    closeout_semantics = [
-        {
-            "path": item["path"],
-            **closeout_semantic_analysis(
-                parse_frontmatter(Path(item["path"]).read_text(encoding="utf-8")),
-                Path(item["path"]).read_text(encoding="utf-8"),
-                state,
-            ),
-        }
-        for item in closeout_semantics
-    ]
+    if execution_closeout.get("status") == "not-required":
+        closeout_semantics = []
+    else:
+        closeout_semantics = [
+            {
+                "path": item["path"],
+                **closeout_semantic_analysis(
+                    parse_frontmatter(Path(item["path"]).read_text(encoding="utf-8")),
+                    Path(item["path"]).read_text(encoding="utf-8"),
+                    state,
+                ),
+            }
+            for item in closeout_semantics
+        ]
 for item in closeout_semantics:
     for reason in item.get("reasons", []):
         semantic_errors.append(f"{reason}: {item['path']}")

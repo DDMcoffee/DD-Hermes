@@ -55,6 +55,7 @@ state_path = context_wrapper["state_path"]
 from team_governance import (
     governance_snapshot,
 )
+from artifact_semantics import lane_artifact_paths, skeptic_lane_verdict
 
 
 def handoff_for(agent_id):
@@ -73,6 +74,93 @@ def run_json(cmd):
         check=True,
     )
     return json.loads(proc.stdout)
+
+
+def ensure_handoff(agent_id, role):
+    path = repo / "workspace" / "handoffs" / f"{task_id}-lead-to-{agent_id}.md"
+    if path.exists():
+        return str(path)
+
+    role_scope = "skeptic review lane" if role == "skeptic" else f"{role} lane"
+    outcome = (
+        "A maintainer can see that skeptical review is running in its own lane with explicit artifacts."
+        if role == "skeptic"
+        else f"A maintainer can see the {role} lane is explicitly materialized."
+    )
+    body = f"""---
+schema_version: 2
+from: lead
+to: {agent_id}
+scope: {task_id} {role_scope}
+product_rationale: Keep {task_id} tied to the declared product goal while materializing a real {role} lane.
+goal_drift_risk: This slice could drift into generic orchestration cleanup if it stops improving task-bound traceability.
+user_visible_outcome: {outcome}
+files:
+  - workspace/contracts/{task_id}.md
+  - workspace/state/{task_id}/state.json
+decisions:
+  - Follow the existing contract, state, and gate surfaces.
+  - Keep the separate lane internal to DD Hermes instead of exposing a new user-facing thread.
+risks:
+  - Do not overclaim independent review before its artifacts are materialized.
+  - Keep degraded fallback explicit when the lane is not available.
+next_checks:
+  - Run context-build for this lane.
+  - Verify dispatch, gate, and state surfaces expose the lane truth.
+---
+
+# Lead Handoff
+
+## Context
+
+This handoff materializes the `{role}` lane for `{task_id}`. Reuse the existing control-plane surfaces and keep the slice bounded to traceable task artifacts.
+
+## Required Fields
+
+- `from`
+- `to`
+- `scope`
+- `product_rationale`
+- `goal_drift_risk`
+- `user_visible_outcome`
+- `files`
+- `decisions`
+- `risks`
+- `next_checks`
+
+## Acceptance
+
+- The `{role}` lane has its own handoff, context packet, and worktree truth where applicable.
+
+## Product Check
+
+- Confirm the lane still serves the declared product goal and does not expand into runtime/provider redesign.
+
+## Verification
+
+- Include the dispatch result, the lane-specific context path, and the gate result.
+
+## Open Questions
+
+- None for this materialized lane.
+"""
+    path.write_text(body, encoding="utf-8")
+    return str(path)
+
+
+def build_context(agent_role, agent_id="", worktree_path=""):
+    cmd = [
+        str(script_dir / "context-build.sh"),
+        "--task-id",
+        task_id,
+        "--agent-role",
+        agent_role,
+    ]
+    if agent_id:
+        cmd.extend(["--agent-id", agent_id])
+    if worktree_path:
+        cmd.extend(["--worktree", worktree_path])
+    return run_json(cmd)
 
 
 team = state.get("team", {}) if isinstance(state.get("team"), dict) else {}
@@ -193,6 +281,7 @@ for agent_id in executors:
         branch = created["branch"]
         status = "created"
         created_worktrees.append(str(expected_worktree))
+    executor_context = build_context("executor", agent_id=agent_id, worktree_path=str(expected_worktree))
     assignments.append({
         "agent_id": agent_id,
         "role": "executor",
@@ -205,38 +294,73 @@ for agent_id in executors:
         "artifacts": {
             "contract_path": state.get("contract_path", ""),
             "state_path": state_path,
-            "context_path": context_path,
-            "runtime_path": runtime_path,
+            "context_path": executor_context["context_path"],
+            "runtime_path": executor_context["runtime_path"],
         },
         "next_commands": [
             f"cd {shlex.quote(str(expected_worktree))}",
             "git status --short",
-            f"./scripts/context-build.sh --task-id {task_id} --agent-role executor --worktree {shlex.quote(str(expected_worktree))}",
+            f"./scripts/context-build.sh --task-id {task_id} --agent-role executor --agent-id {agent_id} --worktree {shlex.quote(str(expected_worktree))}",
         ],
     })
 
 for agent_id in skeptics:
+    skeptic_independent = role_integrity["independent_skeptic"] and agent_id not in executors and agent_id not in supervisors
+    skeptic_worktree = repo / ".worktrees" / f"{task_id}-{agent_id}"
+    skeptic_branch = f"{task_id}-{agent_id}"
+    skeptic_status = "ready"
+    skeptic_handoff = ""
+    skeptic_context_path = context_path
+    skeptic_runtime_path = runtime_path
+    skeptic_next_commands = [
+        f"cd {shlex.quote(str(repo))}",
+        f"./scripts/context-build.sh --task-id {task_id} --agent-role skeptic",
+        f"./scripts/state-read.sh --task-id {task_id}",
+    ]
+    if skeptic_independent:
+        skeptic_handoff = ensure_handoff(agent_id, "skeptic")
+        if skeptic_worktree.exists():
+            existing_worktrees.append(str(skeptic_worktree))
+            skeptic_status = "existing"
+        else:
+            created = run_json([str(script_dir / "worktree-create.sh"), "--task-id", task_id, "--expert", agent_id])
+            skeptic_worktree = Path(created["worktree_path"]).resolve()
+            skeptic_branch = created["branch"]
+            skeptic_status = "created"
+            created_worktrees.append(str(skeptic_worktree))
+        skeptic_context = build_context("skeptic", agent_id=agent_id, worktree_path=str(skeptic_worktree))
+        skeptic_context_path = skeptic_context["context_path"]
+        skeptic_runtime_path = skeptic_context["runtime_path"]
+        skeptic_next_commands = [
+            f"cd {shlex.quote(str(skeptic_worktree))}",
+            "git status --short",
+            f"./scripts/context-build.sh --task-id {task_id} --agent-role skeptic --agent-id {agent_id} --worktree {shlex.quote(str(skeptic_worktree))}",
+            f"./scripts/state-read.sh --task-id {task_id}",
+        ]
     assignments.append({
         "agent_id": agent_id,
         "role": "skeptic",
         "anchor_role": "quality_anchor" if agent_id in quality_anchors else "",
-        "status": "ready",
-        "worktree_required": False,
-        "worktree_path": "",
-        "branch": "",
-        "handoff_path": "",
+        "status": skeptic_status,
+        "worktree_required": skeptic_independent,
+        "worktree_path": str(skeptic_worktree) if skeptic_independent else "",
+        "branch": skeptic_branch if skeptic_independent else "",
+        "handoff_path": skeptic_handoff,
         "artifacts": {
             "contract_path": state.get("contract_path", ""),
             "state_path": state_path,
-            "context_path": context_path,
-            "runtime_path": runtime_path,
+            "context_path": skeptic_context_path,
+            "runtime_path": skeptic_runtime_path,
         },
-        "next_commands": [
-            f"cd {shlex.quote(str(repo))}",
-            f"./scripts/context-build.sh --task-id {task_id} --agent-role skeptic",
-            f"./scripts/state-read.sh --task-id {task_id}",
-        ],
+        "next_commands": skeptic_next_commands,
     })
+
+skeptic_lane = skeptic_lane_verdict(
+    repo,
+    task_id,
+    state=state,
+    updated_at=state.get("updated_at", ""),
+)
 
 print(json.dumps({
     "task_id": task_id,
@@ -281,6 +405,9 @@ print(json.dumps({
     "quality_seat_ready": quality_seat["execution_ready"],
     "quality_seat_status": quality_seat["execution_status"],
     "quality_seat_reasons": quality_seat["execution_reasons"],
+    "skeptic_lane_ready": skeptic_lane["ready"],
+    "skeptic_lane_status": skeptic_lane["status"],
+    "skeptic_lane_reasons": skeptic_lane["reasons"],
     "task_class": task_policy["task_class"],
     "task_class_bucket": task_policy["bucket"],
     "quality_requirement": task_policy["quality_requirement"],
@@ -301,6 +428,8 @@ print(json.dumps({
         "quality_seat_mode": quality_seat["mode"],
         "quality_seat_ready": quality_seat["execution_ready"],
         "quality_seat_status": quality_seat["execution_status"],
+        "skeptic_lane_ready": skeptic_lane["ready"],
+        "skeptic_lane_status": skeptic_lane["status"],
     },
     "created_worktrees": created_worktrees,
     "existing_worktrees": existing_worktrees,

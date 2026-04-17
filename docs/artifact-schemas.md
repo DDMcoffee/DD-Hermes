@@ -137,7 +137,10 @@
   - `degraded_ack`
   - `quality_seat_execution`
   - `quality_seat_completion`
+  - `skeptic_lane`
   - `execution_closeout`
+- 兼容说明：
+  - 旧 state 若还没回填 `skeptic_lane`，`state-read / context-build / check-artifact-schemas` 应现场派生该 verdict，而不是把历史 archive 全部打坏。
 - Required per-verdict keys:
   - `status`
   - `ready`
@@ -151,6 +154,7 @@
   - `ready_for_execution_slice_done`
   - `execution_commit`
   - `quality_review_status`
+  - `status` 允许 `ready` / `blocked` / `not-required`
 
 ## 4) Execution Closeout
 
@@ -178,6 +182,11 @@
   - `verified_files` 不能为空，且不能停留在模板占位值
   - `quality_review_status` 必须是 `approved` 或 `degraded-approved`
   - `quality_findings_summary` 必须是真实复核摘要，不是占位句
+- 若 `task_class_bucket == no-execution`（`T0/T1`）：
+  - `execution_closeout.status` 应为 `not-required`
+  - `execution_closeout.ready` 应为 `true`
+  - `ready_for_execution_slice_done` 应为 `true`
+  - 即使存在 bootstrap 占位 closeout 文件，也不应继续把 archive truth 判成 blocked
 - Sections required:
   - `## Context`
   - `## Required Fields`
@@ -215,6 +224,7 @@
   - `quality_review_gate_status`
   - `degraded_ack_status`
   - `quality_seat_mode`, `quality_seat_status`, `quality_seat_reasons`
+  - `skeptic_lane_status`, `skeptic_lane_ready`, `skeptic_lane_reasons`
   - `execution_closeout_status`, `execution_closeout_ready`, `execution_closeout_reasons`, `execution_closeout_path`
   - `ready_for_execution_slice_done`
   - `independent_skeptic`, `role_integrity_degraded`, `degraded_ack_required`, `degraded_ack_ready`, `role_conflicts`
@@ -258,4 +268,5 @@
 
 - `scripts/check-artifact-schemas.sh --task-id <task_id>` 是字段校验入口。
 - 该入口同时返回 `semantic_valid` 与 `ready_for_execution_slice_done`，用于区分“结构完整”与“真的可以宣称 execution slice done”。
+- 对 `T0/T1` 这类 `no-execution` 任务，`execution_closeout` 应显式返回 `not-required`，而不是伪造一个 blocked closeout。
 - `scripts/test-artifact-schemas.sh` 与 `tests/smoke.sh schema` 都应覆盖该入口。

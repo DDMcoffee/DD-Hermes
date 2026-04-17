@@ -204,10 +204,12 @@ EOF
   dispatch=$("$ROOT/scripts/dispatch-create.sh" --task-id smoke-sprint)
   assert_json_field "$dispatch" "data['task_id'] == 'smoke-sprint' and data['summary']['supervisor_count'] >= 1 and data['summary']['executor_count'] >= 2 and data['summary']['skeptic_count'] >= 1"
   assert_json_field "$dispatch" "len([item for item in data['assignments'] if item['role'] == 'supervisor']) >= 1 and len([item for item in data['assignments'] if item['role'] == 'executor']) >= 2 and len([item for item in data['assignments'] if item['role'] == 'skeptic']) >= 1"
-  assert_json_field "$dispatch" "all(item['next_commands'] for item in data['assignments']) and all(item['artifacts']['context_path'].endswith('context.json') for item in data['assignments'])"
+  assert_json_field "$dispatch" "all(item['next_commands'] for item in data['assignments']) and all(item['artifacts']['context_path'].endswith('.json') and item['artifacts']['runtime_path'].endswith('.json') for item in data['assignments'])"
   assert_json_field "$dispatch" "all(item['handoff_path'].endswith('.md') for item in data['assignments'] if item['role'] == 'executor') and any(item['status'] in ('created', 'existing') for item in data['assignments'] if item['role'] == 'executor')"
+  assert_json_field "$dispatch" "all(item['worktree_required'] is True and item['handoff_path'].endswith('.md') and item['worktree_path'].endswith('smoke-sprint-' + item['agent_id']) and item['artifacts']['context_path'].endswith('context-skeptic-' + item['agent_id'] + '.json') and item['artifacts']['runtime_path'].endswith('runtime-skeptic-' + item['agent_id'] + '.json') and item['status'] in ('created', 'existing') for item in data['assignments'] if item['role'] == 'skeptic')"
   assert_json_field "$dispatch" "data['independent_skeptic'] is True and data['degraded'] is False and data['role_conflicts'] == []"
   assert_json_field "$dispatch" "data['quality_seat_mode'] == 'independent' and data['quality_seat_ready'] is True and data['quality_seat_status'] == 'ready'"
+  assert_json_field "$dispatch" "data['skeptic_lane_status'] == 'ready' and data['skeptic_lane_ready'] is True and data['skeptic_lane_reasons'] == []"
   assert_json_field "$dispatch" "data['task_class'] == 'T2' and data['quality_requirement'] == 'degraded-allowed'"
   assert_json_field "$dispatch" "data['anchors']['product_goal'] != '' and len(data['anchors']['product_anchors']) >= 1 and len(data['anchors']['quality_anchors']) >= 1"
   assert_json_field "$dispatch" "data['anchors']['product_gate_ready'] is True and data['anchors']['quality_anchor_ready'] is True"
@@ -240,6 +242,7 @@ EOF
   degraded_ready=$("$ROOT/scripts/dispatch-create.sh" --task-id smoke-sprint)
   assert_json_field "$degraded_ready" "data['independent_skeptic'] is False and data['degraded'] is True and data['degraded_ack_ready'] is True"
   assert_json_field "$degraded_ready" "data['quality_seat_mode'] == 'degraded' and data['quality_seat_ready'] is True and data['quality_seat_status'] == 'ready'"
+  assert_json_field "$degraded_ready" "data['skeptic_lane_status'] == 'not-required' and data['skeptic_lane_ready'] is True and data['skeptic_lane_reasons'] == []"
   assert_json_field "$degraded_ready" "'supervisor_skeptic_overlap:lead' in data['role_conflicts'] and 'independent_skeptic_unavailable' in data['scale_out_triggers']"
 }
 
@@ -474,7 +477,9 @@ EOF
   "$ROOT/scripts/state-update.sh" --task-id architecture-sprint <<'EOF' >/dev/null
 {"skeptics":["expert-c"],"quality_anchors":["expert-c"],"degraded_ack_by":"","degraded_ack_at":"","note":"architecture independent skeptic fixture"}
 EOF
-  "$ROOT/scripts/dispatch-create.sh" --task-id architecture-sprint >/dev/null
+  local architecture_dispatch_ready
+  architecture_dispatch_ready=$("$ROOT/scripts/dispatch-create.sh" --task-id architecture-sprint)
+  assert_json_field "$architecture_dispatch_ready" "data['skeptic_lane_status'] == 'ready' and data['skeptic_lane_ready'] is True"
   local architecture_gate_pass
   architecture_gate_pass=$("$ROOT/hooks/thread-switch-gate.sh" --task-id architecture-sprint --target execution)
   assert_json_field "$architecture_gate_pass" "data['pass'] is True"
@@ -611,7 +616,7 @@ for line in match.group(1).splitlines():
     elif line.startswith("current_gap_1:"):
         lines.append("current_gap_1: 最近一个 phase-2 proof 已归档；当前还没有新的 active mainline。")
     elif line.startswith("current_gap_2:"):
-        lines.append("current_gap_2: 下一步需要在新 task id 下定义 successor mainline，而不是重开 `dd-hermes-quality-seat-escalation-rules-v1`。")
+        lines.append("current_gap_2: 下一步需要在新 task id 下定义 successor mainline，而不是把任何已归档 proof 重新当成 active mainline。")
     else:
         lines.append(line)
 updated = "---\n" + "\n".join(lines) + "\n---\n" + text[match.end():]
@@ -722,10 +727,10 @@ for key in ("anchor", "goal", "user_value", "task_class", "quality_requirement",
 for key in ("anchor", "review_status", "review_findings", "review_examples", "last_review_at"):
     if key not in state["quality"]:
         fail(f"state.quality missing key: {key}")
-for key in ("updated_at", "task_policy", "product_gate", "quality_anchor", "quality_review", "degraded_ack", "quality_seat_execution", "quality_seat_completion", "execution_closeout"):
+for key in ("updated_at", "task_policy", "product_gate", "quality_anchor", "quality_review", "degraded_ack", "quality_seat_execution", "quality_seat_completion", "skeptic_lane", "execution_closeout"):
     if key not in state["verdicts"]:
         fail(f"state.verdicts missing key: {key}")
-for verdict_key in ("task_policy", "product_gate", "quality_anchor", "quality_review", "degraded_ack", "quality_seat_execution", "quality_seat_completion", "execution_closeout"):
+for verdict_key in ("task_policy", "product_gate", "quality_anchor", "quality_review", "degraded_ack", "quality_seat_execution", "quality_seat_completion", "skeptic_lane", "execution_closeout"):
     verdict = state["verdicts"][verdict_key]
     for key in ("status", "ready", "reasons", "updated_at"):
         if key not in verdict:
@@ -736,6 +741,9 @@ for key in ("task_id", "runtime", "state", "memory", "continuation", "documents"
     if key not in context:
         fail(f"context missing key: {key}")
 for key in ("supervisor_count", "product_anchor_count", "quality_anchor_count", "product_anchor_name", "product_anchor_role", "quality_anchor_name", "quality_anchor_role", "product_goal", "product_goal_status", "task_class", "task_class_bucket", "task_class_rationale", "quality_requirement", "quality_requirement_source", "quality_requirement_ready", "quality_requirement_reasons", "task_policy_status", "manual_escalation_required", "manual_escalation_reasons", "quality_review_status", "scale_out_recommended", "scale_out_triggers", "product_gate_ready", "product_gate_status", "quality_anchor_ready", "quality_anchor_status", "quality_review_ready", "quality_review_gate_status", "degraded_ack_required", "degraded_ack_ready", "degraded_ack_status", "execution_closeout_ready", "execution_closeout_status", "execution_closeout_reasons", "execution_closeout_path", "ready_for_execution_slice_done", "verdicts_updated_at"):
+    if key not in context["context_summary"]:
+        fail(f"context_summary missing key: {key}")
+for key in ("skeptic_lane_ready", "skeptic_lane_status", "skeptic_lane_reasons"):
     if key not in context["context_summary"]:
         fail(f"context_summary missing key: {key}")
 for key in ("independent_skeptic", "role_integrity_degraded", "role_conflicts"):
@@ -774,8 +782,8 @@ subprocess.run(
 )
 
 dispatch = run_json([str(root / "scripts" / "dispatch-create.sh"), "--task-id", "smoke-sprint"])
-require_keys(dispatch, ("task_id", "contract_path", "state_path", "context_path", "runtime_path", "independent_skeptic", "degraded", "degraded_ack_ready", "degraded_ack_status", "role_conflicts", "role_overlap", "task_class", "task_class_bucket", "quality_requirement", "manual_escalation_required", "manual_escalation_reasons", "task_policy_reasons", "task_policy_status", "quality_seat_mode", "quality_seat_ready", "quality_seat_status", "quality_seat_reasons", "scale_out_recommended", "scale_out_triggers", "summary", "assignments"))
-require_keys(dispatch["summary"], ("supervisor_count", "executor_count", "skeptic_count", "assignment_count", "created_worktree_count", "existing_worktree_count", "quality_seat_mode", "quality_seat_ready", "quality_seat_status"))
+require_keys(dispatch, ("task_id", "contract_path", "state_path", "context_path", "runtime_path", "independent_skeptic", "degraded", "degraded_ack_ready", "degraded_ack_status", "role_conflicts", "role_overlap", "task_class", "task_class_bucket", "quality_requirement", "manual_escalation_required", "manual_escalation_reasons", "task_policy_reasons", "task_policy_status", "quality_seat_mode", "quality_seat_ready", "quality_seat_status", "quality_seat_reasons", "skeptic_lane_ready", "skeptic_lane_status", "skeptic_lane_reasons", "scale_out_recommended", "scale_out_triggers", "summary", "assignments"))
+require_keys(dispatch["summary"], ("supervisor_count", "executor_count", "skeptic_count", "assignment_count", "created_worktree_count", "existing_worktree_count", "quality_seat_mode", "quality_seat_ready", "quality_seat_status", "skeptic_lane_ready", "skeptic_lane_status"))
 if dispatch["summary"]["supervisor_count"] < 1 or dispatch["summary"]["executor_count"] < 2 or dispatch["summary"]["skeptic_count"] < 1:
     fail("dispatch summary counts are incomplete")
 if dispatch["independent_skeptic"] is not False or dispatch["degraded"] is not True:
@@ -784,6 +792,8 @@ if dispatch["task_class"] != "T2" or dispatch["quality_requirement"] != "degrade
     fail("dispatch should expose T2 degraded-allowed truth for smoke fixture")
 if dispatch["quality_seat_mode"] != "degraded" or dispatch["quality_seat_ready"] is not True:
     fail("dispatch quality seat should report degraded but ready after explicit degraded ack")
+if dispatch["skeptic_lane_status"] != "not-required" or dispatch["skeptic_lane_ready"] is not True:
+    fail("dispatch should report skeptic lane as not-required for degraded-ready smoke fixture")
 if "supervisor_skeptic_overlap:lead" not in dispatch["role_conflicts"]:
     fail("dispatch role_conflicts missing supervisor skeptic overlap")
 
@@ -794,9 +804,11 @@ if context_build["memory_count"] < 1:
 
 state_read = run_json([str(root / "scripts" / "state-read.sh"), "--task-id", "smoke-sprint"])
 require_keys(state_read, ("state", "summary"))
-require_keys(state_read["summary"], ("verification_complete", "has_context", "has_runtime_report", "has_supervisor", "supervisor_count", "product_anchor_count", "quality_anchor_count", "product_anchor_name", "product_anchor_role", "product_goal_ready", "product_goal_status", "task_class", "task_class_bucket", "quality_requirement", "quality_requirement_ready", "quality_requirement_reasons", "task_policy_status", "manual_escalation_required", "manual_escalation_reasons", "quality_review_status", "product_gate_ready", "product_gate_status", "quality_anchor_ready", "quality_anchor_status", "quality_review_ready", "quality_review_gate_status", "quality_seat_mode", "quality_seat_ready", "quality_seat_status", "quality_seat_reasons", "execution_closeout_ready", "execution_closeout_status", "execution_closeout_reasons", "execution_closeout_path", "ready_for_execution_slice_done", "independent_skeptic", "role_integrity_degraded", "degraded_ack_required", "degraded_ack_ready", "degraded_ack_status", "role_conflicts", "scale_out_recommended", "scale_out_triggers", "verdicts_updated_at", "event_count"))
+require_keys(state_read["summary"], ("verification_complete", "has_context", "has_runtime_report", "has_supervisor", "supervisor_count", "product_anchor_count", "quality_anchor_count", "product_anchor_name", "product_anchor_role", "product_goal_ready", "product_goal_status", "task_class", "task_class_bucket", "quality_requirement", "quality_requirement_ready", "quality_requirement_reasons", "task_policy_status", "manual_escalation_required", "manual_escalation_reasons", "quality_review_status", "product_gate_ready", "product_gate_status", "quality_anchor_ready", "quality_anchor_status", "quality_review_ready", "quality_review_gate_status", "quality_seat_mode", "quality_seat_ready", "quality_seat_status", "quality_seat_reasons", "skeptic_lane_ready", "skeptic_lane_status", "skeptic_lane_reasons", "execution_closeout_ready", "execution_closeout_status", "execution_closeout_reasons", "execution_closeout_path", "ready_for_execution_slice_done", "independent_skeptic", "role_integrity_degraded", "degraded_ack_required", "degraded_ack_ready", "degraded_ack_status", "role_conflicts", "scale_out_recommended", "scale_out_triggers", "verdicts_updated_at", "event_count"))
 if state_read["summary"]["quality_seat_mode"] != "degraded" or state_read["summary"]["quality_seat_status"] != "ready":
     fail("state-read quality seat summary should expose degraded ready truth")
+if state_read["summary"]["skeptic_lane_status"] != "not-required" or state_read["summary"]["skeptic_lane_ready"] is not True:
+    fail("state-read should expose skeptic lane as not-required for degraded-ready smoke fixture")
 if state_read["summary"]["task_class"] != "T2" or state_read["summary"]["quality_requirement"] != "degraded-allowed":
     fail("state-read should expose T2 degraded-allowed truth")
 if state_read["summary"]["task_policy_status"] != "ready" or state_read["summary"]["product_gate_status"] != "ready":
@@ -817,6 +829,18 @@ for archived_task in ("dd-hermes-anchor-governance-v1", "dd-hermes-independent-q
     archived_check = run_json([str(root / "scripts" / "check-artifact-schemas.sh"), "--task-id", archived_task])
     if not archived_check["valid"] or not archived_check["semantic_valid"]:
         fail(f"archived task schema regression for {archived_task}: {archived_check}")
+
+for no_execution_task in ("dd-hermes-backlog-truth-hygiene-v1", "dd-hermes-s5-2expert-20260416"):
+    no_execution_state = run_json([str(root / "scripts" / "state-read.sh"), "--task-id", no_execution_task])
+    if no_execution_state["summary"]["task_class_bucket"] != "no-execution":
+        fail(f"{no_execution_task} should stay in the no-execution bucket")
+    if no_execution_state["summary"]["execution_closeout_status"] != "not-required" or no_execution_state["summary"]["ready_for_execution_slice_done"] is not True:
+        fail(f"{no_execution_task} should expose not-required execution_closeout truth")
+    no_execution_check = run_json([str(root / "scripts" / "check-artifact-schemas.sh"), "--task-id", no_execution_task])
+    if not no_execution_check["valid"] or not no_execution_check["semantic_valid"]:
+        fail(f"{no_execution_task} should remain schema-valid after no-execution normalization")
+    if no_execution_check["execution_closeout"]["status"] != "not-required" or not no_execution_check["ready_for_execution_slice_done"]:
+        fail(f"{no_execution_task} should report not-required closeout semantics")
 
 state["git"]["latest_commit"] = "1234567890abcdef1234567890abcdef12345678"
 (root / "workspace" / "state" / "smoke-sprint" / "state.json").write_text(json.dumps(state, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

@@ -1,8 +1,22 @@
 ---
+schema_version: 2
 task_id: dd-hermes-demo-entry-v1
 owner: lead
 experts:
   - expert-a
+product_goal: Give DD Hermes one truthful user-visible entry for the phase-1 experience surface.
+user_value: Let a newcomer or maintainer run one command and immediately see what DD Hermes has already proved, instead of stitching together multiple commander docs by hand.
+task_class: T2
+quality_requirement: degraded-allowed
+task_class_rationale: 用户可见但边界清晰的入口收口任务，涉及少量脚本和文档对齐，允许显式 degraded 监督。
+non_goals:
+  - Do not expand into new runtime services, scheduler recovery, provider integrations, or plugin loading.
+  - Do not turn the entry slice into a new control-plane feature track.
+product_acceptance:
+  - One canonical command reports the current DD Hermes experience status from repo facts.
+  - One canonical Chinese landing page explains the experience surface without forcing the reader into scattered commander docs.
+  - The entry shows the latest proof and current mainline truth honestly.
+drift_risk: This task could drift into generic doc cleanup if it stops serving the single truthful experience-entry outcome.
 acceptance:
   - A single user-visible experience entry exists for DD Hermes phase-1.
   - The entry tells a human what DD Hermes can already do, what the latest end-to-end proof is, and what the next mainline task is.
@@ -44,6 +58,12 @@ Turn the already-proven DD Hermes experience demo into a user-visible entry poin
 - The entry surfaces the latest completed end-to-end proof, including task id and commit anchors.
 - The entry points at the canonical Chinese doc instead of forcing the reader to manually stitch together multiple commander files.
 - The resulting experience remains truthful: it must report readiness from repo facts, not from hand-written claims.
+
+## Product Gate
+
+- The product outcome is one truthful experience entry, not a new control-plane feature.
+- The slice must stay bounded to the canonical command, the landing page, and the minimum doc alignment needed to make them discoverable.
+- If the task stops being a user-visible entry slice, it should be split instead of silently expanded.
 
 ## Verification
 

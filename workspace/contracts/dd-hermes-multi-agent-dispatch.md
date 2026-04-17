@@ -1,8 +1,22 @@
 ---
+schema_version: 2
 task_id: dd-hermes-multi-agent-dispatch
 owner: lead
 experts:
   - expert-a
+product_goal: Materialize runnable supervisor/executor/skeptic assignments from DD Hermes task state.
+user_value: Let a maintainer see real assignment packets and degraded role-integrity truth instead of keeping role division as documentation-only metadata.
+task_class: T2
+quality_requirement: degraded-allowed
+task_class_rationale: 多角色派发切片，但写集集中在 dispatch/governance/smoke 输出层，允许显式 degraded 监督。
+non_goals:
+  - Do not expand into new runtime/provider behavior or multi-thread scheduling.
+  - Do not silently make independent skepticism the default experience without a dedicated follow-up task.
+product_acceptance:
+  - Dispatch materializes supervisor/executor/skeptic assignments from task state.
+  - Role-integrity truth is exposed through `independent_skeptic`, `degraded`, and `role_conflicts`.
+  - Task-bound artifacts capture the integrated dispatch slice under the correct task id.
+drift_risk: This task could drift into general orchestration redesign if it stops focusing on assignment materialization and role-integrity truth.
 acceptance:
   - Dispatch materializes supervisor/executor/skeptic assignments from task state.
   - Role-integrity truth is exposed through `independent_skeptic`, `degraded`, and `role_conflicts`.
@@ -43,6 +57,12 @@ Close `dd-hermes-multi-agent-dispatch` as a task-bound record for the dispatch s
 - Dispatch output exposes degraded role integrity truth when `Skeptic` is not independent.
 - Smoke coverage verifies both independent-skeptic and degraded-skeptic cases.
 - Task-bound handoff, closeout, archive, and state evidence exist for this dispatch slice.
+
+## Product Gate
+
+- The product outcome is runnable dispatch materialization and truthful role-integrity output.
+- This task must not absorb later orchestration or scheduler scope.
+- If the slice starts redefining the default quality-seat experience, it belongs in a separate follow-up task.
 
 ## Verification
 

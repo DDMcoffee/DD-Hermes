@@ -1,8 +1,22 @@
 ---
+schema_version: 2
 task_id: dd-hermes-experience-demo-v1
 owner: lead
 experts:
   - expert-a
+product_goal: Prove the first real DD Hermes experience slice by auto-routing architecture work into discussion synthesis and enforcing execution gating from that synthesis.
+user_value: Let a maintainer trust that architecture-flavored tasks will not jump straight into execution without an explicit synthesis boundary.
+task_class: T3
+quality_requirement: requires-independent
+task_class_rationale: 讨论策略和线程门卫属于控制面与架构边界任务，默认要求独立质量位。
+non_goals:
+  - Do not add new runtime services, scheduler work, provider integration, or unrelated endpoint/dispatch expansion.
+  - Do not turn heuristic routing into a broad metadata system in this slice.
+product_acceptance:
+  - Architecture-oriented tasks auto-initialize into `3-explorer-then-execute`.
+  - Delivery-only tasks still initialize into `direct`.
+  - Execution thread switching is blocked until a real synthesis boundary exists.
+drift_risk: This task could drift into broad workflow redesign if it stops targeting discussion-policy routing and thread-gate enforcement specifically.
 acceptance:
   - Architecture-oriented tasks are automatically initialized with `discussion.policy = 3-explorer-then-execute`.
   - Delivery-oriented tasks still default to `discussion.policy = direct`.
@@ -44,6 +58,12 @@ Run the first real DD Hermes experience demo task by tightening how task initial
 - Delivery-only tasks still initialize into `direct`.
 - Execution thread switching is blocked until the synthesis file exists and contains a concrete accepted path plus execution boundary.
 - The task can be demonstrated through the normal DD Hermes flow: task artifacts, worktree execution, verification, integration, archive.
+
+## Product Gate
+
+- The product outcome is a real experience proof for discussion-policy routing and execution gating.
+- This slice must remain inside architecture-task routing and gate enforcement, not expand into unrelated workflow redesign.
+- Because the task changes control-plane entry conditions, independent quality review is mandatory.
 
 ## Verification
 

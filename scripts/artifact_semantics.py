@@ -97,6 +97,127 @@ def _merge_reasons(*groups):
     return merged
 
 
+def lane_slug(agent_role: str = "", agent_id: str = "") -> str:
+    role = _clean_text(agent_role)
+    agent = _clean_text(agent_id)
+    if not role or role == "commander":
+        return ""
+    return f"{role}-{agent}" if agent else role
+
+
+def lane_artifact_paths(repo_root, task_id: str, *, agent_role: str = "", agent_id: str = "") -> dict:
+    repo_root = Path(repo_root).resolve()
+    task_id = _clean_text(task_id)
+    state_dir = repo_root / "workspace" / "state" / task_id
+    slug = lane_slug(agent_role, agent_id)
+    if slug:
+        return {
+            "context_path": state_dir / f"context-{slug}.json",
+            "runtime_path": state_dir / f"runtime-{slug}.json",
+            "slug": slug,
+        }
+    return {
+        "context_path": state_dir / "context.json",
+        "runtime_path": state_dir / "runtime.json",
+        "slug": "",
+    }
+
+
+def skeptic_lane_verdict(repo_root, task_id: str, *, state: dict | None = None, updated_at: str = "") -> dict:
+    repo_root = Path(repo_root).resolve()
+    task_id = _clean_text(task_id)
+    state = state if isinstance(state, dict) else {}
+    updated_at = _clean_text(updated_at) or _clean_text(state.get("updated_at", ""))
+
+    task_policy = {}
+    role_integrity = {}
+    skeptics = []
+    try:
+        from team_governance import governance_snapshot
+
+        governance = governance_snapshot(state)
+        task_policy = governance.get("task_policy", {})
+        role_integrity = governance.get("role_integrity", {})
+        skeptics = governance.get("skeptics", [])
+    except Exception:
+        task_policy = {}
+        role_integrity = {}
+        skeptics = []
+
+    requires_independent = bool(task_policy.get("requires_independent", False))
+    independent_skeptic = bool(role_integrity.get("independent_skeptic", False))
+
+    if not requires_independent and not independent_skeptic:
+        return {
+            "status": "not-required",
+            "ready": True,
+            "reasons": [],
+            "updated_at": updated_at,
+            "required": False,
+            "independent_skeptic": False,
+            "lane_count": 0,
+            "ready_lane_count": 0,
+            "lanes": [],
+        }
+
+    if not independent_skeptic:
+        return {
+            "status": "blocked",
+            "ready": False,
+            "reasons": ["independent_skeptic_unavailable"],
+            "updated_at": updated_at,
+            "required": requires_independent,
+            "independent_skeptic": False,
+            "lane_count": 0,
+            "ready_lane_count": 0,
+            "lanes": [],
+        }
+
+    lanes = []
+    reasons = []
+    ready_lane_count = 0
+    for agent_id in _clean_list(skeptics):
+        worktree_path = repo_root / ".worktrees" / f"{task_id}-{agent_id}"
+        handoff_path = repo_root / "workspace" / "handoffs" / f"{task_id}-lead-to-{agent_id}.md"
+        paths = lane_artifact_paths(repo_root, task_id, agent_role="skeptic", agent_id=agent_id)
+        lane_reasons = []
+        if not handoff_path.exists():
+            lane_reasons.append(f"skeptic_handoff_missing:{agent_id}")
+        if not worktree_path.exists():
+            lane_reasons.append(f"skeptic_worktree_missing:{agent_id}")
+        if not paths["context_path"].exists():
+            lane_reasons.append(f"skeptic_context_missing:{agent_id}")
+        if not paths["runtime_path"].exists():
+            lane_reasons.append(f"skeptic_runtime_missing:{agent_id}")
+        if not lane_reasons:
+            ready_lane_count += 1
+        reasons = _merge_reasons(reasons, lane_reasons)
+        lanes.append(
+            {
+                "agent_id": agent_id,
+                "ready": not lane_reasons,
+                "reasons": lane_reasons,
+                "handoff_path": str(handoff_path),
+                "worktree_path": str(worktree_path),
+                "context_path": str(paths["context_path"]),
+                "runtime_path": str(paths["runtime_path"]),
+            }
+        )
+
+    ready = bool(lanes) and not reasons
+    return {
+        "status": "ready" if ready else "blocked",
+        "ready": ready,
+        "reasons": reasons,
+        "updated_at": updated_at,
+        "required": True,
+        "independent_skeptic": True,
+        "lane_count": len(lanes),
+        "ready_lane_count": ready_lane_count,
+        "lanes": lanes,
+    }
+
+
 def closeout_semantic_analysis(frontmatter: dict, text: str = "", state: dict | None = None) -> dict:
     frontmatter = frontmatter if isinstance(frontmatter, dict) else {}
     state = state if isinstance(state, dict) else {}
@@ -157,6 +278,33 @@ def closeout_verdict(repo_root, task_id: str, *, state: dict | None = None, acti
 
     closeout_dir = repo_root / "workspace" / "closeouts"
     candidates = sorted(closeout_dir.glob(f"{task_id}-*.md")) if task_id else []
+
+    task_policy = {}
+    try:
+        from team_governance import task_class_analysis
+
+        task_policy = task_class_analysis(state.get("product", {}))
+    except Exception:
+        task_policy = {}
+
+    if task_policy.get("bucket") == "no-execution":
+        return {
+            "status": "not-required",
+            "ready": True,
+            "reasons": [],
+            "updated_at": updated_at,
+            "closeout_path": "",
+            "selected_by": "task_policy",
+            "candidate_count": len(candidates),
+            "semantic_valid": True,
+            "ready_for_execution_slice_done": True,
+            "execution_commit": "",
+            "quality_review_status": _clean_text((state.get("quality") or {}).get("review_status", "")),
+            "verified_step_count": 0,
+            "verified_file_count": 0,
+            "quality_findings_count": 0,
+        }
+
     closeout_path = ""
     selection_reasons = []
     selected_by = ""

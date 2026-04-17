@@ -35,7 +35,7 @@ events_path = repo / "workspace" / "state" / task_id / "events.jsonl"
 from team_governance import (
     governance_snapshot,
 )
-from artifact_semantics import closeout_verdict
+from artifact_semantics import closeout_verdict, skeptic_lane_verdict
 
 if not state_path.exists():
     print(json.dumps({"error": "state not found", "task_id": task_id}, ensure_ascii=False))
@@ -74,7 +74,14 @@ if execution_closeout is None:
         state=state,
         updated_at=state.get("updated_at", ""),
     )
+skeptic_lane = skeptic_lane_verdict(
+    repo,
+    task_id,
+    state=state,
+    updated_at=state.get("updated_at", ""),
+)
 verdicts["execution_closeout"] = execution_closeout
+verdicts["skeptic_lane"] = skeptic_lane
 summary = {
     "blocked": bool(state.get("blocked_reason")) or state.get("status") == "blocked",
     "paused": state.get("lease", {}).get("status") == "paused",
@@ -141,6 +148,9 @@ summary = {
     "quality_seat_completion_ready": quality_seat["completion_ready"],
     "quality_seat_completion_status": quality_seat["completion_status"],
     "quality_seat_completion_reasons": quality_seat["completion_reasons"],
+    "skeptic_lane_ready": skeptic_lane["ready"],
+    "skeptic_lane_status": skeptic_lane["status"],
+    "skeptic_lane_reasons": skeptic_lane["reasons"],
     "execution_closeout_ready": execution_closeout["ready"],
     "execution_closeout_status": execution_closeout["status"],
     "execution_closeout_reasons": execution_closeout["reasons"],

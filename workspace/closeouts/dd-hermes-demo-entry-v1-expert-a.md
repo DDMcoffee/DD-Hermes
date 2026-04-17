@@ -1,4 +1,5 @@
 ---
+schema_version: 2
 task_id: dd-hermes-demo-entry-v1
 from: expert-a
 to: lead
@@ -22,10 +23,15 @@ verified_files:
   - 指挥文档/04-任务重校准与线程策略.md
   - 指挥文档/06-一期PhaseDone审计.md
   - 指挥文档/07-体验入口任务说明.md
+quality_review_status: degraded-approved
+quality_findings_summary:
+  - Accepted with degraded supervision because this archived phase-1 proof still used `lead` as the fallback skeptic seat.
+  - The later independent-quality-seat proof tightened this gap without invalidating the original demo-entry slice.
 open_risks:
   - The current control plane still reports `independent_skeptic=false` for this task because lead is temporarily doubling as skeptic.
 next_actions:
-  - Fill in the execution commit after `git-commit-task.sh`.
+  - Keep the archive anchored to the execution commit instead of the later integration commit.
+  - Read this proof together with the later independent-quality-seat hardening task when evaluating current default quality posture.
 ---
 
 # Execution Closeout
@@ -46,6 +52,8 @@ Execution closeout for the single-thread user-visible experience entry slice on 
 - `runtime_path`
 - `verified_steps`
 - `verified_files`
+- `quality_review_status`
+- `quality_findings_summary`
 - `open_risks`
 - `next_actions`
 
@@ -58,6 +66,11 @@ Execution closeout for the single-thread user-visible experience entry slice on 
 - `./scripts/spec-first.sh --changed-files AGENTS.md,docs/context-runtime-state-memory.md,scripts/demo-entry.sh,scripts/execution-thread-prompt.sh,README.md,指挥文档/README.md,指挥文档/03-执行线程干到底说明.md,指挥文档/04-任务重校准与线程策略.md,指挥文档/06-一期PhaseDone审计.md,指挥文档/07-体验入口任务说明.md --spec-path openspec/proposals/dd-hermes-demo-entry-v1.md --task-id dd-hermes-demo-entry-v1`
 - `bash -n scripts/demo-entry.sh scripts/execution-thread-prompt.sh`
 - `./scripts/demo-entry.sh`
+
+## Quality Review
+
+- Quality anchor accepted a degraded review for this archived proof because the slice was bounded and fully verified, but `lead` still occupied the skeptic seat.
+- The real finding is governance-related, not code-related: the user-visible entry was correct, while independent quality coverage lagged until a later proof.
 
 ## Open Questions
 

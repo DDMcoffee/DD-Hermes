@@ -92,24 +92,23 @@
   },
   "product": {
     "anchor": "lead",
-    "goal": "Make Product Anchor and Quality Anchor enforce DD Hermes phase-2 task progression through state, dispatch, context, thread gate, and completion gate.",
+    "goal": "Advance DD Hermes through task dd-hermes-anchor-governance-v1 without drifting from the current product focus.",
     "user_value": "Let a DD Hermes maintainer start a phase-2 task and have the system block execution or completion when product intent or quality review is missing.",
     "non_goals": [
-      "Do not create a new runtime, provider, gateway, or scheduler.",
-      "Do not reintroduce multi-thread chat orchestration as the main control model."
+      "Do not expand into unrelated runtime, provider, or gateway work."
     ],
     "product_acceptance": [
-      "Thread-switch and dispatch refuse implementation when product anchor intent is incomplete or drifting.",
+      "Thread-switch and dispatch refuse to enter implementation when product anchor intent is incomplete or drifting.",
       "Quality gate refuses completion when code changed but quality review is still pending.",
       "The phase-2 mainline exists as a task-bound package with contract, state, proposal, handoff, decision synthesis, and verification evidence."
     ],
-    "drift_risk": "This task could drift into generic control-plane cleanup if it stops improving the maintainer-facing phase-2 anchor-governance workflow.",
+    "drift_risk": "This task could drift into generic control-plane cleanup if it stops improving the phase-2 product anchor and quality anchor experience.",
     "task_class": "T2",
     "quality_requirement": "degraded-allowed",
     "task_class_rationale": "This archived proof slice predates the frozen T0-T4 escalation matrix and is preserved as a bounded governance proof task accepted under explicit degraded supervision.",
-    "goal_status": "validated",
+    "goal_status": "defined",
     "goal_drift_flags": [],
-    "last_product_review_at": "2026-04-17T00:10:00Z"
+    "last_product_review_at": "2026-04-17T08:18:51Z"
   },
   "quality": {
     "anchor": "lead",
@@ -156,6 +155,22 @@
     {
       "timestamp": "2026-04-17T00:00:00Z",
       "text": "archived dd-hermes-anchor-governance-v1 after integration evidence and execution closeout were frozen on main",
+      "product_gate_ready": true,
+      "quality_anchor_ready": true,
+      "quality_review_ready": true,
+      "degraded_ack_ready": true
+    },
+    {
+      "timestamp": "2026-04-17T07:57:54Z",
+      "text": "anchor governance initialized",
+      "product_gate_ready": true,
+      "quality_anchor_ready": true,
+      "quality_review_ready": true,
+      "degraded_ack_ready": true
+    },
+    {
+      "timestamp": "2026-04-17T08:18:51Z",
+      "text": "anchor governance initialized",
       "product_gate_ready": true,
       "quality_anchor_ready": true,
       "quality_review_ready": true,
@@ -233,5 +248,92 @@
       "degraded_ack_at": "2026-04-16T17:02:53Z"
     }
   },
-  "updated_at": "2026-04-17T00:00:00Z"
+  "updated_at": "2026-04-17T08:18:51Z",
+  "verdicts": {
+    "updated_at": "2026-04-17T08:18:51Z",
+    "task_policy": {
+      "status": "blocked",
+      "ready": false,
+      "reasons": [
+        "t2_manual_escalation_required:high_risk_mode"
+      ],
+      "updated_at": "2026-04-17T08:18:51Z",
+      "task_class": "T2",
+      "task_class_bucket": "bounded-execution",
+      "quality_requirement": "degraded-allowed",
+      "quality_requirement_source": "task_class_default",
+      "manual_escalation_required": true,
+      "manual_escalation_reasons": [
+        "t2_manual_escalation_required:high_risk_mode"
+      ]
+    },
+    "product_gate": {
+      "status": "ready",
+      "ready": true,
+      "reasons": [],
+      "updated_at": "2026-04-17T08:18:51Z",
+      "anchor": "lead",
+      "goal": "Advance DD Hermes through task dd-hermes-anchor-governance-v1 without drifting from the current product focus.",
+      "goal_status": "defined"
+    },
+    "quality_anchor": {
+      "status": "ready",
+      "ready": true,
+      "reasons": [],
+      "updated_at": "2026-04-17T08:18:51Z",
+      "anchor": "lead"
+    },
+    "quality_review": {
+      "status": "ready",
+      "ready": true,
+      "reasons": [],
+      "updated_at": "2026-04-17T08:18:51Z",
+      "anchor": "lead",
+      "review_status": "degraded-approved",
+      "last_review_at": "2026-04-16T17:02:53Z"
+    },
+    "degraded_ack": {
+      "status": "ready",
+      "ready": true,
+      "reasons": [],
+      "updated_at": "2026-04-17T08:18:51Z",
+      "required": true,
+      "ack_by": "lead",
+      "ack_at": "2026-04-16T17:02:53Z"
+    },
+    "quality_seat_execution": {
+      "status": "blocked",
+      "ready": false,
+      "reasons": [
+        "t2_manual_escalation_required:high_risk_mode"
+      ],
+      "updated_at": "2026-04-17T08:18:51Z",
+      "mode": "degraded"
+    },
+    "quality_seat_completion": {
+      "status": "blocked",
+      "ready": false,
+      "reasons": [
+        "t2_manual_escalation_required:high_risk_mode"
+      ],
+      "updated_at": "2026-04-17T08:18:51Z",
+      "mode": "degraded"
+    },
+    "execution_closeout": {
+      "status": "ready",
+      "ready": true,
+      "reasons": [],
+      "updated_at": "2026-04-17T08:18:51Z",
+      "closeout_path": "/Volumes/Coding/Hermes agent for mine/workspace/closeouts/dd-hermes-anchor-governance-v1-expert-a.md",
+      "selected_by": "single_match",
+      "candidate_count": 1,
+      "semantic_valid": true,
+      "ready_for_execution_slice_done": true,
+      "execution_commit": "6d2f3f5fc9eb9b708f8e97b1df34d82da1325137",
+      "quality_review_status": "degraded-approved",
+      "verified_step_count": 6,
+      "verified_file_count": 15,
+      "quality_findings_count": 3
+    }
+  }
 }

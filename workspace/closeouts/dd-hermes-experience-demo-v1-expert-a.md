@@ -1,4 +1,5 @@
 ---
+schema_version: 2
 task_id: dd-hermes-experience-demo-v1
 from: expert-a
 to: lead
@@ -20,6 +21,10 @@ verified_files:
   - tests/smoke.sh
   - docs/decision-discussion.md
   - README.md
+quality_review_status: approved
+quality_findings_summary:
+  - Independent quality review accepted the experience-demo slice because architecture-task auto-routing and synthesis gating were both explicitly verified.
+  - Heuristic routing remains intentionally narrow and is documented as a follow-up product decision rather than hidden scope creep.
 open_risks:
   - Auto-routing currently infers from `task_id` and `current_focus`, which is intentionally narrow but may need explicit metadata later.
   - The stricter gate will correctly block callers that skip `context-build` or `dispatch-create`; downstream automation must respect that order.
@@ -46,6 +51,8 @@ Execution closeout for the first DD Hermes experience-demo slice, which tightene
 - `runtime_path`
 - `verified_steps`
 - `verified_files`
+- `quality_review_status`
+- `quality_findings_summary`
 - `open_risks`
 - `next_actions`
 
@@ -63,6 +70,11 @@ Execution closeout for the first DD Hermes experience-demo slice, which tightene
 - `./tests/smoke.sh discussion` => pass
 - `./tests/smoke.sh workflow` => pass
 - `./tests/smoke.sh all` => pass
+
+## Quality Review
+
+- Independent quality review accepted this slice because the architecture-task routing rule and the execution gate both had explicit smoke coverage and a real synthesis boundary.
+- The remaining finding is product-facing, not correctness-breaking: heuristic routing should stay narrow until explicit metadata is introduced by a later task.
 
 ## Open Questions
 

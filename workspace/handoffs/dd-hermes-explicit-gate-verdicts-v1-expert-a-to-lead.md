@@ -31,18 +31,18 @@ decisions:
   - Extend the persisted verdict layer to `execution_closeout` so closeout truth stops living only inside `quality-gate`.
   - Keep the slice bounded to shared governance/state/docs/tests and the current mainline task package.
 risks:
-  - Primary worktree still carries dirty copies of many of the same files, so lead integration may be blocked until the main workspace is cleaned or explicitly reconciled.
-  - This handoff closes the execution slice baseline, not the full task archive.
+  - This handoff closes the execution slice baseline, not the full task archive or successor decision.
+  - `state.git.latest_commit` must stay aligned to the execution anchor `b07d0d436624d983a9ee5ee4baf83026a4902d11`, even after the later merge commit lands on `main`.
 next_checks:
   - Lead should validate `check-artifact-schemas`, `quality-gate`, and `state.read` against the updated closeout and quality-review evidence.
-  - If integration is blocked by the dirty primary worktree, record that blocker explicitly instead of pretending the task is archived.
+  - Lead should cut the archive checkpoint and leave the repo with no active mainline unless a successor is explicitly justified by repo evidence.
 ---
 
 # Expert Handoff
 
 ## Context
 
-This handoff returns the persisted verdict execution slice for `dd-hermes-explicit-gate-verdicts-v1`. The slice is now committed in the expert worktree and the remaining work is lead-side closeout validation plus integration handling.
+This handoff returns the persisted verdict execution slice for `dd-hermes-explicit-gate-verdicts-v1`. The slice is committed, reviewed, later integrated on `main`, and now ready for lead-side archive handling without changing the execution anchor semantics.
 
 ## Required Fields
 
@@ -71,7 +71,8 @@ This handoff returns the persisted verdict execution slice for `dd-hermes-explic
 - `./scripts/check-artifact-schemas.sh --task-id dd-hermes-explicit-gate-verdicts-v1` -> pass structurally before closeout completion; semantic gate now depends on the updated closeout file
 - `bash tests/smoke.sh all` -> pass
 - execution commit: `b07d0d436624d983a9ee5ee4baf83026a4902d11` (`feat(dd-hermes): persist explicit gate verdicts`)
+- later merge on `main`: `dfd6652eae7d080173f445e4ebccfa66deda1fe7` (`integrate(dd-hermes-explicit-gate-verdicts-v1): merge dd-hermes-explicit-gate-verdicts-v1-expert-a into main`)
 
 ## Open Questions
 
-- Can lead integrate this slice cleanly while the primary worktree still contains overlapping dirty files, or does DD Hermes need to record that as the current honest blocker?
+- Is there now one clearly favored successor task, or should DD Hermes archive this proof and return to “no active mainline” until a new task package is defined?

@@ -8,12 +8,14 @@ source "$SCRIPT_DIR/common.sh"
 task_id=""
 worktree=""
 agent_role="commander"
+agent_id=""
 memory_limit="8"
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --task-id) task_id="$2"; shift 2 ;;
     --worktree) worktree="$2"; shift 2 ;;
     --agent-role) agent_role="$2"; shift 2 ;;
+    --agent-id) agent_id="$2"; shift 2 ;;
     --memory-limit) memory_limit="$2"; shift 2 ;;
     --stdin|--json) shift ;;
     *) shift ;;
@@ -40,7 +42,7 @@ fi
 runtime_json=$("$SCRIPT_DIR/runtime-report.sh" --task-id "$task_id" --worktree "$worktree" --agent-role "$agent_role")
 state_json=$("$SCRIPT_DIR/state-read.sh" --task-id "$task_id")
 
-payload=$(RUNTIME_JSON="$runtime_json" STATE_JSON="$state_json" python3 - <<'PY' "$repo" "$task_id" "$agent_role" "$memory_limit" "$SCRIPT_DIR"
+payload=$(RUNTIME_JSON="$runtime_json" STATE_JSON="$state_json" python3 - <<'PY' "$repo" "$task_id" "$agent_role" "$agent_id" "$memory_limit" "$SCRIPT_DIR"
 import json
 import os
 import subprocess
@@ -51,8 +53,9 @@ from pathlib import Path
 repo = Path(sys.argv[1]).resolve()
 task_id = sys.argv[2]
 agent_role = sys.argv[3]
-memory_limit = sys.argv[4]
-script_dir = Path(sys.argv[5]).resolve()
+agent_id = sys.argv[4]
+memory_limit = sys.argv[5]
+script_dir = Path(sys.argv[6]).resolve()
 sys.path.insert(0, str(script_dir))
 runtime = json.loads(os.environ["RUNTIME_JSON"])
 state_wrapper = json.loads(os.environ["STATE_JSON"])
@@ -61,13 +64,15 @@ timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 state_dir = repo / "workspace" / "state" / task_id
 state_path = state_dir / "state.json"
 events_path = state_dir / "events.jsonl"
-runtime_path = state_dir / "runtime.json"
-context_path = state_dir / "context.json"
 
 from team_governance import (
     governance_snapshot,
 )
-from artifact_semantics import closeout_verdict
+from artifact_semantics import closeout_verdict, lane_artifact_paths, skeptic_lane_verdict
+
+lane_paths = lane_artifact_paths(repo, task_id, agent_role=agent_role, agent_id=agent_id)
+runtime_path = lane_paths["runtime_path"]
+context_path = lane_paths["context_path"]
 
 
 def read_doc(path: Path):
@@ -114,6 +119,7 @@ runtime_path.write_text(json.dumps(runtime, ensure_ascii=False, indent=2) + "\n"
 packet = {
     "task_id": task_id,
     "agent_role": agent_role,
+    "agent_id": agent_id,
     "generated_at": timestamp,
     "sources": {
         "contract_path": contract["path"] if contract else "",
@@ -191,7 +197,14 @@ execution_closeout = closeout_verdict(
     state=state,
     updated_at=timestamp,
 )
+skeptic_lane = skeptic_lane_verdict(
+    repo,
+    task_id,
+    state=state,
+    updated_at=timestamp,
+)
 verdicts["execution_closeout"] = execution_closeout
+verdicts["skeptic_lane"] = skeptic_lane
 state["verdicts"] = verdicts
 packet["context_summary"]["scale_out_triggers"] = governance["scale_out_triggers"]
 packet["context_summary"]["scale_out_recommended"] = governance["scale_out_recommended"]
@@ -233,6 +246,9 @@ packet["context_summary"]["quality_seat_reasons"] = quality_seat["execution_reas
 packet["context_summary"]["quality_seat_completion_ready"] = quality_seat["completion_ready"]
 packet["context_summary"]["quality_seat_completion_status"] = quality_seat["completion_status"]
 packet["context_summary"]["quality_seat_completion_reasons"] = quality_seat["completion_reasons"]
+packet["context_summary"]["skeptic_lane_ready"] = skeptic_lane["ready"]
+packet["context_summary"]["skeptic_lane_status"] = skeptic_lane["status"]
+packet["context_summary"]["skeptic_lane_reasons"] = skeptic_lane["reasons"]
 packet["context_summary"]["execution_closeout_ready"] = execution_closeout["ready"]
 packet["context_summary"]["execution_closeout_status"] = execution_closeout["status"]
 packet["context_summary"]["execution_closeout_reasons"] = execution_closeout["reasons"]
@@ -260,10 +276,22 @@ if runtime_path.exists():
         pass
 
 context_path.write_text(json.dumps(packet, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+skeptic_lane = skeptic_lane_verdict(
+    repo,
+    task_id,
+    state=state,
+    updated_at=timestamp,
+)
+state["verdicts"]["skeptic_lane"] = skeptic_lane
+packet["context_summary"]["skeptic_lane_ready"] = skeptic_lane["ready"]
+packet["context_summary"]["skeptic_lane_status"] = skeptic_lane["status"]
+packet["context_summary"]["skeptic_lane_reasons"] = skeptic_lane["reasons"]
+context_path.write_text(json.dumps(packet, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 state.setdefault("runtime", {})
-state["runtime"]["last_context_path"] = str(context_path)
-state["runtime"]["last_runtime_report_path"] = str(runtime_path)
+if not lane_paths["slug"]:
+    state["runtime"]["last_context_path"] = str(context_path)
+    state["runtime"]["last_runtime_report_path"] = str(runtime_path)
 state.setdefault("memory", {})
 state["memory"]["last_selected_ids"] = selected_ids
 state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

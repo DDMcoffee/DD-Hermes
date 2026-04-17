@@ -44,7 +44,7 @@ from team_governance import (
     scale_out_analysis,
     task_class_analysis,
 )
-from artifact_semantics import closeout_verdict
+from artifact_semantics import closeout_verdict, skeptic_lane_verdict
 
 if not state_path.exists():
     print(json.dumps({"error": "state not found", "task_id": task_id}, ensure_ascii=False))
@@ -409,6 +409,12 @@ team.update({
 state["product"]["anchor"] = governance["product_anchors"][0] if governance["product_anchors"] else owner
 state["quality"]["anchor"] = governance["quality_anchors"][0] if governance["quality_anchors"] else ""
 state["verdicts"] = governance["verdicts"]
+state["verdicts"]["skeptic_lane"] = skeptic_lane_verdict(
+    repo,
+    task_id,
+    state=state,
+    updated_at=timestamp,
+)
 state["verdicts"]["execution_closeout"] = closeout_verdict(
     repo,
     task_id,

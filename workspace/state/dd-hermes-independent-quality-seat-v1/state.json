@@ -130,9 +130,9 @@
     "task_class": "T2",
     "quality_requirement": "degraded-allowed",
     "task_class_rationale": "This archived proof slice predates the frozen T0-T4 escalation matrix and is preserved as a bounded quality-seat proof task accepted under explicit degraded supervision.",
-    "goal_status": "validated",
+    "goal_status": "defined",
     "goal_drift_flags": [],
-    "last_product_review_at": "2026-04-17T00:30:00Z"
+    "last_product_review_at": "2026-04-17T08:18:51Z"
   },
   "quality": {
     "anchor": "lead",
@@ -225,6 +225,22 @@
       "quality_anchor_ready": true,
       "quality_review_ready": true,
       "degraded_ack_ready": true
+    },
+    {
+      "timestamp": "2026-04-17T07:57:54Z",
+      "text": "anchor governance initialized",
+      "product_gate_ready": true,
+      "quality_anchor_ready": true,
+      "quality_review_ready": true,
+      "degraded_ack_ready": true
+    },
+    {
+      "timestamp": "2026-04-17T08:18:51Z",
+      "text": "anchor governance initialized",
+      "product_gate_ready": true,
+      "quality_anchor_ready": true,
+      "quality_review_ready": true,
+      "degraded_ack_ready": true
     }
   ],
   "task_id": "dd-hermes-independent-quality-seat-v1",
@@ -239,6 +255,7 @@
   "blocked_reason": "",
   "contract_path": "/Volumes/Coding/Hermes agent for mine/workspace/contracts/dd-hermes-independent-quality-seat-v1.md",
   "handoff_paths": [
+    "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-independent-quality-seat-v1-expert-a-to-lead.md",
     "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-independent-quality-seat-v1-lead-to-expert-a.md"
   ],
   "exploration_paths": [
@@ -298,5 +315,92 @@
       "degraded_ack_at": "2026-04-16T17:48:51Z"
     }
   },
-  "updated_at": "2026-04-16T18:07:22Z"
+  "updated_at": "2026-04-17T08:18:51Z",
+  "verdicts": {
+    "updated_at": "2026-04-17T08:18:51Z",
+    "task_policy": {
+      "status": "blocked",
+      "ready": false,
+      "reasons": [
+        "t2_manual_escalation_required:high_risk_mode"
+      ],
+      "updated_at": "2026-04-17T08:18:51Z",
+      "task_class": "T2",
+      "task_class_bucket": "bounded-execution",
+      "quality_requirement": "degraded-allowed",
+      "quality_requirement_source": "task_class_default",
+      "manual_escalation_required": true,
+      "manual_escalation_reasons": [
+        "t2_manual_escalation_required:high_risk_mode"
+      ]
+    },
+    "product_gate": {
+      "status": "ready",
+      "ready": true,
+      "reasons": [],
+      "updated_at": "2026-04-17T08:18:51Z",
+      "anchor": "lead",
+      "goal": "Make DD Hermes expose and enforce whether the quality seat is independent or degraded, so maintainers can trust quality-review truth before execution and completion.",
+      "goal_status": "defined"
+    },
+    "quality_anchor": {
+      "status": "ready",
+      "ready": true,
+      "reasons": [],
+      "updated_at": "2026-04-17T08:18:51Z",
+      "anchor": "lead"
+    },
+    "quality_review": {
+      "status": "ready",
+      "ready": true,
+      "reasons": [],
+      "updated_at": "2026-04-17T08:18:51Z",
+      "anchor": "lead",
+      "review_status": "degraded-approved",
+      "last_review_at": "2026-04-16T17:48:51Z"
+    },
+    "degraded_ack": {
+      "status": "ready",
+      "ready": true,
+      "reasons": [],
+      "updated_at": "2026-04-17T08:18:51Z",
+      "required": true,
+      "ack_by": "lead",
+      "ack_at": "2026-04-16T17:48:51Z"
+    },
+    "quality_seat_execution": {
+      "status": "blocked",
+      "ready": false,
+      "reasons": [
+        "t2_manual_escalation_required:high_risk_mode"
+      ],
+      "updated_at": "2026-04-17T08:18:51Z",
+      "mode": "degraded"
+    },
+    "quality_seat_completion": {
+      "status": "blocked",
+      "ready": false,
+      "reasons": [
+        "t2_manual_escalation_required:high_risk_mode"
+      ],
+      "updated_at": "2026-04-17T08:18:51Z",
+      "mode": "degraded"
+    },
+    "execution_closeout": {
+      "status": "ready",
+      "ready": true,
+      "reasons": [],
+      "updated_at": "2026-04-17T08:18:51Z",
+      "closeout_path": "/Volumes/Coding/Hermes agent for mine/workspace/closeouts/dd-hermes-independent-quality-seat-v1-expert-a.md",
+      "selected_by": "single_match",
+      "candidate_count": 1,
+      "semantic_valid": true,
+      "ready_for_execution_slice_done": true,
+      "execution_commit": "bfe1739f92ff2ef1ff30b1c0d16547b1e4c43cd6",
+      "quality_review_status": "degraded-approved",
+      "verified_step_count": 7,
+      "verified_file_count": 13,
+      "quality_findings_count": 3
+    }
+  }
 }

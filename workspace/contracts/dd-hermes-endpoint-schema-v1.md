@@ -1,8 +1,22 @@
 ---
+schema_version: 2
 task_id: dd-hermes-endpoint-schema-v1
 owner: lead
 experts:
   - expert-a
+product_goal: Make DD Hermes endpoint and artifact contracts explicit, field-level, and executable through repository checks.
+user_value: Let a maintainer inspect and validate DD Hermes control-plane contracts from docs/templates/checkers instead of relying on implicit commit history.
+task_class: T2
+quality_requirement: degraded-allowed
+task_class_rationale: 公共 schema/doc/checker 切片，但实现写集受控，主要是协议文档、模板和校验脚本的收口。
+non_goals:
+  - Do not expand into router-only or dispatch-only follow-up work.
+  - Do not introduce new runtime services or provider-layer changes.
+product_acceptance:
+  - Endpoint and artifact schema docs are explicit and field-level.
+  - Execution closeout support is materialized in templates and sprint bootstrap flow.
+  - Repository checks verify contract, handoff, state, and closeout requirements.
+drift_risk: This task could drift into generic docs churn if it stops hardening the executable schema path specifically.
 acceptance:
   - Endpoint and artifact schema docs are explicit, field-level, and executable through repository checks.
   - Execution closeout support is materialized in repository templates and sprint bootstrap flow.
@@ -44,6 +58,12 @@ Close `dd-hermes-endpoint-schema-v1` as a task-bound record for the endpoint/sch
 - `.codex/templates/EXECUTION-CLOSEOUT.md` exists and sprint bootstrap can materialize closeout files from it.
 - `scripts/check-artifact-schemas.sh` and smoke/schema verification paths validate the required artifact structure.
 - The task has task-bound handoff, closeout, state, and archive evidence instead of relying only on commit history.
+
+## Product Gate
+
+- The slice is about making endpoint/schema contracts executable, not about expanding the endpoint surface itself.
+- The outcome must remain task-bound to schema docs, closeout templating, and validation paths.
+- If router or dispatch follow-up work becomes the center of gravity, this task boundary has been crossed.
 
 ## Verification
 

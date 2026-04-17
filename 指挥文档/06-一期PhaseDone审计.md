@@ -1,11 +1,11 @@
 ---
 phase_status: 一期已经达到完整的 `phase done`；现在可以直接使用 DD Hermes harness 的只读入口与任务控制面。
-latest_proof_task_id: dd-hermes-quality-seat-escalation-rules-v1
-latest_proof_archive: openspec/archive/dd-hermes-quality-seat-escalation-rules-v1.md
-current_mainline_task_id: dd-hermes-explicit-gate-verdicts-v1
-current_mainline_doc: 指挥文档/04-任务重校准与线程策略.md
-current_gap_1: `dd-hermes-explicit-gate-verdicts-v1` 的 execution slice 已经 commit 且 review-backed；当前未完成的是 lead integration / archive。
-current_gap_2: lead integration 现在被主工作区与 execution branch 的重叠 dirty files 挡住；在显式清理或对账前，不应宣称 archive ready。
+latest_proof_task_id: dd-hermes-legacy-archive-normalization-v1
+latest_proof_archive: openspec/archive/dd-hermes-legacy-archive-normalization-v1.md
+current_mainline_task_id: dd-hermes-independent-skeptic-dispatch-v1
+current_mainline_doc: workspace/contracts/dd-hermes-independent-skeptic-dispatch-v1.md
+current_gap_1: 当前 active mainline 已切到 `dd-hermes-independent-skeptic-dispatch-v1`；它负责把真实独立 skeptic 从命名真相推进到可派发、可审查、可验收的运行面。
+current_gap_2: 共享控制面上的第一个 implementation slice 已经落下：skeptic lane 现在有了 worktree + handoff/context/runtime truth。当前剩余 blocker 变成这条 task 自己还没进入 git baseline，因此还不能诚实 materialize 它自己的 expert/skeptic lane。
 ---
 
 # DD Hermes 一期 Phase Done 审计
@@ -44,28 +44,29 @@ current_gap_2: lead integration 现在被主工作区与 execution branch 的重
    - `docs/artifact-schemas.md`
    - `docs/git-management.md`
 3. phase-2 已经可以在不破坏一期入口的前提下继续推进
-  - 最近归档 proof task：`dd-hermes-quality-seat-escalation-rules-v1`
-  - 当前 active mainline：`dd-hermes-explicit-gate-verdicts-v1`
+  - 最近归档 proof task：`dd-hermes-legacy-archive-normalization-v1`
+  - 当前 active mainline：`dd-hermes-independent-skeptic-dispatch-v1`
 
 ## 你现在能用到什么
 
 - `./scripts/demo-entry.sh`
   - 只读查看当前状态、最近 proof、是否存在当前 mainline，以及锚点真相
 - `workspace/contracts/<task_id>.md`
-  - 如果存在 active mainline，查看它的产品边界和验收范围
+  - 查看当前 active mainline 的产品边界和验收范围
 - `workspace/state/<task_id>/state.json`
-  - 如果存在 active mainline，查看它的最新控制面真相
+  - 查看当前 active mainline 的最新控制面真相
+- `openspec/archive/<task_id>.md`
+  - 回到最近 proof 的 archive 看“刚刚到底证明了什么、为什么会切到当前治理主线”
 - `workspace/handoffs/` 与 `workspace/closeouts/`
   - 查看最近一个 execution slice 或 archive checkpoint 到底做到哪
 
 ## 当前 phase-2 处于什么位置
 
-- 最近归档 proof task：`dd-hermes-quality-seat-escalation-rules-v1`
-- 当前 active mainline：`dd-hermes-explicit-gate-verdicts-v1`
-- 最近归档 proof 已经完成两条 execution slice
-- 当前 successor 已确定为 `dd-hermes-explicit-gate-verdicts-v1`
-- 当前 execution slice 已经有真实 execution commit、approved quality review 和 semantic closeout
-- 当前未完成的是 lead integration / archive，而且真实 blocker 是主工作区重叠 dirty files，不是 successor 选择
+- 最近归档 proof task：`dd-hermes-legacy-archive-normalization-v1`
+- 最近归档治理主线：`dd-hermes-successor-triage-v1`
+- 当前 active mainline：`dd-hermes-independent-skeptic-dispatch-v1`
+- 最近归档 proof 已经完成 no-execution closeout semantics、legacy archived proof 的 schema-v2 contract/state/closeout truth 回填，以及 execution-anchor-backed archive 收口
+- 当前真正剩下的不是 proof 补洞，而是把已经落地到共享脚本层的 skeptic lane 能力，推进成这条 task 自己的可派发、可验证、可归档运行面
 
 ## 一期为什么现在算 `phase done`
 
@@ -84,15 +85,15 @@ current_gap_2: lead integration 现在被主工作区与 execution branch 的重
 ### 3. phase-2 可以在一期基线之上继续，而不是重开一期
 
 - 最近 proof 已归档
-- 当前可以诚实地处于“没有 active mainline”的状态
+- 当前可以在不破坏一期入口的前提下重新选择下一条 active mainline
 - 一期本身不需要再返工
 
 ## 当前剩余 gap
 
 - 一期无剩余 blocker。
 - 当前剩余 gap 全部属于 phase-2：
-  - 需要把 `dd-hermes-explicit-gate-verdicts-v1` 从“已有 review-backed execution slice”推进到“已 integrate / archive”
-  - 需要先处理主工作区与 execution branch 的重叠 dirty files，否则归档声明会失真
+  - 当前 active mainline 的共享 implementation slice 已完成；但这条 task 还没进入 git/worktree baseline，所以还不能诚实派发自己的 expert/skeptic lane
+  - 不能再把“共享脚本已支持 skeptic lane”误当成“当前 task 已经拥有了自己的运行中 skeptic lane”
 
 ## 当前线程应该去哪里继续看
 

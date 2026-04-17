@@ -7,6 +7,7 @@ source "$SCRIPT_DIR/common.sh"
 
 repo=$(repo_root)
 landing_doc_rel="指挥文档/06-一期PhaseDone审计.md"
+decision_doc_rel="指挥文档/04-任务重校准与线程策略.md"
 landing_doc="$repo/$landing_doc_rel"
 
 if [[ ! -f "$landing_doc" ]]; then
@@ -210,12 +211,8 @@ EOF
 else
 cat <<EOF
 - 当前 active mainline：暂无
+- 下一步决策文档：$decision_doc_rel
 EOF
-if [[ -n "$task_doc_rel" ]]; then
-cat <<EOF
-- 下一步决策文档：$task_doc_rel
-EOF
-fi
 fi
 
 cat <<EOF

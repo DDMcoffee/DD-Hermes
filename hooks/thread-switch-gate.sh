@@ -37,6 +37,7 @@ script_dir = Path(sys.argv[3]).resolve()
 sys.path.insert(0, str(script_dir))
 
 from team_governance import governance_snapshot
+from artifact_semantics import skeptic_lane_verdict
 
 if not state_path.exists():
     print(json.dumps({
@@ -106,6 +107,7 @@ if target == "execution":
     task_policy = governance["task_policy"]
     quality_seat = governance["quality_seat"]
     verdicts = governance["verdicts"]
+    skeptic_lane = skeptic_lane_verdict(repo_root, state.get("task_id", ""), state=state, updated_at=state.get("updated_at", ""))
     goal = product.get("goal", "").strip()
     goal_status = product.get("goal_status", "")
     drift_flags = product.get("goal_drift_flags", [])
@@ -121,6 +123,8 @@ if target == "execution":
         reasons.append(f"task classification not ready: {', '.join(task_policy['reasons'])}")
     if not quality_seat["execution_ready"]:
         reasons.append(f"quality seat not ready ({quality_seat['mode']}): {', '.join(quality_seat['execution_reasons'])}")
+    if task_policy.get("requires_independent", False) and not skeptic_lane["ready"]:
+        reasons.append(f"skeptic lane not materialized: {', '.join(skeptic_lane['reasons'])}")
 
     executors = [e for e in team.get("executors", []) if isinstance(e, str) and e.strip()]
     if not executors:
@@ -165,6 +169,9 @@ result = {
     "quality_seat_mode": quality_seat["mode"] if target == "execution" else "",
     "quality_seat_status": quality_seat["execution_status"] if target == "execution" else "",
     "quality_seat_reasons": quality_seat["execution_reasons"] if target == "execution" else [],
+    "skeptic_lane_status": skeptic_lane["status"] if target == "execution" else "",
+    "skeptic_lane_ready": skeptic_lane["ready"] if target == "execution" else False,
+    "skeptic_lane_reasons": skeptic_lane["reasons"] if target == "execution" else [],
     "verdicts_updated_at": verdicts["updated_at"] if target == "execution" else "",
     "blocked_reason": reason,
     "required_next_step": reason if blocked else "",

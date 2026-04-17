@@ -47,6 +47,9 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
   - `summary.quality_seat_mode`
   - `summary.quality_seat_status`
   - `summary.quality_seat_reasons`
+  - `summary.skeptic_lane_status`
+  - `summary.skeptic_lane_ready`
+  - `summary.skeptic_lane_reasons`
   - `summary.execution_closeout_status`
   - `summary.execution_closeout_ready`
   - `summary.execution_closeout_reasons`
@@ -74,6 +77,8 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
 - Router entry: `scripts/coordination-endpoint.sh --endpoint context.build --task-id <task_id> --agent-role <role>`
 - Implementation: `scripts/context-build.sh --task-id <task_id> --agent-role <role>`
 - Purpose: 组装执行输入包。
+- Notes:
+  - 对 lane 级 packet，可附加 `--agent-id <agent_id>`，输出 `context-<role>-<agent>.json / runtime-<role>-<agent>.json`，避免多个 lane 互相覆盖。
 - Stdout response required fields:
   - `context_path`
   - `runtime_path`
@@ -95,6 +100,9 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
   - `context_summary.manual_escalation_reasons`
   - `context_summary.quality_seat_mode`
   - `context_summary.quality_seat_status`
+  - `context_summary.skeptic_lane_status`
+  - `context_summary.skeptic_lane_ready`
+  - `context_summary.skeptic_lane_reasons`
   - `context_summary.execution_closeout_status`
   - `context_summary.execution_closeout_ready`
   - `context_summary.execution_closeout_reasons`
@@ -115,6 +123,7 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
   - `degraded_ack_status`
   - `task_class`, `task_class_bucket`, `quality_requirement`, `task_policy_status`, `manual_escalation_required`, `manual_escalation_reasons`, `task_policy_reasons`
   - `quality_seat_mode`, `quality_seat_status`, `quality_seat_reasons`
+  - `skeptic_lane_status`, `skeptic_lane_ready`, `skeptic_lane_reasons`
   - `summary.supervisor_count`, `summary.executor_count`, `summary.skeptic_count`
   - `assignments`
 
@@ -132,6 +141,7 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
   - `execution_closeout`
   - `semantic_valid`
   - `ready_for_execution_slice_done`
+- `execution_closeout.status` 对 `T0/T1` 应允许返回 `not-required`；这类任务不应因为 placeholder closeout 而被判成 blocked。
 
 ### 6) `lease.check`
 
@@ -158,8 +168,10 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
   - 若 `T2` 已命中手动升级条件，则必须先把 `quality_requirement` 显式写成 `requires-independent`
   - 若 `role_integrity.degraded == true`，必须先有显式 `degraded ack`
   - 若 `quality_requirement == requires-independent`，则 `quality_seat_mode` 必须是 `independent`
+  - 若 `quality_requirement == requires-independent`，则 `skeptic lane` 也必须已物化，不能只停留在 `independent_skeptic=true`
 - Response required fields:
   - `pass`, `target_thread`, `blocked_reason`
+  - `skeptic_lane_status`, `skeptic_lane_ready`, `skeptic_lane_reasons`
 
 ### 8) `quality.gate`
 
@@ -172,6 +184,7 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
   - `task_class_policy` 是否完整
   - `degraded_ack` / `quality_review` / `quality_seat` 是否通过
   - closeout 语义是否已从占位态升级为真实 execution evidence
+- 若 `task_class_bucket == no-execution`，则 closeout 应视为 `not-required`，不再要求 execution commit 证据。
 - Response required fields:
   - `event`, `pass`, `missing_verification`, `uncovered_files`
   - `task_class`, `quality_requirement`, `manual_escalation_required`, `manual_escalation_reasons`, `task_policy_status`, `task_policy_reasons`
@@ -233,5 +246,6 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
 - 若 `degraded_ack_ready == false`，不得进入 execution。
 - 若 `summary.quality_requirement == requires-independent` 且 `summary.independent_skeptic == false`，不得进入 execution。
 - 若 closeout 结构不完整或 `ready_for_execution_slice_done == false`，不得判定 `execution slice done`。
+- 对 `T0/T1` 的 `no-execution` 任务，`execution_closeout_status = not-required` 即为合法完成态，不需要伪造 execution slice。
 - 若 `quality-gate` 未通过，不得宣称 `execution slice done` 或 `task done`。
 - 若 state 未写入 commit 锚点和 verification 证据，不得判定 `task done`。

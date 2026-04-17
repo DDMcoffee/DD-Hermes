@@ -22,11 +22,11 @@
       "/Volumes/Coding/Hermes agent for mine/workspace/decisions/quality-seat-escalation-routing/curriculum.md"
     ],
     "synthesis_path": "/Volumes/Coding/Hermes agent for mine/workspace/decisions/quality-seat-escalation-routing/synthesis.md",
-    "current_executor": "expert-a"
+    "current_executor": ""
   },
   "verification": {
     "last_pass": true,
-    "last_run_at": "2026-04-16T23:57:31Z",
+    "last_run_at": "2026-04-17T06:24:24Z",
     "verified_steps": [
       "./scripts/test-workflow.sh --task-id dd-hermes-quality-seat-escalation-rules-v1",
       "./scripts/context-build.sh --task-id dd-hermes-quality-seat-escalation-rules-v1 --agent-role commander",
@@ -35,7 +35,12 @@
       "./scripts/check-artifact-schemas.sh --task-id dd-hermes-anchor-governance-v1",
       "./scripts/check-artifact-schemas.sh --task-id dd-hermes-independent-quality-seat-v1",
       "./scripts/dispatch-create.sh --task-id dd-hermes-quality-seat-escalation-rules-v1",
-      "./hooks/thread-switch-gate.sh --task-id dd-hermes-quality-seat-escalation-rules-v1 --target execution"
+      "./hooks/thread-switch-gate.sh --task-id dd-hermes-quality-seat-escalation-rules-v1 --target execution",
+      "bash -n scripts/demo-entry.sh tests/smoke.sh",
+      "./scripts/state-read.sh --task-id dd-hermes-quality-seat-escalation-rules-v1",
+      "./hooks/quality-gate.sh --event Stop --state workspace/state/dd-hermes-quality-seat-escalation-rules-v1/state.json",
+      "./scripts/check-artifact-schemas.sh --task-id dd-hermes-quality-seat-escalation-rules-v1",
+      "bash tests/smoke.sh entry"
     ],
     "verified_files": [
       "workspace/contracts/dd-hermes-quality-seat-escalation-rules-v1.md",
@@ -68,7 +73,12 @@
       "workspace/contracts/dd-hermes-anchor-governance-v1.md",
       "workspace/contracts/dd-hermes-independent-quality-seat-v1.md",
       "workspace/closeouts/dd-hermes-quality-seat-escalation-rules-v1-expert-a.md",
-      "workspace/handoffs/dd-hermes-quality-seat-escalation-rules-v1-expert-a-to-lead.md"
+      "workspace/handoffs/dd-hermes-quality-seat-escalation-rules-v1-expert-a-to-lead.md",
+      "docs/coordination-endpoints.md",
+      "docs/artifact-schemas.md",
+      "openspec/archive/dd-hermes-quality-seat-escalation-rules-v1.md",
+      "workspace/handoffs/dd-hermes-quality-seat-escalation-rules-v1-lead-to-lead-archive.md",
+      "指挥文档/README.md"
     ]
   },
   "runtime": {
@@ -99,8 +109,8 @@
     ],
     "last_selected_ids": [
       "no-destruction-without-confirmation",
-      "user-pref-no-manual-generator-commands",
       "dd-hermes-multi-agent-dispatch",
+      "user-pref-no-manual-generator-commands",
       "dd-hermes-demo-entry-v1",
       "dd-hermes-experience-demo-v1",
       "dd-hermes-endpoint-router-v1",
@@ -126,7 +136,7 @@
     "drift_risk": "This task could drift into abstract role theory or broad governance cleanup if it stops reducing the maintainer-facing ambiguity around degraded vs independent quality seats.",
     "goal_status": "defined",
     "goal_drift_flags": [],
-    "last_product_review_at": "2026-04-16T23:43:56Z",
+    "last_product_review_at": "2026-04-17T08:18:51Z",
     "task_class": "T3",
     "quality_requirement": "requires-independent",
     "task_class_rationale": "This task changes shared governance surfaces, dispatch truth, and gate behavior, so it belongs to DD Hermes strict-execution work."
@@ -205,31 +215,89 @@
       "quality_anchor_ready": true,
       "quality_review_ready": true,
       "degraded_ack_ready": true
+    },
+    {
+      "timestamp": "2026-04-17T05:10:30Z",
+      "text": "landed T2 manual escalation rules and revalidated workflow/context/smoke",
+      "product_gate_ready": true,
+      "quality_anchor_ready": true,
+      "quality_review_ready": true,
+      "degraded_ack_ready": true
+    },
+    {
+      "timestamp": "2026-04-17T05:18:57Z",
+      "text": "archived escalation-rules proof and cleared the active-mainline slot until a successor task is explicitly defined",
+      "product_gate_ready": true,
+      "quality_anchor_ready": true,
+      "quality_review_ready": true,
+      "degraded_ack_ready": true
+    },
+    {
+      "timestamp": "2026-04-17T05:21:03Z",
+      "text": "revalidated archived escalation-rules proof and no-active-mainline entry surface",
+      "product_gate_ready": true,
+      "quality_anchor_ready": true,
+      "quality_review_ready": true,
+      "degraded_ack_ready": true
+    },
+    {
+      "timestamp": "2026-04-17T06:24:01Z",
+      "text": "reviewed successor candidates and kept no-active-mainline truth because repo evidence does not yet clearly favor gate verdict fields, routing metadata, or resuming the two-expert experiment",
+      "product_gate_ready": true,
+      "quality_anchor_ready": true,
+      "quality_review_ready": true,
+      "degraded_ack_ready": true
+    },
+    {
+      "timestamp": "2026-04-17T06:24:24Z",
+      "text": "validated successor triage decision log and kept no-active-mainline entry truthful",
+      "product_gate_ready": true,
+      "quality_anchor_ready": true,
+      "quality_review_ready": true,
+      "degraded_ack_ready": true
+    },
+    {
+      "timestamp": "2026-04-17T07:57:55Z",
+      "text": "anchor governance initialized",
+      "product_gate_ready": true,
+      "quality_anchor_ready": true,
+      "quality_review_ready": true,
+      "degraded_ack_ready": true
+    },
+    {
+      "timestamp": "2026-04-17T08:18:51Z",
+      "text": "anchor governance initialized",
+      "product_gate_ready": true,
+      "quality_anchor_ready": true,
+      "quality_review_ready": true,
+      "degraded_ack_ready": true
     }
   ],
   "task_id": "dd-hermes-quality-seat-escalation-rules-v1",
-  "status": "in_progress",
-  "mode": "execution",
-  "current_focus": "first execution slice closed with compatibility backfill and quality review evidence",
+  "status": "done",
+  "mode": "archive",
+  "current_focus": "archived after the initial task-class matrix and bounded T2 manual-escalation rules closed the first escalation-rules proof",
   "owner": "lead",
   "experts": [
     "expert-a"
   ],
-  "active_expert": "expert-a",
+  "active_expert": "",
   "blocked_reason": "",
   "contract_path": "/Volumes/Coding/Hermes agent for mine/workspace/contracts/dd-hermes-quality-seat-escalation-rules-v1.md",
   "handoff_paths": [
-    "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-quality-seat-escalation-rules-v1-lead-to-expert-a.md"
+    "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-quality-seat-escalation-rules-v1-expert-a-to-lead.md",
+    "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-quality-seat-escalation-rules-v1-lead-to-expert-a.md",
+    "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-quality-seat-escalation-rules-v1-lead-to-lead-archive.md"
   ],
   "exploration_paths": [
     "/Volumes/Coding/Hermes agent for mine/workspace/exploration/exploration-lead-dd-hermes-quality-seat-escalation-rules-v1.md"
   ],
   "openspec": {
-    "stage": "task",
+    "stage": "archive",
     "proposal_path": "/Volumes/Coding/Hermes agent for mine/openspec/proposals/dd-hermes-quality-seat-escalation-rules-v1.md",
     "design_path": "/Volumes/Coding/Hermes agent for mine/openspec/designs/dd-hermes-quality-seat-escalation-rules-v1.md",
     "task_path": "/Volumes/Coding/Hermes agent for mine/openspec/tasks/dd-hermes-quality-seat-escalation-rules-v1.md",
-    "archive_path": ""
+    "archive_path": "/Volumes/Coding/Hermes agent for mine/openspec/archive/dd-hermes-quality-seat-escalation-rules-v1.md"
   },
   "team": {
     "supervisor_min_count": 1,
@@ -270,5 +338,84 @@
       "degraded_ack_at": ""
     }
   },
-  "updated_at": "2026-04-16T23:57:39Z"
+  "updated_at": "2026-04-17T08:18:51Z",
+  "verdicts": {
+    "updated_at": "2026-04-17T08:18:51Z",
+    "task_policy": {
+      "status": "ready",
+      "ready": true,
+      "reasons": [],
+      "updated_at": "2026-04-17T08:18:51Z",
+      "task_class": "T3",
+      "task_class_bucket": "strict-execution",
+      "quality_requirement": "requires-independent",
+      "quality_requirement_source": "task_class_default",
+      "manual_escalation_required": false,
+      "manual_escalation_reasons": []
+    },
+    "product_gate": {
+      "status": "ready",
+      "ready": true,
+      "reasons": [],
+      "updated_at": "2026-04-17T08:18:51Z",
+      "anchor": "lead",
+      "goal": "Define DD Hermes task-class escalation rules so maintainers know when degraded quality-seat supervision is allowed and when execution must wait for an independent quality seat.",
+      "goal_status": "defined"
+    },
+    "quality_anchor": {
+      "status": "ready",
+      "ready": true,
+      "reasons": [],
+      "updated_at": "2026-04-17T08:18:51Z",
+      "anchor": "quality-anchor"
+    },
+    "quality_review": {
+      "status": "ready",
+      "ready": true,
+      "reasons": [],
+      "updated_at": "2026-04-17T08:18:51Z",
+      "anchor": "quality-anchor",
+      "review_status": "approved",
+      "last_review_at": "2026-04-16T23:56:09Z"
+    },
+    "degraded_ack": {
+      "status": "not-required",
+      "ready": true,
+      "reasons": [],
+      "updated_at": "2026-04-17T08:18:51Z",
+      "required": false,
+      "ack_by": "",
+      "ack_at": ""
+    },
+    "quality_seat_execution": {
+      "status": "ready",
+      "ready": true,
+      "reasons": [],
+      "updated_at": "2026-04-17T08:18:51Z",
+      "mode": "independent"
+    },
+    "quality_seat_completion": {
+      "status": "ready",
+      "ready": true,
+      "reasons": [],
+      "updated_at": "2026-04-17T08:18:51Z",
+      "mode": "independent"
+    },
+    "execution_closeout": {
+      "status": "ready",
+      "ready": true,
+      "reasons": [],
+      "updated_at": "2026-04-17T08:18:51Z",
+      "closeout_path": "/Volumes/Coding/Hermes agent for mine/workspace/closeouts/dd-hermes-quality-seat-escalation-rules-v1-expert-a.md",
+      "selected_by": "single_match",
+      "candidate_count": 1,
+      "semantic_valid": true,
+      "ready_for_execution_slice_done": true,
+      "execution_commit": "f1d84d97e0d993f1720153038c07a106293cd37a",
+      "quality_review_status": "approved",
+      "verified_step_count": 6,
+      "verified_file_count": 16,
+      "quality_findings_count": 3
+    }
+  }
 }

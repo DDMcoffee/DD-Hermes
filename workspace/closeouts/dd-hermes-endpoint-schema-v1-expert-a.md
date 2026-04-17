@@ -1,9 +1,10 @@
 ---
+schema_version: 2
 task_id: dd-hermes-endpoint-schema-v1
 from: expert-a
 to: lead
 scope: endpoint/schema execution slice closeout
-execution_commit: ef8d12b
+execution_commit: ef8d12b3aa04beb906980b6b2362faef38b2b9c1
 state_path: workspace/state/dd-hermes-endpoint-schema-v1/state.json
 context_path: workspace/state/dd-hermes-endpoint-schema-v1/context.json
 runtime_path: workspace/state/dd-hermes-endpoint-schema-v1/runtime.json
@@ -21,6 +22,10 @@ verified_files:
   - scripts/test-artifact-schemas.sh
   - tests/smoke.sh
   - README.md
+quality_review_status: degraded-approved
+quality_findings_summary:
+  - Accepted with degraded supervision because the original schema hardening landed before DD Hermes had an independent quality seat by default.
+  - The archived closeout should stay anchored to the schema-introduction commit, not later doc integrations on `main`.
 open_risks:
   - Task-bound workspace trace was backfilled after integration, so commit history and closeout should be read together.
   - Endpoint-router follow-up work later touched `docs/coordination-endpoints.md`, but that does not invalidate this task's accepted slice.
@@ -47,6 +52,8 @@ This closeout records the endpoint/schema slice that introduced explicit endpoin
 - `runtime_path`
 - `verified_steps`
 - `verified_files`
+- `quality_review_status`
+- `quality_findings_summary`
 - `open_risks`
 - `next_actions`
 
@@ -62,6 +69,11 @@ This closeout records the endpoint/schema slice that introduced explicit endpoin
 - `bash -n scripts/sprint-init.sh scripts/check-artifact-schemas.sh scripts/test-artifact-schemas.sh tests/smoke.sh` => pass
 - `./scripts/test-artifact-schemas.sh` => pass
 - `./tests/smoke.sh all` => pass
+
+## Quality Review
+
+- Quality anchor accepted a degraded review because the slice was bounded to executable schema/docs/checker hardening and had passing verification, but it still relied on the archived fallback skeptic arrangement.
+- The main finding is archival: later router follow-up edits on `main` should not overwrite the original schema-introduction anchor for this proof.
 
 ## Open Questions
 
