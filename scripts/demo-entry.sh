@@ -96,19 +96,28 @@ next_task=$(read_frontmatter_field current_mainline_task_id)
 gap_1=$(read_frontmatter_field current_gap_1)
 gap_2=$(read_frontmatter_field current_gap_2)
 archive_doc="$repo/$archive_rel"
-task_doc="$repo/$task_doc_rel"
+task_doc=""
+if [[ -n "$task_doc_rel" ]]; then
+  task_doc="$repo/$task_doc_rel"
+fi
 proof_state_path="$repo/workspace/state/$proof_task/state.json"
-mainline_state_json=$("$repo/scripts/state-read.sh" --task-id "$next_task" 2>/dev/null || true)
+mainline_state_json=""
+if [[ -n "$next_task" ]]; then
+  mainline_state_json=$("$repo/scripts/state-read.sh" --task-id "$next_task" 2>/dev/null || true)
+fi
 proof_latest_commit=$(read_state_field "$proof_state_path" "git.latest_commit")
 proof_status=$(read_state_field "$proof_state_path" "status")
 proof_mode=$(read_state_field "$proof_state_path" "mode")
 
 missing=()
-for path in "$archive_doc" "$task_doc"; do
+for path in "$archive_doc"; do
   if [[ ! -f "$path" ]]; then
     missing+=("$path")
   fi
 done
+if [[ -n "$task_doc" && ! -f "$task_doc" ]]; then
+  missing+=("$task_doc")
+fi
 
 if (( ${#missing[@]} > 0 )); then
   printf 'DD Hermes 体验入口无法生成，缺少以下事实源：\n'
@@ -127,7 +136,10 @@ integration_commit_display=$(short_sha "$integration_commit")
 if [[ -z "$integration_commit" && "$proof_status" == "done" && "$proof_mode" == "archive" ]]; then
   integration_commit_display="不单独存在"
 fi
-entry_task_commit=$(latest_touch_commit "$task_doc_rel")
+entry_task_commit="未找到"
+if [[ -n "$task_doc_rel" ]]; then
+  entry_task_commit=$(short_sha "$(latest_touch_commit "$task_doc_rel")")
+fi
 mainline_summary=$(STATE_JSON="$mainline_state_json" python3 - <<'PY'
 import json
 import os
@@ -154,11 +166,11 @@ non_goals = summary.get("product_non_goals", [])
 if non_goals:
     lines.append(f"- Non-goals：{'；'.join(non_goals)}")
 lines.extend([
-    f"- Product Gate：{'ready' if summary.get('product_gate_ready') else 'blocked'}",
-    f"- Quality Anchor：{summary.get('quality_anchor_name', '未设置')} ({summary.get('quality_anchor_role', '未设置')})",
+    f"- Product Gate：{summary.get('product_gate_status', 'unknown')}",
+    f"- Quality Anchor：{summary.get('quality_anchor_name', '未设置')} ({summary.get('quality_anchor_role', '未设置')}, {summary.get('quality_anchor_status', 'unknown')})",
     f"- Quality Seat：{summary.get('quality_seat_mode', 'unknown')} ({summary.get('quality_seat_status', 'blocked')})",
     f"- Independent Skeptic：{'yes' if summary.get('independent_skeptic') else 'no'}",
-    f"- Degraded Ack：{'ready' if summary.get('degraded_ack_ready') else 'missing'}",
+    f"- Degraded Ack：{summary.get('degraded_ack_status', 'unknown')}",
 ])
 reasons = summary.get("product_gate_reasons", [])
 if reasons:
@@ -187,9 +199,26 @@ DD Hermes 体验入口
 - archive：$archive_rel
 
 当前 phase-2 主线
+EOF
+
+if [[ -n "$next_task" ]]; then
+cat <<EOF
 - task_id：$next_task
-- 任务说明最新提交：$(short_sha "$entry_task_commit")
+- 任务说明最新提交：$entry_task_commit
 - 任务说明：$task_doc_rel
+EOF
+else
+cat <<EOF
+- 当前 active mainline：暂无
+EOF
+if [[ -n "$task_doc_rel" ]]; then
+cat <<EOF
+- 下一步决策文档：$task_doc_rel
+EOF
+fi
+fi
+
+cat <<EOF
 
 当前还没做到什么
 - $gap_1
@@ -197,8 +226,20 @@ DD Hermes 体验入口
 
 推荐阅读顺序
 1. 先看：$landing_doc_rel
+EOF
+
+if [[ -n "$task_doc_rel" ]]; then
+cat <<EOF
 2. 再看：$task_doc_rel
-3. 若要看第一次真实证明：$archive_rel
+EOF
+else
+cat <<EOF
+2. 再看：$archive_rel
+EOF
+fi
+
+cat <<EOF
+3. 若要看最近一次真实证明：$archive_rel
 EOF
 
 if [[ -n "$mainline_summary" ]]; then

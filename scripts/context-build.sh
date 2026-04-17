@@ -65,15 +65,9 @@ runtime_path = state_dir / "runtime.json"
 context_path = state_dir / "context.json"
 
 from team_governance import (
-    degraded_ack_analysis,
-    merge_triggers,
-    product_gate_analysis,
-    quality_anchor_analysis,
-    quality_seat_analysis,
-    quality_review_analysis,
-    scale_out_analysis,
-    task_class_analysis,
+    governance_snapshot,
 )
+from artifact_semantics import closeout_verdict
 
 
 def read_doc(path: Path):
@@ -180,36 +174,35 @@ packet = {
     },
 }
 
+state["updated_at"] = timestamp
+governance = governance_snapshot(state)
 team = state.get("team", {}) if isinstance(state.get("team"), dict) else {}
-role_analysis = scale_out_analysis(
-    owner=state.get("owner", "lead"),
-    supervisors=team.get("supervisors", []),
-    executors=team.get("executors", []),
-    skeptics=team.get("skeptics", []),
-    high_risk_mode=bool(team.get("high_risk_mode", False)),
-    integration_pressure=bool(team.get("integration_pressure", False)),
+role_integrity = governance["role_integrity"]
+product_gate = governance["product_gate"]
+quality_anchor = governance["quality_anchor"]
+quality_review = governance["quality_review"]
+degraded_ack = governance["degraded_ack"]
+task_policy = governance["task_policy"]
+quality_seat = governance["quality_seat"]
+verdicts = governance["verdicts"]
+execution_closeout = closeout_verdict(
+    repo,
+    task_id,
+    state=state,
+    updated_at=timestamp,
 )
-role_integrity = dict(role_analysis["role_integrity"])
-stored_role_integrity = team.get("role_integrity", {}) if isinstance(team.get("role_integrity"), dict) else {}
-role_integrity["degraded_ack_by"] = stored_role_integrity.get("degraded_ack_by", "")
-role_integrity["degraded_ack_at"] = stored_role_integrity.get("degraded_ack_at", "")
-product_anchors = team.get("product_anchors", []) if isinstance(team.get("product_anchors"), list) else []
-quality_anchors = team.get("quality_anchors", []) if isinstance(team.get("quality_anchors"), list) else []
-product_gate = product_gate_analysis(state.get("product", {}), product_anchors, team.get("anchor_policy", {}))
-quality_anchor = quality_anchor_analysis(state.get("quality", {}), quality_anchors, team.get("anchor_policy", {}))
-quality_review = quality_review_analysis(state.get("quality", {}), quality_anchors, team.get("anchor_policy", {}))
-degraded_ack = degraded_ack_analysis(role_integrity)
-task_policy = task_class_analysis(state.get("product", {}))
-quality_seat = quality_seat_analysis(role_integrity, quality_anchor, degraded_ack, quality_review, task_policy)
+verdicts["execution_closeout"] = execution_closeout
+state["verdicts"] = verdicts
+packet["context_summary"]["scale_out_triggers"] = governance["scale_out_triggers"]
+packet["context_summary"]["scale_out_recommended"] = governance["scale_out_recommended"]
 packet["context_summary"]["independent_skeptic"] = role_integrity["independent_skeptic"]
 packet["context_summary"]["role_integrity_degraded"] = role_integrity["degraded"]
 packet["context_summary"]["degraded_ack_required"] = degraded_ack["required"]
 packet["context_summary"]["degraded_ack_ready"] = degraded_ack["ready"]
+packet["context_summary"]["degraded_ack_status"] = verdicts["degraded_ack"]["status"]
 packet["context_summary"]["degraded_ack_by"] = degraded_ack["ack_by"]
 packet["context_summary"]["degraded_ack_at"] = degraded_ack["ack_at"]
 packet["context_summary"]["role_conflicts"] = role_integrity["role_conflicts"]
-packet["context_summary"]["scale_out_triggers"] = merge_triggers(team.get("scale_out_triggers", []), role_analysis["scale_out_triggers"])
-packet["context_summary"]["scale_out_recommended"] = bool(team.get("scale_out_recommended", False)) or bool(packet["context_summary"]["scale_out_triggers"])
 packet["context_summary"]["product_user_value"] = state.get("product", {}).get("user_value", "")
 packet["context_summary"]["product_non_goals"] = state.get("product", {}).get("non_goals", [])
 packet["context_summary"]["product_acceptance"] = state.get("product", {}).get("product_acceptance", [])
@@ -221,12 +214,18 @@ packet["context_summary"]["quality_requirement"] = task_policy["quality_requirem
 packet["context_summary"]["quality_requirement_source"] = task_policy["quality_requirement_source"]
 packet["context_summary"]["quality_requirement_ready"] = task_policy["ready"]
 packet["context_summary"]["quality_requirement_reasons"] = task_policy["reasons"]
+packet["context_summary"]["task_policy_status"] = verdicts["task_policy"]["status"]
+packet["context_summary"]["manual_escalation_required"] = task_policy["manual_escalation_required"]
+packet["context_summary"]["manual_escalation_reasons"] = task_policy["manual_escalation_reasons"]
 packet["context_summary"]["product_gate_ready"] = product_gate["ready"]
 packet["context_summary"]["product_gate_reasons"] = product_gate["reasons"]
+packet["context_summary"]["product_gate_status"] = verdicts["product_gate"]["status"]
 packet["context_summary"]["quality_anchor_ready"] = quality_anchor["ready"]
 packet["context_summary"]["quality_anchor_reasons"] = quality_anchor["reasons"]
+packet["context_summary"]["quality_anchor_status"] = verdicts["quality_anchor"]["status"]
 packet["context_summary"]["quality_review_ready"] = quality_review["ready"]
 packet["context_summary"]["quality_review_reasons"] = quality_review["reasons"]
+packet["context_summary"]["quality_review_gate_status"] = verdicts["quality_review"]["status"]
 packet["context_summary"]["quality_seat_mode"] = quality_seat["mode"]
 packet["context_summary"]["quality_seat_ready"] = quality_seat["execution_ready"]
 packet["context_summary"]["quality_seat_status"] = quality_seat["execution_status"]
@@ -234,6 +233,15 @@ packet["context_summary"]["quality_seat_reasons"] = quality_seat["execution_reas
 packet["context_summary"]["quality_seat_completion_ready"] = quality_seat["completion_ready"]
 packet["context_summary"]["quality_seat_completion_status"] = quality_seat["completion_status"]
 packet["context_summary"]["quality_seat_completion_reasons"] = quality_seat["completion_reasons"]
+packet["context_summary"]["execution_closeout_ready"] = execution_closeout["ready"]
+packet["context_summary"]["execution_closeout_status"] = execution_closeout["status"]
+packet["context_summary"]["execution_closeout_reasons"] = execution_closeout["reasons"]
+packet["context_summary"]["execution_closeout_path"] = execution_closeout["closeout_path"]
+packet["context_summary"]["execution_closeout_selected_by"] = execution_closeout["selected_by"]
+packet["context_summary"]["execution_closeout_candidate_count"] = execution_closeout["candidate_count"]
+packet["context_summary"]["execution_closeout_semantic_valid"] = execution_closeout["semantic_valid"]
+packet["context_summary"]["ready_for_execution_slice_done"] = execution_closeout["ready_for_execution_slice_done"]
+packet["context_summary"]["verdicts_updated_at"] = verdicts["updated_at"]
 packet["context_summary"]["quality_review_findings"] = state.get("quality", {}).get("review_findings", [])
 packet["context_summary"]["quality_review_examples"] = state.get("quality", {}).get("review_examples", [])
 packet["context_summary"]["anchor_policy"] = team.get("anchor_policy", {})
@@ -258,7 +266,6 @@ state["runtime"]["last_context_path"] = str(context_path)
 state["runtime"]["last_runtime_report_path"] = str(runtime_path)
 state.setdefault("memory", {})
 state["memory"]["last_selected_ids"] = selected_ids
-state["updated_at"] = timestamp
 state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 event = {

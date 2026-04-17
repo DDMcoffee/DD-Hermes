@@ -51,17 +51,15 @@ sys.path.insert(0, str(script_dir))
 timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 from team_governance import (
-    degraded_ack_analysis,
     default_product_anchors,
     default_quality_anchors,
     default_skeptics,
+    governance_snapshot,
     normalize_people,
-    product_gate_analysis,
-    quality_anchor_analysis,
-    quality_review_analysis,
     scale_out_analysis,
     task_class_analysis,
 )
+from artifact_semantics import closeout_verdict
 
 state_dir = repo / "workspace" / "state" / task_id
 state_dir.mkdir(parents=True, exist_ok=True)
@@ -349,7 +347,7 @@ state["product"].update({
     "goal_drift_flags": state.get("product", {}).get("goal_drift_flags", []),
     "last_product_review_at": timestamp if product_goal else state.get("product", {}).get("last_product_review_at", ""),
 })
-task_policy = task_class_analysis(state.get("product", {}))
+task_policy = task_class_analysis(state.get("product", {}), escalation_triggers=scale_out["scale_out_triggers"])
 if not str(state["product"].get("quality_requirement", "")).strip() and task_policy.get("quality_requirement"):
     state["product"]["quality_requirement"] = task_policy["quality_requirement"]
 if not str(state["product"].get("task_class_rationale", "")).strip() and task_policy.get("rationale"):
@@ -366,18 +364,36 @@ state["quality"].update({
     "review_examples": state.get("quality", {}).get("review_examples", []),
     "last_review_at": state.get("quality", {}).get("last_review_at", ""),
 })
-product_gate = product_gate_analysis(state.get("product", {}), product_anchors, state["team"].get("anchor_policy", {}))
-quality_anchor = quality_anchor_analysis(state.get("quality", {}), quality_anchors, state["team"].get("anchor_policy", {}))
-quality_review = quality_review_analysis(state.get("quality", {}), quality_anchors, state["team"].get("anchor_policy", {}))
-degraded_ack = degraded_ack_analysis(role_integrity)
+governance = governance_snapshot(state, fill_missing_team=True)
+state["team"].update({
+    "supervisors": governance["supervisors"],
+    "executors": governance["executors"],
+    "skeptics": governance["skeptics"],
+    "product_anchors": governance["product_anchors"],
+    "quality_anchors": governance["quality_anchors"],
+    "high_risk_mode": governance["high_risk_mode"],
+    "integration_pressure": governance["integration_pressure"],
+    "scale_out_recommended": governance["scale_out_recommended"],
+    "scale_out_triggers": governance["scale_out_triggers"],
+    "role_integrity": governance["role_integrity"],
+})
+state["product"]["anchor"] = governance["product_anchors"][0] if governance["product_anchors"] else resolved_owner
+state["quality"]["anchor"] = governance["quality_anchors"][0] if governance["quality_anchors"] else ""
+state["verdicts"] = governance["verdicts"]
+state["verdicts"]["execution_closeout"] = closeout_verdict(
+    repo,
+    task_id,
+    state=state,
+    updated_at=timestamp,
+)
 state.setdefault("notes", [])
 state["notes"].append({
     "timestamp": timestamp,
     "text": "anchor governance initialized",
-    "product_gate_ready": product_gate["ready"],
-    "quality_anchor_ready": quality_anchor["ready"],
-    "quality_review_ready": quality_review["ready"],
-    "degraded_ack_ready": degraded_ack["ready"],
+    "product_gate_ready": governance["product_gate"]["ready"],
+    "quality_anchor_ready": governance["quality_anchor"]["ready"],
+    "quality_review_ready": governance["quality_review"]["ready"],
+    "degraded_ack_ready": governance["degraded_ack"]["ready"],
 })
 
 state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

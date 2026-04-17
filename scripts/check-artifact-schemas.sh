@@ -32,7 +32,7 @@ checked = []
 script_dir = (repo / "scripts").resolve()
 sys.path.insert(0, str(script_dir))
 
-from artifact_semantics import closeout_semantic_analysis, parse_frontmatter
+from artifact_semantics import closeout_semantic_analysis, closeout_verdict, parse_frontmatter
 
 
 def check_markdown(path, required_frontmatter, required_sections, label):
@@ -143,6 +143,21 @@ else:
     if missing_integrity:
         errors.append(f"state.team.role_integrity missing keys {missing_integrity}: {state_path}")
     if int(state.get("state_version", 1) or 1) >= 2:
+        verdicts = state.get("verdicts", {}) if isinstance(state.get("verdicts"), dict) else {}
+        required_verdicts = (
+            "updated_at",
+            "task_policy",
+            "product_gate",
+            "quality_anchor",
+            "quality_review",
+            "degraded_ack",
+            "quality_seat_execution",
+            "quality_seat_completion",
+            "execution_closeout",
+        )
+        missing_verdicts = [key for key in required_verdicts if key not in verdicts]
+        if missing_verdicts:
+            errors.append(f"state.verdicts missing keys {missing_verdicts}: {state_path}")
         required_team_v2 = ("product_anchors", "quality_anchors", "anchor_policy")
         missing_team_v2 = [key for key in required_team_v2 if key not in team]
         if missing_team_v2:
@@ -162,10 +177,33 @@ else:
         missing_quality = [key for key in required_quality if key not in quality]
         if missing_quality:
             errors.append(f"state.quality missing keys {missing_quality}: {state_path}")
+        required_verdict_entry = ("status", "ready", "reasons", "updated_at")
+        for verdict_key in ("task_policy", "product_gate", "quality_anchor", "quality_review", "degraded_ack", "quality_seat_execution", "quality_seat_completion", "execution_closeout"):
+            verdict = verdicts.get(verdict_key, {}) if isinstance(verdicts.get(verdict_key), dict) else {}
+            missing_verdict_entry = [key for key in required_verdict_entry if key not in verdict]
+            if missing_verdict_entry:
+                errors.append(f"state.verdicts.{verdict_key} missing keys {missing_verdict_entry}: {state_path}")
     checked.append(str(state_path))
 
 semantic_errors = []
+execution_closeout = {
+    "status": "blocked",
+    "ready": False,
+    "reasons": ["state_missing"],
+    "updated_at": "",
+    "closeout_path": "",
+    "selected_by": "",
+    "candidate_count": 0,
+    "semantic_valid": False,
+    "ready_for_execution_slice_done": False,
+}
 if state is not None:
+    execution_closeout = closeout_verdict(
+        repo,
+        task_id,
+        state=state,
+        updated_at=state.get("updated_at", ""),
+    )
     closeout_semantics = [
         {
             "path": item["path"],
@@ -193,9 +231,10 @@ result = {
     "errors": errors,
     "valid": len(errors) == 0,
     "closeout_semantics": closeout_semantics,
+    "execution_closeout": execution_closeout,
     "semantic_errors": semantic_errors,
     "semantic_valid": len(semantic_errors) == 0,
-    "ready_for_execution_slice_done": bool(closeout_semantics) and all(item.get("ready") for item in closeout_semantics),
+    "ready_for_execution_slice_done": execution_closeout.get("ready_for_execution_slice_done", False),
 }
 print(json.dumps(result, ensure_ascii=False))
 PY

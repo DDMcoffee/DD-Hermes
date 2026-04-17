@@ -33,15 +33,9 @@ state_path = repo / "workspace" / "state" / task_id / "state.json"
 events_path = repo / "workspace" / "state" / task_id / "events.jsonl"
 
 from team_governance import (
-    degraded_ack_analysis,
-    merge_triggers,
-    product_gate_analysis,
-    quality_anchor_analysis,
-    quality_seat_analysis,
-    quality_review_analysis,
-    scale_out_analysis,
-    task_class_analysis,
+    governance_snapshot,
 )
+from artifact_semantics import closeout_verdict
 
 if not state_path.exists():
     print(json.dumps({"error": "state not found", "task_id": task_id}, ensure_ascii=False))
@@ -56,30 +50,31 @@ runtime = state.get("runtime", {})
 verification = state.get("verification", {})
 discussion = state.get("discussion", {})
 team = state.get("team", {}) if isinstance(state.get("team"), dict) else {}
-supervisors = [item for item in team.get("supervisors", []) if isinstance(item, str) and item.strip()]
-executors = [item for item in team.get("executors", []) if isinstance(item, str) and item.strip()]
-skeptics = [item for item in team.get("skeptics", []) if isinstance(item, str) and item.strip()]
-product_anchors = [item for item in team.get("product_anchors", []) if isinstance(item, str) and item.strip()]
-quality_anchors = [item for item in team.get("quality_anchors", []) if isinstance(item, str) and item.strip()]
-role_analysis = scale_out_analysis(
-    owner=state.get("owner", "lead"),
-    supervisors=supervisors,
-    executors=executors,
-    skeptics=skeptics,
-    high_risk_mode=bool(team.get("high_risk_mode", False)),
-    integration_pressure=bool(team.get("integration_pressure", False)),
-)
-scale_out_triggers = merge_triggers(team.get("scale_out_triggers", []), role_analysis["scale_out_triggers"])
-role_integrity = role_analysis["role_integrity"]
-stored_role_integrity = team.get("role_integrity", {}) if isinstance(team.get("role_integrity"), dict) else {}
-role_integrity["degraded_ack_by"] = stored_role_integrity.get("degraded_ack_by", "")
-role_integrity["degraded_ack_at"] = stored_role_integrity.get("degraded_ack_at", "")
-product_gate = product_gate_analysis(state.get("product", {}), product_anchors, team.get("anchor_policy", {}))
-quality_anchor = quality_anchor_analysis(state.get("quality", {}), quality_anchors, team.get("anchor_policy", {}))
-quality_review = quality_review_analysis(state.get("quality", {}), quality_anchors, team.get("anchor_policy", {}))
-degraded_ack = degraded_ack_analysis(role_integrity)
-task_policy = task_class_analysis(state.get("product", {}))
-quality_seat = quality_seat_analysis(role_integrity, quality_anchor, degraded_ack, quality_review, task_policy)
+governance = governance_snapshot(state)
+supervisors = governance["supervisors"]
+executors = governance["executors"]
+skeptics = governance["skeptics"]
+product_anchors = governance["product_anchors"]
+quality_anchors = governance["quality_anchors"]
+scale_out_triggers = governance["scale_out_triggers"]
+role_integrity = governance["role_integrity"]
+product_gate = governance["product_gate"]
+quality_anchor = governance["quality_anchor"]
+quality_review = governance["quality_review"]
+degraded_ack = governance["degraded_ack"]
+task_policy = governance["task_policy"]
+quality_seat = governance["quality_seat"]
+verdicts = governance["verdicts"]
+stored_verdicts = state.get("verdicts", {}) if isinstance(state.get("verdicts"), dict) else {}
+execution_closeout = stored_verdicts.get("execution_closeout") if isinstance(stored_verdicts.get("execution_closeout"), dict) else None
+if execution_closeout is None:
+    execution_closeout = closeout_verdict(
+        repo,
+        task_id,
+        state=state,
+        updated_at=state.get("updated_at", ""),
+    )
+verdicts["execution_closeout"] = execution_closeout
 summary = {
     "blocked": bool(state.get("blocked_reason")) or state.get("status") == "blocked",
     "paused": state.get("lease", {}).get("status") == "paused",
@@ -119,6 +114,9 @@ summary = {
     "quality_requirement_source": task_policy["quality_requirement_source"],
     "quality_requirement_ready": task_policy["ready"],
     "quality_requirement_reasons": task_policy["reasons"],
+    "task_policy_status": verdicts["task_policy"]["status"],
+    "manual_escalation_required": task_policy["manual_escalation_required"],
+    "manual_escalation_reasons": task_policy["manual_escalation_reasons"],
     "product_user_value_ready": bool(state.get("product", {}).get("user_value", "")),
     "product_non_goal_count": len(state.get("product", {}).get("non_goals", [])),
     "product_acceptance_count": len(state.get("product", {}).get("product_acceptance", [])),
@@ -127,12 +125,15 @@ summary = {
     "product_review_recorded": bool(state.get("product", {}).get("last_product_review_at", "")),
     "product_gate_ready": product_gate["ready"],
     "product_gate_reasons": product_gate["reasons"],
+    "product_gate_status": verdicts["product_gate"]["status"],
     "quality_review_status": state.get("quality", {}).get("review_status", ""),
     "quality_anchor_ready": quality_anchor["ready"],
     "quality_anchor_reasons": quality_anchor["reasons"],
+    "quality_anchor_status": verdicts["quality_anchor"]["status"],
     "quality_review_recorded": bool(state.get("quality", {}).get("last_review_at", "")),
     "quality_review_ready": quality_review["ready"],
     "quality_review_reasons": quality_review["reasons"],
+    "quality_review_gate_status": verdicts["quality_review"]["status"],
     "quality_seat_mode": quality_seat["mode"],
     "quality_seat_ready": quality_seat["execution_ready"],
     "quality_seat_status": quality_seat["execution_status"],
@@ -140,16 +141,26 @@ summary = {
     "quality_seat_completion_ready": quality_seat["completion_ready"],
     "quality_seat_completion_status": quality_seat["completion_status"],
     "quality_seat_completion_reasons": quality_seat["completion_reasons"],
+    "execution_closeout_ready": execution_closeout["ready"],
+    "execution_closeout_status": execution_closeout["status"],
+    "execution_closeout_reasons": execution_closeout["reasons"],
+    "execution_closeout_path": execution_closeout["closeout_path"],
+    "execution_closeout_selected_by": execution_closeout["selected_by"],
+    "execution_closeout_candidate_count": execution_closeout["candidate_count"],
+    "execution_closeout_semantic_valid": execution_closeout["semantic_valid"],
+    "ready_for_execution_slice_done": execution_closeout["ready_for_execution_slice_done"],
     "anchor_policy_constant_seats": bool(team.get("anchor_policy", {}).get("constant_anchor_seats", False)),
     "independent_skeptic": role_integrity["independent_skeptic"],
     "role_integrity_degraded": role_integrity["degraded"],
     "degraded_ack_required": degraded_ack["required"],
     "degraded_ack_ready": degraded_ack["ready"],
+    "degraded_ack_status": verdicts["degraded_ack"]["status"],
     "degraded_ack_by": degraded_ack["ack_by"],
     "degraded_ack_at": degraded_ack["ack_at"],
     "role_conflicts": role_integrity["role_conflicts"],
-    "scale_out_recommended": bool(team.get("scale_out_recommended")) or bool(scale_out_triggers),
+    "scale_out_recommended": governance["scale_out_recommended"],
     "scale_out_triggers": scale_out_triggers,
+    "verdicts_updated_at": verdicts["updated_at"],
     "event_count": event_count,
 }
 
