@@ -29,6 +29,12 @@ TASK_CLASS_RULES = {
     },
 }
 
+T2_MANUAL_ESCALATION_TRIGGERS = {
+    "high_risk_mode": "bounded task entered a high-risk domain and can no longer rely on degraded supervision",
+    "integration_pressure": "bounded task now carries integration pressure and should be upgraded before execution continues",
+    "repeated_verification_failures": "bounded task already failed verification repeatedly and should not keep running degraded",
+}
+
 TASK_CLASS_ALIASES = {
     "t0": "T0",
     "t1": "T1",
@@ -114,8 +120,9 @@ def normalize_task_class(value):
     return TASK_CLASS_ALIASES.get(text, "")
 
 
-def task_class_analysis(product):
+def task_class_analysis(product, escalation_triggers=None):
     product = product if isinstance(product, dict) else {}
+    escalation_triggers = _clean_list(escalation_triggers)
 
     raw_task_class = _clean_text(product.get("task_class", ""))
     raw_requirement = _clean_text(product.get("quality_requirement", ""))
@@ -155,6 +162,13 @@ def task_class_analysis(product):
     if quality_requirement and quality_requirement not in ALLOWED_QUALITY_REQUIREMENTS:
         reasons.append("quality_requirement_invalid")
 
+    manual_escalation_reasons = []
+    if task_class == "T2" and quality_requirement != "requires-independent":
+        for trigger in escalation_triggers:
+            if trigger in T2_MANUAL_ESCALATION_TRIGGERS:
+                manual_escalation_reasons.append(f"t2_manual_escalation_required:{trigger}")
+    reasons = merge_triggers(reasons, manual_escalation_reasons)
+
     return {
         "task_class": task_class,
         "bucket": bucket,
@@ -165,6 +179,8 @@ def task_class_analysis(product):
         "quality_requirement_source": source,
         "degraded_allowed": quality_requirement == "degraded-allowed",
         "requires_independent": quality_requirement == "requires-independent",
+        "manual_escalation_required": bool(manual_escalation_reasons),
+        "manual_escalation_reasons": manual_escalation_reasons,
         "ready": not reasons,
         "reasons": reasons,
     }
@@ -363,6 +379,164 @@ def quality_seat_analysis(role_integrity, quality_anchor=None, degraded_ack=None
         "completion_ready": not completion_reasons,
         "completion_status": "ready" if not completion_reasons else "blocked",
         "completion_reasons": completion_reasons,
+    }
+
+
+def _ready_status(ready):
+    return "ready" if ready else "blocked"
+
+
+def _degraded_ack_status(degraded_ack):
+    degraded_ack = degraded_ack if isinstance(degraded_ack, dict) else {}
+    if not degraded_ack.get("required", False):
+        return "not-required"
+    return "ready" if degraded_ack.get("ready", False) else "blocked"
+
+
+def _verdict_entry(*, status, ready, reasons=None, updated_at="", **extra):
+    payload = {
+        "status": _clean_text(status),
+        "ready": bool(ready),
+        "reasons": merge_triggers(reasons or []),
+        "updated_at": _clean_text(updated_at),
+    }
+    payload.update(extra)
+    return payload
+
+
+def governance_snapshot(state, verification_history=None, fill_missing_team=False):
+    state = state if isinstance(state, dict) else {}
+    team = state.get("team", {}) if isinstance(state.get("team"), dict) else {}
+    owner = _clean_text(state.get("owner", "")) or "lead"
+    supervisors = normalize_people(team.get("supervisors", []))
+    executors = normalize_people(team.get("executors", []))
+    skeptics = normalize_people(team.get("skeptics", []))
+    product_anchors = normalize_people(team.get("product_anchors", []))
+    quality_anchors = normalize_people(team.get("quality_anchors", []))
+
+    if fill_missing_team:
+        supervisors = supervisors or [owner]
+        executors = executors or normalize_people(state.get("experts", []))
+        skeptics = skeptics or default_skeptics(owner, supervisors, executors)
+        product_anchors = product_anchors or default_product_anchors(owner, supervisors)
+        quality_anchors = quality_anchors or default_quality_anchors(owner, supervisors, skeptics, executors)
+
+    high_risk_mode = bool(team.get("high_risk_mode", False))
+    integration_pressure = bool(team.get("integration_pressure", False))
+    stored_role_integrity = team.get("role_integrity", {}) if isinstance(team.get("role_integrity"), dict) else {}
+    explicit_role_truth = bool(supervisors or executors or skeptics or stored_role_integrity)
+    scale_out = scale_out_analysis(
+        owner=owner,
+        supervisors=supervisors,
+        executors=executors,
+        skeptics=skeptics,
+        high_risk_mode=high_risk_mode,
+        integration_pressure=integration_pressure,
+        verification_history=verification_history,
+    )
+    if explicit_role_truth:
+        role_integrity = {
+            **scale_out["role_integrity"],
+            "degraded_ack_by": _clean_text(stored_role_integrity.get("degraded_ack_by", "")),
+            "degraded_ack_at": _clean_text(stored_role_integrity.get("degraded_ack_at", "")),
+        }
+        scale_out_triggers = merge_triggers(team.get("scale_out_triggers", []), scale_out["scale_out_triggers"])
+        scale_out_recommended = bool(team.get("scale_out_recommended", False)) or bool(scale_out_triggers)
+    else:
+        role_integrity = {}
+        scale_out_triggers = merge_triggers(team.get("scale_out_triggers", []))
+        scale_out_recommended = bool(team.get("scale_out_recommended", False)) or bool(scale_out_triggers)
+    task_policy = task_class_analysis(state.get("product", {}), escalation_triggers=scale_out_triggers)
+    product_gate = product_gate_analysis(state.get("product", {}), product_anchors, team.get("anchor_policy", {}))
+    quality_anchor = quality_anchor_analysis(state.get("quality", {}), quality_anchors, team.get("anchor_policy", {}))
+    quality_review = quality_review_analysis(state.get("quality", {}), quality_anchors, team.get("anchor_policy", {}))
+    degraded_ack = degraded_ack_analysis(role_integrity)
+    quality_seat = quality_seat_analysis(role_integrity, quality_anchor, degraded_ack, quality_review, task_policy)
+    updated_at = _clean_text(state.get("updated_at", ""))
+
+    verdicts = {
+        "updated_at": updated_at,
+        "task_policy": _verdict_entry(
+            status=_ready_status(task_policy["ready"]),
+            ready=task_policy["ready"],
+            reasons=task_policy["reasons"],
+            updated_at=updated_at,
+            task_class=task_policy["task_class"],
+            task_class_bucket=task_policy["bucket"],
+            quality_requirement=task_policy["quality_requirement"],
+            quality_requirement_source=task_policy["quality_requirement_source"],
+            manual_escalation_required=task_policy["manual_escalation_required"],
+            manual_escalation_reasons=task_policy["manual_escalation_reasons"],
+        ),
+        "product_gate": _verdict_entry(
+            status=_ready_status(product_gate["ready"]),
+            ready=product_gate["ready"],
+            reasons=product_gate["reasons"],
+            updated_at=updated_at,
+            anchor=product_gate["anchor"],
+            goal=product_gate["goal"],
+            goal_status=product_gate["goal_status"],
+        ),
+        "quality_anchor": _verdict_entry(
+            status=_ready_status(quality_anchor["ready"]),
+            ready=quality_anchor["ready"],
+            reasons=quality_anchor["reasons"],
+            updated_at=updated_at,
+            anchor=quality_anchor["anchor"],
+        ),
+        "quality_review": _verdict_entry(
+            status=_ready_status(quality_review["ready"]),
+            ready=quality_review["ready"],
+            reasons=quality_review["reasons"],
+            updated_at=updated_at,
+            anchor=quality_review["anchor"],
+            review_status=quality_review["review_status"],
+            last_review_at=quality_review["last_review_at"],
+        ),
+        "degraded_ack": _verdict_entry(
+            status=_degraded_ack_status(degraded_ack),
+            ready=degraded_ack["ready"],
+            reasons=degraded_ack["reasons"],
+            updated_at=updated_at,
+            required=degraded_ack["required"],
+            ack_by=degraded_ack["ack_by"],
+            ack_at=degraded_ack["ack_at"],
+        ),
+        "quality_seat_execution": _verdict_entry(
+            status=quality_seat["execution_status"],
+            ready=quality_seat["execution_ready"],
+            reasons=quality_seat["execution_reasons"],
+            updated_at=updated_at,
+            mode=quality_seat["mode"],
+        ),
+        "quality_seat_completion": _verdict_entry(
+            status=quality_seat["completion_status"],
+            ready=quality_seat["completion_ready"],
+            reasons=quality_seat["completion_reasons"],
+            updated_at=updated_at,
+            mode=quality_seat["mode"],
+        ),
+    }
+
+    return {
+        "owner": owner,
+        "supervisors": supervisors,
+        "executors": executors,
+        "skeptics": skeptics,
+        "product_anchors": product_anchors,
+        "quality_anchors": quality_anchors,
+        "high_risk_mode": high_risk_mode,
+        "integration_pressure": integration_pressure,
+        "scale_out_recommended": scale_out_recommended,
+        "scale_out_triggers": scale_out_triggers,
+        "role_integrity": role_integrity,
+        "task_policy": task_policy,
+        "product_gate": product_gate,
+        "quality_anchor": quality_anchor,
+        "quality_review": quality_review,
+        "degraded_ack": degraded_ack,
+        "quality_seat": quality_seat,
+        "verdicts": verdicts,
     }
 
 

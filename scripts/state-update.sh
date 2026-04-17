@@ -36,17 +36,15 @@ state_path = repo / "workspace" / "state" / task_id / "state.json"
 events_path = repo / "workspace" / "state" / task_id / "events.jsonl"
 
 from team_governance import (
-    degraded_ack_analysis,
     default_product_anchors,
     default_quality_anchors,
     default_skeptics,
+    governance_snapshot,
     normalize_people,
-    product_gate_analysis,
-    quality_anchor_analysis,
-    quality_review_analysis,
     scale_out_analysis,
     task_class_analysis,
 )
+from artifact_semantics import closeout_verdict
 
 if not state_path.exists():
     print(json.dumps({"error": "state not found", "task_id": task_id}, ensure_ascii=False))
@@ -381,7 +379,7 @@ state["product"].setdefault("task_class", "")
 state["product"].setdefault("quality_requirement", "")
 state["product"].setdefault("task_class_rationale", "")
 state["product"]["anchor"] = product_anchors[0] if product_anchors else owner
-task_policy = task_class_analysis(state["product"])
+task_policy = task_class_analysis(state["product"], escalation_triggers=team.get("scale_out_triggers", []))
 if not str(state["product"].get("quality_requirement", "")).strip() and task_policy.get("quality_requirement"):
     state["product"]["quality_requirement"] = task_policy["quality_requirement"]
 if not str(state["product"].get("task_class_rationale", "")).strip() and task_policy.get("rationale"):
@@ -394,23 +392,41 @@ state["quality"].setdefault("review_examples", [])
 state["quality"].setdefault("last_review_at", "")
 state["quality"]["anchor"] = quality_anchors[0] if quality_anchors else ""
 
-product_gate = product_gate_analysis(state.get("product", {}), product_anchors, team.get("anchor_policy", {}))
-quality_anchor = quality_anchor_analysis(state.get("quality", {}), quality_anchors, team.get("anchor_policy", {}))
-quality_review = quality_review_analysis(state.get("quality", {}), quality_anchors, team.get("anchor_policy", {}))
-degraded_ack = degraded_ack_analysis(role_integrity)
+state["updated_at"] = timestamp
+governance = governance_snapshot(state, verification_history=verification_history, fill_missing_team=True)
+team.update({
+    "supervisors": governance["supervisors"],
+    "executors": governance["executors"],
+    "skeptics": governance["skeptics"],
+    "product_anchors": governance["product_anchors"],
+    "quality_anchors": governance["quality_anchors"],
+    "high_risk_mode": governance["high_risk_mode"],
+    "integration_pressure": governance["integration_pressure"],
+    "scale_out_recommended": governance["scale_out_recommended"],
+    "scale_out_triggers": governance["scale_out_triggers"],
+    "role_integrity": governance["role_integrity"],
+})
+state["product"]["anchor"] = governance["product_anchors"][0] if governance["product_anchors"] else owner
+state["quality"]["anchor"] = governance["quality_anchors"][0] if governance["quality_anchors"] else ""
+state["verdicts"] = governance["verdicts"]
+state["verdicts"]["execution_closeout"] = closeout_verdict(
+    repo,
+    task_id,
+    state=state,
+    updated_at=timestamp,
+)
 
 state.setdefault("notes", [])
 if data.get("note"):
     state["notes"].append({
         "timestamp": timestamp,
         "text": data["note"],
-        "product_gate_ready": product_gate["ready"],
-        "quality_anchor_ready": quality_anchor["ready"],
-        "quality_review_ready": quality_review["ready"],
-        "degraded_ack_ready": degraded_ack["ready"],
+        "product_gate_ready": governance["product_gate"]["ready"],
+        "quality_anchor_ready": governance["quality_anchor"]["ready"],
+        "quality_review_ready": governance["quality_review"]["ready"],
+        "degraded_ack_ready": governance["degraded_ack"]["ready"],
     })
 
-state["updated_at"] = timestamp
 state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 event = {

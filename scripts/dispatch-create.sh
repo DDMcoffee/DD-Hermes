@@ -53,14 +53,7 @@ runtime_path = context_wrapper["runtime_path"]
 state_path = context_wrapper["state_path"]
 
 from team_governance import (
-    degraded_ack_analysis,
-    merge_triggers,
-    normalize_people,
-    product_gate_analysis,
-    task_class_analysis,
-    quality_anchor_analysis,
-    quality_seat_analysis,
-    scale_out_analysis,
+    governance_snapshot,
 )
 
 
@@ -83,33 +76,22 @@ def run_json(cmd):
 
 
 team = state.get("team", {}) if isinstance(state.get("team"), dict) else {}
-supervisors = normalize_people(team.get("supervisors", []))
-executors = normalize_people(team.get("executors", []))
-skeptics = normalize_people(team.get("skeptics", []))
-product_anchors = normalize_people(team.get("product_anchors", []))
-quality_anchors = normalize_people(team.get("quality_anchors", []))
 product = state.get("product", {}) if isinstance(state.get("product"), dict) else {}
 quality = state.get("quality", {}) if isinstance(state.get("quality"), dict) else {}
-task_policy = task_class_analysis(product)
-role_analysis = scale_out_analysis(
-    owner=state.get("owner", "lead"),
-    supervisors=supervisors,
-    executors=executors,
-    skeptics=skeptics,
-    high_risk_mode=bool(team.get("high_risk_mode", False)),
-    integration_pressure=bool(team.get("integration_pressure", False)),
-)
-scale_out_triggers = merge_triggers(team.get("scale_out_triggers", []), role_analysis["scale_out_triggers"])
-stored_role_integrity = team.get("role_integrity", {}) if isinstance(team.get("role_integrity"), dict) else {}
-role_integrity = {
-    **role_analysis["role_integrity"],
-    "degraded_ack_by": stored_role_integrity.get("degraded_ack_by", ""),
-    "degraded_ack_at": stored_role_integrity.get("degraded_ack_at", ""),
-}
-product_gate = product_gate_analysis(product, product_anchors, team.get("anchor_policy", {}))
-quality_anchor = quality_anchor_analysis(quality, quality_anchors, team.get("anchor_policy", {}))
-degraded_ack = degraded_ack_analysis(role_integrity)
-quality_seat = quality_seat_analysis(role_integrity, quality_anchor, degraded_ack, None, task_policy)
+governance = governance_snapshot(state)
+supervisors = governance["supervisors"]
+executors = governance["executors"]
+skeptics = governance["skeptics"]
+product_anchors = governance["product_anchors"]
+quality_anchors = governance["quality_anchors"]
+scale_out_triggers = governance["scale_out_triggers"]
+task_policy = governance["task_policy"]
+role_integrity = governance["role_integrity"]
+product_gate = governance["product_gate"]
+quality_anchor = governance["quality_anchor"]
+degraded_ack = governance["degraded_ack"]
+quality_seat = governance["quality_seat"]
+verdicts = governance["verdicts"]
 
 if not supervisors:
     print(json.dumps({"error": "dispatch requires at least one supervisor", "blocked": True}, ensure_ascii=False))
@@ -272,19 +254,25 @@ print(json.dumps({
         "task_class_rationale": product.get("task_class_rationale", "") or task_policy["rationale"],
         "quality_requirement": task_policy["quality_requirement"],
         "quality_requirement_source": task_policy["quality_requirement_source"],
+        "task_policy_status": verdicts["task_policy"]["status"],
+        "manual_escalation_required": task_policy["manual_escalation_required"],
+        "manual_escalation_reasons": task_policy["manual_escalation_reasons"],
         "task_policy_reasons": task_policy["reasons"],
         "product_gate_ready": product_gate["ready"],
+        "product_gate_status": verdicts["product_gate"]["status"],
         "product_gate_reasons": product_gate["reasons"],
         "product_user_value": product.get("user_value", ""),
         "product_non_goals": product.get("non_goals", []),
         "quality_review_status": quality.get("review_status", ""),
         "quality_anchor_ready": quality_anchor["ready"],
+        "quality_anchor_status": verdicts["quality_anchor"]["status"],
         "quality_anchor_reasons": quality_anchor["reasons"],
     },
     "independent_skeptic": role_integrity["independent_skeptic"],
     "degraded": role_integrity["degraded"],
     "degraded_ack_required": degraded_ack["required"],
     "degraded_ack_ready": degraded_ack["ready"],
+    "degraded_ack_status": verdicts["degraded_ack"]["status"],
     "degraded_ack_by": degraded_ack["ack_by"],
     "degraded_ack_at": degraded_ack["ack_at"],
     "role_conflicts": role_integrity["role_conflicts"],
@@ -297,8 +285,11 @@ print(json.dumps({
     "task_class_bucket": task_policy["bucket"],
     "quality_requirement": task_policy["quality_requirement"],
     "quality_requirement_source": task_policy["quality_requirement_source"],
+    "task_policy_status": verdicts["task_policy"]["status"],
+    "manual_escalation_required": task_policy["manual_escalation_required"],
+    "manual_escalation_reasons": task_policy["manual_escalation_reasons"],
     "task_policy_reasons": task_policy["reasons"],
-    "scale_out_recommended": bool(team.get("scale_out_recommended", False)) or bool(scale_out_triggers),
+    "scale_out_recommended": governance["scale_out_recommended"],
     "scale_out_triggers": scale_out_triggers,
     "summary": {
         "supervisor_count": len(supervisors),

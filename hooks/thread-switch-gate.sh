@@ -36,7 +36,7 @@ target = sys.argv[2]
 script_dir = Path(sys.argv[3]).resolve()
 sys.path.insert(0, str(script_dir))
 
-from team_governance import degraded_ack_analysis, product_gate_analysis, quality_anchor_analysis, quality_seat_analysis, task_class_analysis
+from team_governance import governance_snapshot
 
 if not state_path.exists():
     print(json.dumps({
@@ -98,14 +98,14 @@ if target == "execution" and lease_status == "paused":
 
 if target == "execution":
     product = state.get("product", {}) if isinstance(state.get("product"), dict) else {}
-    quality = state.get("quality", {}) if isinstance(state.get("quality"), dict) else {}
+    governance = governance_snapshot(state)
     team = state.get("team", {}) if isinstance(state.get("team"), dict) else {}
-    role_integrity = team.get("role_integrity", {}) if isinstance(team.get("role_integrity"), dict) else {}
-    product_gate = product_gate_analysis(product, team.get("product_anchors", []), team.get("anchor_policy", {}))
-    quality_anchor = quality_anchor_analysis(quality, team.get("quality_anchors", []), team.get("anchor_policy", {}))
-    degraded_ack = degraded_ack_analysis(role_integrity)
-    task_policy = task_class_analysis(product)
-    quality_seat = quality_seat_analysis(role_integrity, quality_anchor, degraded_ack, None, task_policy)
+    product_gate = governance["product_gate"]
+    quality_anchor = governance["quality_anchor"]
+    degraded_ack = governance["degraded_ack"]
+    task_policy = governance["task_policy"]
+    quality_seat = governance["quality_seat"]
+    verdicts = governance["verdicts"]
     goal = product.get("goal", "").strip()
     goal_status = product.get("goal_status", "")
     drift_flags = product.get("goal_drift_flags", [])
@@ -158,9 +158,14 @@ result = {
     "target_thread": target,
     "discussion_policy": policy,
     "synthesis_path": synthesis_path,
+    "task_policy_status": verdicts["task_policy"]["status"] if target == "execution" else "",
+    "product_gate_status": verdicts["product_gate"]["status"] if target == "execution" else "",
+    "quality_anchor_status": verdicts["quality_anchor"]["status"] if target == "execution" else "",
+    "degraded_ack_status": verdicts["degraded_ack"]["status"] if target == "execution" else "",
     "quality_seat_mode": quality_seat["mode"] if target == "execution" else "",
     "quality_seat_status": quality_seat["execution_status"] if target == "execution" else "",
     "quality_seat_reasons": quality_seat["execution_reasons"] if target == "execution" else [],
+    "verdicts_updated_at": verdicts["updated_at"] if target == "execution" else "",
     "blocked_reason": reason,
     "required_next_step": reason if blocked else "",
 }

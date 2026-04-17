@@ -313,6 +313,7 @@ run_context_state() {
   state=$("$ROOT/scripts/state-read.sh" --task-id smoke-sprint)
   assert_json_field "$state" "data['summary']['has_context'] is True and data['summary']['has_runtime_report'] is True and data['summary']['has_supervisor'] is True and data['summary']['supervisor_count'] >= 1"
   assert_json_field "$state" "data['summary']['task_class'] == 'T2' and data['summary']['quality_requirement'] == 'degraded-allowed'"
+  assert_json_field "$state" "data['summary']['execution_closeout_status'] == 'blocked' and data['summary']['ready_for_execution_slice_done'] is False"
 
   local state_from_worktree
   state_from_worktree=$(cd "$ROOT/.worktrees/smoke-sprint-expert-a" && ./scripts/state-read.sh --task-id smoke-sprint)
@@ -325,8 +326,8 @@ EOF
   local updated
   updated=$("$ROOT/scripts/state-read.sh" --task-id smoke-sprint)
   assert_json_field "$updated" "data['state']['mode'] == 'execution' and data['state']['active_expert'] == 'expert-a' and data['state']['lease']['status'] == 'running' and data['summary']['scale_out_recommended'] is True and 'parallel_execution_slices' in data['summary']['scale_out_triggers'] and 'integration_pressure' in data['summary']['scale_out_triggers'] and data['summary']['independent_skeptic'] is True and data['summary']['role_conflicts'] == []"
-  assert_json_field "$updated" "data['summary']['product_gate_ready'] is True and data['summary']['quality_anchor_ready'] is True"
-  assert_json_field "$updated" "data['summary']['task_class'] == 'T2' and data['summary']['quality_requirement'] == 'degraded-allowed'"
+  assert_json_field "$updated" "data['summary']['product_gate_ready'] is True and data['summary']['quality_anchor_ready'] is True and data['summary']['product_gate_status'] == 'ready' and data['summary']['quality_anchor_status'] == 'ready'"
+  assert_json_field "$updated" "data['summary']['task_class'] == 'T2' and data['summary']['quality_requirement'] == 'degraded-allowed' and data['summary']['quality_requirement_ready'] is False and data['summary']['manual_escalation_required'] is True and 't2_manual_escalation_required:integration_pressure' in data['summary']['manual_escalation_reasons']"
 
   set +e
   "$ROOT/scripts/state-update.sh" --task-id smoke-sprint <<'EOF' >/dev/null
@@ -369,10 +370,16 @@ PY
 )
   assert_json_field "$paused_packet" "data['continuation']['lease']['status'] == 'paused' and data['continuation']['lease']['resume_checkpoint'] == 'expert-a:after-hooks'"
   assert_json_field "$paused_packet" "data['context_summary']['supervisor_count'] >= 1 and data['context_summary']['scale_out_recommended'] is True and 'parallel_execution_slices' in data['context_summary']['scale_out_triggers'] and data['context_summary']['independent_skeptic'] is True"
-  assert_json_field "$paused_packet" "data['context_summary']['product_gate_ready'] is True and data['context_summary']['quality_anchor_ready'] is True"
+  assert_json_field "$paused_packet" "data['context_summary']['product_gate_ready'] is True and data['context_summary']['quality_anchor_ready'] is True and data['context_summary']['product_gate_status'] == 'ready' and data['context_summary']['quality_anchor_status'] == 'ready'"
+  assert_json_field "$paused_packet" "data['context_summary']['task_class'] == 'T2' and data['context_summary']['quality_requirement'] == 'degraded-allowed' and data['context_summary']['quality_requirement_ready'] is False and data['context_summary']['manual_escalation_required'] is True and 't2_manual_escalation_required:integration_pressure' in data['context_summary']['manual_escalation_reasons']"
+  assert_json_field "$paused_packet" "data['context_summary']['execution_closeout_status'] == 'blocked' and data['context_summary']['ready_for_execution_slice_done'] is False"
 
   "$ROOT/scripts/state-update.sh" --task-id smoke-sprint <<'EOF' >/dev/null
 {"lease_status":"running","pause_reason":"","resume_after":"","current_focus":"resume from checkpoint","note":"resume execution"}
+EOF
+
+  "$ROOT/scripts/state-update.sh" --task-id smoke-sprint <<'EOF' >/dev/null
+{"integration_pressure":false,"note":"restore low-risk smoke fixture"}
 EOF
 }
 
@@ -493,6 +500,50 @@ EOF
   delivery_gate=$("$ROOT/hooks/thread-switch-gate.sh" --task-id delivery-sprint --target execution)
   assert_json_field "$delivery_gate" "data['pass'] is True and data['discussion_policy'] == 'direct'"
 
+  "$ROOT/scripts/sprint-init.sh" --task-id t2-override-sprint --owner lead --experts expert-a --current-focus "bounded slice under integration pressure" >/dev/null
+  "$ROOT/scripts/state-update.sh" --task-id t2-override-sprint <<'EOF' >/dev/null
+{"supervisors":["lead"],"executors":["expert-a"],"skeptics":["expert-c"],"quality_anchors":["expert-c"],"integration_pressure":true,"note":"t2 manual escalation required fixture"}
+EOF
+
+  local t2_override_state
+  t2_override_state=$("$ROOT/scripts/state-read.sh" --task-id t2-override-sprint)
+  assert_json_field "$t2_override_state" "data['summary']['task_class'] == 'T2' and data['summary']['quality_requirement'] == 'degraded-allowed' and data['summary']['quality_requirement_ready'] is False and data['summary']['manual_escalation_required'] is True and 't2_manual_escalation_required:integration_pressure' in data['summary']['manual_escalation_reasons']"
+
+  local t2_override_context
+  t2_override_context=$("$ROOT/scripts/context-build.sh" --task-id t2-override-sprint --agent-role commander --memory-limit 5)
+  assert_json_field "$t2_override_context" "data['context_path'].endswith('context.json')"
+  local t2_override_packet
+  t2_override_packet=$(python3 - "$ROOT/workspace/state/t2-override-sprint/context.json" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+print(json.dumps(json.loads(Path(sys.argv[1]).read_text(encoding='utf-8')), ensure_ascii=False))
+PY
+)
+  assert_json_field "$t2_override_packet" "data['context_summary']['quality_requirement_ready'] is False and data['context_summary']['manual_escalation_required'] is True and 't2_manual_escalation_required:integration_pressure' in data['context_summary']['manual_escalation_reasons']"
+
+  set +e
+  local t2_override_dispatch_blocked
+  t2_override_dispatch_blocked=$("$ROOT/scripts/dispatch-create.sh" --task-id t2-override-sprint)
+  gate_status=$?
+  set -e
+  [[ $gate_status -eq 2 ]]
+  assert_json_field "$t2_override_dispatch_blocked" "data['blocked'] is True and data['task_class'] == 'T2' and data['quality_requirement'] == 'degraded-allowed'"
+  assert_json_field "$t2_override_dispatch_blocked" "'t2_manual_escalation_required:integration_pressure' in data['task_policy_reasons']"
+
+  "$ROOT/scripts/state-update.sh" --task-id t2-override-sprint <<'EOF' >/dev/null
+{"quality_requirement":"requires-independent","note":"t2 explicit escalation fixture"}
+EOF
+  local t2_override_dispatch_ready
+  t2_override_dispatch_ready=$("$ROOT/scripts/dispatch-create.sh" --task-id t2-override-sprint)
+  assert_json_field "$t2_override_dispatch_ready" "data['task_class'] == 'T2' and data['quality_requirement'] == 'requires-independent' and data['quality_requirement_source'] == 'explicit_escalation'"
+  assert_json_field "$t2_override_dispatch_ready" "data['manual_escalation_required'] is False and data['quality_seat_mode'] == 'independent' and data['quality_seat_ready'] is True"
+
+  local t2_override_gate
+  t2_override_gate=$("$ROOT/hooks/thread-switch-gate.sh" --task-id t2-override-sprint --target execution)
+  assert_json_field "$t2_override_gate" "data['pass'] is True"
+
   "$ROOT/scripts/sprint-init.sh" --task-id product-gap-sprint --owner lead --experts expert-a --current-focus "delivery bugfix" >/dev/null
   "$ROOT/scripts/state-update.sh" --task-id product-gap-sprint <<'EOF' >/dev/null
 {"product_goal":"","user_value":"","non_goals":[],"product_acceptance":[],"drift_risk":"","last_product_review_at":"","note":"product gate gap fixture"}
@@ -535,6 +586,42 @@ run_verify() {
   local state
   state=$("$ROOT/scripts/state-read.sh" --task-id smoke-sprint)
   assert_json_field "$state" "data['state']['verification']['last_run_at'] != ''"
+}
+
+run_entry() {
+  local entry
+  entry=$("$ROOT/scripts/demo-entry.sh")
+  [[ "$entry" == *"DD Hermes 体验入口"* ]]
+  [[ "$entry" == *"最近一次真实 end-to-end 证明"* ]]
+
+  python3 - "$ROOT/指挥文档/06-一期PhaseDone审计.md" <<'PY'
+from pathlib import Path
+import re
+import sys
+
+path = Path(sys.argv[1])
+text = path.read_text(encoding="utf-8")
+match = re.match(r"---\n(.*?)\n---\n", text, re.S)
+if not match:
+    raise SystemExit("frontmatter missing")
+lines = []
+for line in match.group(1).splitlines():
+    if line.startswith("current_mainline_task_id:"):
+        lines.append("current_mainline_task_id:")
+    elif line.startswith("current_gap_1:"):
+        lines.append("current_gap_1: 最近一个 phase-2 proof 已归档；当前还没有新的 active mainline。")
+    elif line.startswith("current_gap_2:"):
+        lines.append("current_gap_2: 下一步需要在新 task id 下定义 successor mainline，而不是重开 `dd-hermes-quality-seat-escalation-rules-v1`。")
+    else:
+        lines.append(line)
+updated = "---\n" + "\n".join(lines) + "\n---\n" + text[match.end():]
+path.write_text(updated, encoding="utf-8")
+PY
+
+  local vacant
+  vacant=$("$ROOT/scripts/demo-entry.sh")
+  [[ "$vacant" == *"当前 active mainline：暂无"* ]]
+  [[ "$vacant" == *"下一步决策文档：指挥文档/04-任务重校准与线程策略.md"* ]]
 }
 
 run_schema() {
@@ -620,7 +707,7 @@ for key in ("event_id", "memory_id", "op", "actor", "timestamp", "reason", "sour
         fail(f"memory journal event missing key: {key}")
 
 state = json.loads((root / "workspace" / "state" / "smoke-sprint" / "state.json").read_text(encoding="utf-8"))
-for key in ("task_id", "status", "mode", "owner", "experts", "openspec", "runtime", "lease", "git", "verification", "memory", "team", "updated_at"):
+for key in ("task_id", "status", "mode", "owner", "experts", "openspec", "runtime", "lease", "git", "verification", "memory", "team", "verdicts", "updated_at"):
     if key not in state:
         fail(f"state missing key: {key}")
 for key in ("supervisors", "executors", "skeptics", "product_anchors", "quality_anchors", "anchor_policy", "scale_out_recommended", "scale_out_triggers", "role_integrity"):
@@ -635,12 +722,20 @@ for key in ("anchor", "goal", "user_value", "task_class", "quality_requirement",
 for key in ("anchor", "review_status", "review_findings", "review_examples", "last_review_at"):
     if key not in state["quality"]:
         fail(f"state.quality missing key: {key}")
+for key in ("updated_at", "task_policy", "product_gate", "quality_anchor", "quality_review", "degraded_ack", "quality_seat_execution", "quality_seat_completion", "execution_closeout"):
+    if key not in state["verdicts"]:
+        fail(f"state.verdicts missing key: {key}")
+for verdict_key in ("task_policy", "product_gate", "quality_anchor", "quality_review", "degraded_ack", "quality_seat_execution", "quality_seat_completion", "execution_closeout"):
+    verdict = state["verdicts"][verdict_key]
+    for key in ("status", "ready", "reasons", "updated_at"):
+        if key not in verdict:
+            fail(f"state.verdicts.{verdict_key} missing key: {key}")
 
 context = json.loads((root / "workspace" / "state" / "smoke-sprint" / "context.json").read_text(encoding="utf-8"))
 for key in ("task_id", "runtime", "state", "memory", "continuation", "documents", "context_summary"):
     if key not in context:
         fail(f"context missing key: {key}")
-for key in ("supervisor_count", "product_anchor_count", "quality_anchor_count", "product_anchor_name", "product_anchor_role", "quality_anchor_name", "quality_anchor_role", "product_goal", "product_goal_status", "task_class", "task_class_bucket", "task_class_rationale", "quality_requirement", "quality_requirement_source", "quality_requirement_ready", "quality_requirement_reasons", "quality_review_status", "scale_out_recommended", "scale_out_triggers", "product_gate_ready", "quality_anchor_ready", "quality_review_ready", "degraded_ack_required", "degraded_ack_ready"):
+for key in ("supervisor_count", "product_anchor_count", "quality_anchor_count", "product_anchor_name", "product_anchor_role", "quality_anchor_name", "quality_anchor_role", "product_goal", "product_goal_status", "task_class", "task_class_bucket", "task_class_rationale", "quality_requirement", "quality_requirement_source", "quality_requirement_ready", "quality_requirement_reasons", "task_policy_status", "manual_escalation_required", "manual_escalation_reasons", "quality_review_status", "scale_out_recommended", "scale_out_triggers", "product_gate_ready", "product_gate_status", "quality_anchor_ready", "quality_anchor_status", "quality_review_ready", "quality_review_gate_status", "degraded_ack_required", "degraded_ack_ready", "degraded_ack_status", "execution_closeout_ready", "execution_closeout_status", "execution_closeout_reasons", "execution_closeout_path", "ready_for_execution_slice_done", "verdicts_updated_at"):
     if key not in context["context_summary"]:
         fail(f"context_summary missing key: {key}")
 for key in ("independent_skeptic", "role_integrity_degraded", "role_conflicts"):
@@ -679,7 +774,7 @@ subprocess.run(
 )
 
 dispatch = run_json([str(root / "scripts" / "dispatch-create.sh"), "--task-id", "smoke-sprint"])
-require_keys(dispatch, ("task_id", "contract_path", "state_path", "context_path", "runtime_path", "independent_skeptic", "degraded", "degraded_ack_ready", "role_conflicts", "role_overlap", "task_class", "task_class_bucket", "quality_requirement", "task_policy_reasons", "quality_seat_mode", "quality_seat_ready", "quality_seat_status", "quality_seat_reasons", "scale_out_recommended", "scale_out_triggers", "summary", "assignments"))
+require_keys(dispatch, ("task_id", "contract_path", "state_path", "context_path", "runtime_path", "independent_skeptic", "degraded", "degraded_ack_ready", "degraded_ack_status", "role_conflicts", "role_overlap", "task_class", "task_class_bucket", "quality_requirement", "manual_escalation_required", "manual_escalation_reasons", "task_policy_reasons", "task_policy_status", "quality_seat_mode", "quality_seat_ready", "quality_seat_status", "quality_seat_reasons", "scale_out_recommended", "scale_out_triggers", "summary", "assignments"))
 require_keys(dispatch["summary"], ("supervisor_count", "executor_count", "skeptic_count", "assignment_count", "created_worktree_count", "existing_worktree_count", "quality_seat_mode", "quality_seat_ready", "quality_seat_status"))
 if dispatch["summary"]["supervisor_count"] < 1 or dispatch["summary"]["executor_count"] < 2 or dispatch["summary"]["skeptic_count"] < 1:
     fail("dispatch summary counts are incomplete")
@@ -699,18 +794,24 @@ if context_build["memory_count"] < 1:
 
 state_read = run_json([str(root / "scripts" / "state-read.sh"), "--task-id", "smoke-sprint"])
 require_keys(state_read, ("state", "summary"))
-require_keys(state_read["summary"], ("verification_complete", "has_context", "has_runtime_report", "has_supervisor", "supervisor_count", "product_anchor_count", "quality_anchor_count", "product_anchor_name", "product_anchor_role", "product_goal_ready", "product_goal_status", "task_class", "task_class_bucket", "quality_requirement", "quality_requirement_ready", "quality_requirement_reasons", "quality_review_status", "product_gate_ready", "quality_anchor_ready", "quality_review_ready", "quality_seat_mode", "quality_seat_ready", "quality_seat_status", "quality_seat_reasons", "independent_skeptic", "role_integrity_degraded", "degraded_ack_required", "degraded_ack_ready", "role_conflicts", "scale_out_recommended", "scale_out_triggers", "event_count"))
+require_keys(state_read["summary"], ("verification_complete", "has_context", "has_runtime_report", "has_supervisor", "supervisor_count", "product_anchor_count", "quality_anchor_count", "product_anchor_name", "product_anchor_role", "product_goal_ready", "product_goal_status", "task_class", "task_class_bucket", "quality_requirement", "quality_requirement_ready", "quality_requirement_reasons", "task_policy_status", "manual_escalation_required", "manual_escalation_reasons", "quality_review_status", "product_gate_ready", "product_gate_status", "quality_anchor_ready", "quality_anchor_status", "quality_review_ready", "quality_review_gate_status", "quality_seat_mode", "quality_seat_ready", "quality_seat_status", "quality_seat_reasons", "execution_closeout_ready", "execution_closeout_status", "execution_closeout_reasons", "execution_closeout_path", "ready_for_execution_slice_done", "independent_skeptic", "role_integrity_degraded", "degraded_ack_required", "degraded_ack_ready", "degraded_ack_status", "role_conflicts", "scale_out_recommended", "scale_out_triggers", "verdicts_updated_at", "event_count"))
 if state_read["summary"]["quality_seat_mode"] != "degraded" or state_read["summary"]["quality_seat_status"] != "ready":
     fail("state-read quality seat summary should expose degraded ready truth")
 if state_read["summary"]["task_class"] != "T2" or state_read["summary"]["quality_requirement"] != "degraded-allowed":
     fail("state-read should expose T2 degraded-allowed truth")
+if state_read["summary"]["task_policy_status"] != "ready" or state_read["summary"]["product_gate_status"] != "ready":
+    fail("state-read should expose ready persisted verdict statuses for the degraded-ready fixture")
+if state_read["summary"]["execution_closeout_status"] != "blocked" or state_read["summary"]["ready_for_execution_slice_done"] is not False:
+    fail("state-read should expose blocked execution_closeout before real closeout evidence is written")
 
 artifact_check = run_json([str(root / "scripts" / "check-artifact-schemas.sh"), "--task-id", "smoke-sprint"])
-require_keys(artifact_check, ("task_id", "checked", "artifacts", "errors", "valid", "semantic_valid", "ready_for_execution_slice_done"))
+require_keys(artifact_check, ("task_id", "checked", "artifacts", "errors", "valid", "execution_closeout", "semantic_valid", "ready_for_execution_slice_done"))
 if not artifact_check["valid"]:
     fail(f"artifact schema check failed: {artifact_check['errors']}")
 if artifact_check["semantic_valid"]:
     fail("artifact schema semantic_valid should be false before closeout is completed")
+if artifact_check["execution_closeout"]["status"] != "blocked":
+    fail("artifact schema should expose blocked execution_closeout before closeout is completed")
 
 for archived_task in ("dd-hermes-anchor-governance-v1", "dd-hermes-independent-quality-seat-v1"):
     archived_check = run_json([str(root / "scripts" / "check-artifact-schemas.sh"), "--task-id", archived_task])
@@ -786,6 +887,16 @@ Smoke fixture closeout for {expert} upgraded to semantic completion state.
 artifact_check = run_json([str(root / "scripts" / "check-artifact-schemas.sh"), "--task-id", "smoke-sprint"])
 if not artifact_check["semantic_valid"] or not artifact_check["ready_for_execution_slice_done"]:
     fail(f"artifact semantic check failed after closeout completion: {artifact_check['semantic_errors']}")
+subprocess.run(
+    [str(root / "scripts" / "state-update.sh"), "--task-id", "smoke-sprint"],
+    input=json.dumps({"note": "refresh execution closeout verdict after semantic closeout fixture"}),
+    text=True,
+    capture_output=True,
+    check=True,
+)
+state_after_closeout = json.loads((root / "workspace" / "state" / "smoke-sprint" / "state.json").read_text(encoding="utf-8"))
+if state_after_closeout["verdicts"]["execution_closeout"]["status"] != "ready" or state_after_closeout["verdicts"]["execution_closeout"]["ready"] is not True:
+    fail("state should persist ready execution_closeout after closeout refresh")
 
 worktree_status = run_json([str(root / "scripts" / "worktree-status.sh"), "--task-id", "smoke-sprint"])
 require_keys(worktree_status, ("clean", "dirty_files", "linked_contract", "linked_handoff"))
@@ -854,7 +965,7 @@ EOF
 
   local closeout
   closeout=$("$ROOT/scripts/coordination-endpoint.sh" --task-id smoke-sprint --endpoint closeout.check)
-  assert_json_field "$closeout" "data['task_id'] == 'smoke-sprint' and data['valid'] is True and 'semantic_valid' in data and 'ready_for_execution_slice_done' in data"
+  assert_json_field "$closeout" "data['task_id'] == 'smoke-sprint' and data['valid'] is True and 'execution_closeout' in data and 'semantic_valid' in data and 'ready_for_execution_slice_done' in data"
 
   set +e
   "$ROOT/scripts/coordination-endpoint.sh" --task-id smoke-sprint --endpoint unknown >/dev/null
@@ -889,6 +1000,7 @@ case "$SECTION" in
     run_dispatch
     run_context_state
     run_verify
+    run_entry
     run_endpoint
     run_schema
     ;;
@@ -919,6 +1031,7 @@ case "$SECTION" in
     run_context_state
     run_verify
     ;;
+  entry) run_entry ;;
   endpoint)
     run_workflow
     run_dispatch

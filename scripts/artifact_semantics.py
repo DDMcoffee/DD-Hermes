@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from pathlib import Path
 
 
 def parse_frontmatter(text: str) -> dict:
@@ -83,6 +84,19 @@ def _section_body(text: str, heading: str) -> str:
     return match.group("body").strip()
 
 
+def _merge_reasons(*groups):
+    merged = []
+    seen = set()
+    for group in groups:
+        for item in group or []:
+            text = _clean_text(item)
+            if not text or text in seen:
+                continue
+            seen.add(text)
+            merged.append(text)
+    return merged
+
+
 def closeout_semantic_analysis(frontmatter: dict, text: str = "", state: dict | None = None) -> dict:
     frontmatter = frontmatter if isinstance(frontmatter, dict) else {}
     state = state if isinstance(state, dict) else {}
@@ -131,4 +145,69 @@ def closeout_semantic_analysis(frontmatter: dict, text: str = "", state: dict | 
         "verified_step_count": len(verified_steps),
         "verified_file_count": len(verified_files),
         "quality_findings_count": len(findings),
+    }
+
+
+def closeout_verdict(repo_root, task_id: str, *, state: dict | None = None, active_expert: str = "", updated_at: str = "") -> dict:
+    repo_root = Path(repo_root).resolve()
+    task_id = _clean_text(task_id)
+    state = state if isinstance(state, dict) else {}
+    active_expert = _clean_text(active_expert) or _clean_text(state.get("active_expert", ""))
+    updated_at = _clean_text(updated_at) or _clean_text(state.get("updated_at", ""))
+
+    closeout_dir = repo_root / "workspace" / "closeouts"
+    candidates = sorted(closeout_dir.glob(f"{task_id}-*.md")) if task_id else []
+    closeout_path = ""
+    selection_reasons = []
+    selected_by = ""
+    semantic = {
+        "ready": False,
+        "reasons": [],
+        "execution_commit": "",
+        "quality_review_status": "",
+        "verified_step_count": 0,
+        "verified_file_count": 0,
+        "quality_findings_count": 0,
+    }
+
+    selected = []
+    if active_expert:
+        selected = [candidate for candidate in candidates if candidate.name == f"{task_id}-{active_expert}.md"]
+        if selected:
+            selected_by = "active_expert"
+        elif candidates:
+            selection_reasons.append(f"closeout_for_active_expert_missing:{active_expert}")
+        else:
+            selection_reasons.append("closeout_missing")
+    elif len(candidates) == 1:
+        selected = candidates
+        selected_by = "single_match"
+    elif candidates:
+        selection_reasons.append("closeout_selection_ambiguous")
+    else:
+        selection_reasons.append("closeout_missing")
+
+    if selected:
+        closeout_path = str(selected[0])
+        closeout_text = selected[0].read_text(encoding="utf-8")
+        closeout_frontmatter = parse_frontmatter(closeout_text)
+        semantic = closeout_semantic_analysis(closeout_frontmatter, closeout_text, state)
+
+    reasons = _merge_reasons(selection_reasons, semantic.get("reasons", []))
+    ready = not reasons
+    return {
+        "status": "ready" if ready else "blocked",
+        "ready": ready,
+        "reasons": reasons,
+        "updated_at": updated_at,
+        "closeout_path": closeout_path,
+        "selected_by": selected_by,
+        "candidate_count": len(candidates),
+        "semantic_valid": bool(semantic.get("ready", False)),
+        "ready_for_execution_slice_done": ready,
+        "execution_commit": semantic.get("execution_commit", ""),
+        "quality_review_status": semantic.get("quality_review_status", ""),
+        "verified_step_count": semantic.get("verified_step_count", 0),
+        "verified_file_count": semantic.get("verified_file_count", 0),
+        "quality_findings_count": semantic.get("quality_findings_count", 0),
     }
