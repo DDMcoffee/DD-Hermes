@@ -4,8 +4,8 @@ latest_proof_task_id: dd-hermes-quality-seat-escalation-rules-v1
 latest_proof_archive: openspec/archive/dd-hermes-quality-seat-escalation-rules-v1.md
 current_mainline_task_id: dd-hermes-explicit-gate-verdicts-v1
 current_mainline_doc: 指挥文档/04-任务重校准与线程策略.md
-current_gap_1: 新的 active mainline 已建立，但 `dd-hermes-explicit-gate-verdicts-v1` 还没有完成 closeout / integration / archive 收口。
-current_gap_2: 当前主线已开始把 `execution_closeout` 纳入显式 verdict 持久层；真实剩余问题是何时完成独立质量复核、closeout 收口与 archive。
+current_gap_1: `dd-hermes-explicit-gate-verdicts-v1` 的 execution slice 已经 commit 且 review-backed；当前未完成的是 lead integration / archive。
+current_gap_2: lead integration 现在被主工作区与 execution branch 的重叠 dirty files 挡住；在显式清理或对账前，不应宣称 archive ready。
 ---
 
 # DD Hermes 一期 Phase Done 审计
@@ -64,7 +64,8 @@ current_gap_2: 当前主线已开始把 `execution_closeout` 纳入显式 verdic
 - 当前 active mainline：`dd-hermes-explicit-gate-verdicts-v1`
 - 最近归档 proof 已经完成两条 execution slice
 - 当前 successor 已确定为 `dd-hermes-explicit-gate-verdicts-v1`
-- 当前未完成的是这条新主线的 closeout / integration / archive 收口，而不是 successor 选择
+- 当前 execution slice 已经有真实 execution commit、approved quality review 和 semantic closeout
+- 当前未完成的是 lead integration / archive，而且真实 blocker 是主工作区重叠 dirty files，不是 successor 选择
 
 ## 一期为什么现在算 `phase done`
 
@@ -90,8 +91,8 @@ current_gap_2: 当前主线已开始把 `execution_closeout` 纳入显式 verdic
 
 - 一期无剩余 blocker。
 - 当前剩余 gap 全部属于 phase-2：
-  - 需要把 `dd-hermes-explicit-gate-verdicts-v1` 从“已落地并验证”推进到“已 closeout / integration / archive”
-  - 需要把真实独立质量复核与 closeout 证据补齐，而不是继续停留在协议层验证
+  - 需要把 `dd-hermes-explicit-gate-verdicts-v1` 从“已有 review-backed execution slice”推进到“已 integrate / archive”
+  - 需要先处理主工作区与 execution branch 的重叠 dirty files，否则归档声明会失真
 
 ## 当前线程应该去哪里继续看
 

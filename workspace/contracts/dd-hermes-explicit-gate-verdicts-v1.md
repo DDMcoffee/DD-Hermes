@@ -82,4 +82,4 @@ The previous phase-2 proof task closed the escalation matrix, but DD Hermes stil
 
 ## Open Questions
 
-- 当前剩余开放问题不再是“要不要持久化 closeout semantic verdict”，而是这条主线什么时候完成真实 `quality review / closeout / integration / archive` 收口。
+- 当前剩余开放问题已经收窄为：lead 该如何在主工作区仍有重叠脏改的情况下，诚实完成 integration / archive，而不是继续把 execution evidence 缺口误当成主阻塞。
