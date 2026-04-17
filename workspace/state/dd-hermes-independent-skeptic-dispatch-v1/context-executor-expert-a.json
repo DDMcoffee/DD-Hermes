@@ -1,0 +1,933 @@
+{
+  "task_id": "dd-hermes-independent-skeptic-dispatch-v1",
+  "agent_role": "executor",
+  "agent_id": "expert-a",
+  "generated_at": "2026-04-17T17:38:15Z",
+  "sources": {
+    "contract_path": "/Volumes/Coding/Hermes agent for mine/workspace/contracts/dd-hermes-independent-skeptic-dispatch-v1.md",
+    "handoff_paths": [
+      "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-independent-skeptic-dispatch-v1-lead-to-expert-a.md",
+      "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-independent-skeptic-dispatch-v1-lead-to-expert-b.md"
+    ],
+    "exploration_paths": [
+      "/Volumes/Coding/Hermes agent for mine/workspace/exploration/exploration-lead-dd-hermes-independent-skeptic-dispatch-v1.md"
+    ],
+    "state_path": "/Volumes/Coding/Hermes agent for mine/workspace/state/dd-hermes-independent-skeptic-dispatch-v1/state.json",
+    "runtime_path": "/Volumes/Coding/Hermes agent for mine/workspace/state/dd-hermes-independent-skeptic-dispatch-v1/runtime-executor-expert-a.json",
+    "openspec": {
+      "proposal": "/Volumes/Coding/Hermes agent for mine/openspec/proposals/dd-hermes-independent-skeptic-dispatch-v1.md",
+      "design": "/Volumes/Coding/Hermes agent for mine/openspec/designs/dd-hermes-independent-skeptic-dispatch-v1.md",
+      "task": "/Volumes/Coding/Hermes agent for mine/openspec/tasks/dd-hermes-independent-skeptic-dispatch-v1.md",
+      "archive": ""
+    }
+  },
+  "runtime": {
+    "timestamp": "2026-04-17T17:38:15Z",
+    "repo_root": "/Volumes/Coding/Hermes agent for mine",
+    "worktree": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-independent-skeptic-dispatch-v1-expert-a",
+    "agent_role": "executor",
+    "shell": "/bin/zsh",
+    "git": {
+      "repo_root": "/Volumes/Coding/Hermes agent for mine",
+      "worktree": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-independent-skeptic-dispatch-v1-expert-a",
+      "has_head": true,
+      "head": "a0f30fd139f8a4ceae67edace602faee23335a37",
+      "branch": "dd-hermes-independent-skeptic-dispatch-v1-expert-a",
+      "upstream": "",
+      "ahead": 0,
+      "behind": 0,
+      "clean": true,
+      "dirty_files": [],
+      "remote_urls": {},
+      "known_worktrees": [
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine",
+          "head": "a0f30fd139f8a4ceae67edace602faee23335a37",
+          "branch": "main"
+        },
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-anchor-governance-v1-expert-a",
+          "head": "f9d89194b97c5cb630472c1a025d35576d3785af",
+          "branch": "dd-hermes-anchor-governance-v1-expert-a"
+        },
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-execution-bootstrap-expert-a",
+          "head": "4ea93ab8c265585b3de3555c8ecdd1e60311a70e",
+          "branch": "dd-hermes-execution-bootstrap-expert-a"
+        },
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-explicit-gate-verdicts-v1-expert-a",
+          "head": "1af20f9f046b4533b8ee65096142715016180bc3",
+          "branch": "dd-hermes-explicit-gate-verdicts-v1-expert-a"
+        },
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-independent-quality-seat-v1-expert-a",
+          "head": "bfe1739a7b49ced241cc98817423cde1606d1d3b",
+          "branch": "dd-hermes-independent-quality-seat-v1-expert-a"
+        },
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-independent-skeptic-dispatch-v1-expert-a",
+          "head": "a0f30fd139f8a4ceae67edace602faee23335a37",
+          "branch": "dd-hermes-independent-skeptic-dispatch-v1-expert-a"
+        },
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-independent-skeptic-dispatch-v1-expert-b",
+          "head": "a0f30fd139f8a4ceae67edace602faee23335a37",
+          "branch": "dd-hermes-independent-skeptic-dispatch-v1-expert-b"
+        },
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-legacy-archive-normalization-v1-expert-a",
+          "head": "c0237e5163a9cb8d5477765b586f8571bb7370d6",
+          "branch": "dd-hermes-legacy-archive-normalization-v1-expert-a"
+        },
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-quality-seat-escalation-rules-v1-expert-a",
+          "head": "7b39e070cfab9aac46e37afe3655d5fe3208ba43",
+          "branch": "dd-hermes-quality-seat-escalation-rules-v1-expert-a"
+        },
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-s5-2expert-20260416-expert-a",
+          "head": "f2282ca3d6fa13e94f18a13065b226a5dd8aea11",
+          "branch": "dd-hermes-s5-2expert-20260416-expert-a"
+        },
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-s5-2expert-20260416-expert-b",
+          "head": "f2282ca3d6fa13e94f18a13065b226a5dd8aea11",
+          "branch": "dd-hermes-s5-2expert-20260416-expert-b"
+        },
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-successor-triage-v1-expert-a",
+          "head": "dfd6652eae7d080173f445e4ebccfa66deda1fe7",
+          "branch": "dd-hermes-successor-triage-v1-expert-a"
+        }
+      ]
+    },
+    "hooks": {
+      "events": [
+        "PreToolUse",
+        "PostToolUse",
+        "Stop",
+        "SessionEnd"
+      ],
+      "available": [
+        "guard-dangerous-ops.sh",
+        "peon-ping.sh",
+        "post-edit-typecheck.sh",
+        "quality-gate.sh",
+        "session-end-log.sh",
+        "thread-switch-gate.sh"
+      ]
+    },
+    "skills": [
+      "auto-verify",
+      "coding-harness",
+      "deep-research",
+      "spec-first"
+    ],
+    "tests": [
+      "test-artifact-schemas.sh",
+      "test-coordination-endpoint.sh",
+      "test-hooks.sh",
+      "test-memory.sh",
+      "test-schema.sh",
+      "test-verify-loop.sh",
+      "test-workflow.sh",
+      "tests/smoke.sh"
+    ],
+    "task_surfaces": {
+      "contract_path": "/Volumes/Coding/Hermes agent for mine/workspace/contracts/dd-hermes-independent-skeptic-dispatch-v1.md",
+      "state_path": "/Volumes/Coding/Hermes agent for mine/workspace/state/dd-hermes-independent-skeptic-dispatch-v1/state.json"
+    }
+  },
+  "state": {
+    "state_version": 2,
+    "created_at": "2026-04-17T16:56:20Z",
+    "git": {
+      "baseline_commit": "a0f30fd139f8a4ceae67edace602faee23335a37",
+      "latest_commit": "a0f30fd139f8a4ceae67edace602faee23335a37",
+      "latest_branch": "main",
+      "latest_upstream": "",
+      "latest_remote_urls": {}
+    },
+    "discussion": {
+      "policy": "3-explorer-then-execute",
+      "decision_id": "independent-skeptic-dispatch-routing",
+      "explorer_queue": [
+        "architecture",
+        "delivery",
+        "curriculum"
+      ],
+      "explorer_findings": [
+        "/Volumes/Coding/Hermes agent for mine/workspace/decisions/independent-skeptic-dispatch-routing/architecture.md",
+        "/Volumes/Coding/Hermes agent for mine/workspace/decisions/independent-skeptic-dispatch-routing/delivery.md",
+        "/Volumes/Coding/Hermes agent for mine/workspace/decisions/independent-skeptic-dispatch-routing/curriculum.md"
+      ],
+      "synthesis_path": "/Volumes/Coding/Hermes agent for mine/workspace/decisions/independent-skeptic-dispatch-routing/synthesis.md",
+      "current_executor": "expert-a"
+    },
+    "verification": {
+      "last_pass": true,
+      "last_run_at": "2026-04-17T17:34:53Z",
+      "verified_steps": [
+        "./scripts/test-workflow.sh --task-id dd-hermes-independent-skeptic-dispatch-v1",
+        "./scripts/context-build.sh --task-id dd-hermes-independent-skeptic-dispatch-v1 --agent-role commander",
+        "./scripts/check-artifact-schemas.sh --task-id dd-hermes-independent-skeptic-dispatch-v1",
+        "./scripts/demo-entry.sh",
+        "bash tests/smoke.sh all",
+        "blocked-proof: ./scripts/dispatch-create.sh --task-id dd-hermes-independent-skeptic-dispatch-v1",
+        "blocked-proof: ./hooks/thread-switch-gate.sh --task-id dd-hermes-independent-skeptic-dispatch-v1 --target execution",
+        "bash -n scripts/context-build.sh scripts/dispatch-create.sh scripts/state-read.sh scripts/state-update.sh hooks/thread-switch-gate.sh scripts/check-artifact-schemas.sh tests/smoke.sh",
+        "python3 -m py_compile scripts/artifact_semantics.py scripts/team_governance.py",
+        "bash tests/smoke.sh dispatch",
+        "bash tests/smoke.sh discussion",
+        "bash tests/smoke.sh context",
+        "bash tests/smoke.sh schema",
+        "git commit -m 'chore(dd-hermes): checkpoint repo truth before skeptic dispatch'",
+        "./scripts/worktree-create.sh --task-id dd-hermes-independent-skeptic-dispatch-v1 --expert expert-a",
+        "./scripts/worktree-create.sh --task-id dd-hermes-independent-skeptic-dispatch-v1 --expert expert-b",
+        "./scripts/dispatch-create.sh --task-id dd-hermes-independent-skeptic-dispatch-v1"
+      ],
+      "verified_files": [
+        "/Volumes/Coding/Hermes agent for mine/workspace/contracts/dd-hermes-independent-skeptic-dispatch-v1.md",
+        "/Volumes/Coding/Hermes agent for mine/openspec/proposals/dd-hermes-independent-skeptic-dispatch-v1.md",
+        "/Volumes/Coding/Hermes agent for mine/openspec/designs/dd-hermes-independent-skeptic-dispatch-v1.md",
+        "/Volumes/Coding/Hermes agent for mine/openspec/tasks/dd-hermes-independent-skeptic-dispatch-v1.md",
+        "/Volumes/Coding/Hermes agent for mine/workspace/decisions/independent-skeptic-dispatch-routing/synthesis.md",
+        "/Volumes/Coding/Hermes agent for mine/workspace/state/dd-hermes-independent-skeptic-dispatch-v1/state.json",
+        "/Volumes/Coding/Hermes agent for mine/指挥文档/04-任务重校准与线程策略.md",
+        "/Volumes/Coding/Hermes agent for mine/指挥文档/06-一期PhaseDone审计.md",
+        "/Volumes/Coding/Hermes agent for mine/scripts/artifact_semantics.py",
+        "/Volumes/Coding/Hermes agent for mine/scripts/context-build.sh",
+        "/Volumes/Coding/Hermes agent for mine/scripts/dispatch-create.sh",
+        "/Volumes/Coding/Hermes agent for mine/scripts/state-read.sh",
+        "/Volumes/Coding/Hermes agent for mine/scripts/state-update.sh",
+        "/Volumes/Coding/Hermes agent for mine/scripts/check-artifact-schemas.sh",
+        "/Volumes/Coding/Hermes agent for mine/hooks/thread-switch-gate.sh",
+        "/Volumes/Coding/Hermes agent for mine/docs/artifact-schemas.md",
+        "/Volumes/Coding/Hermes agent for mine/docs/coordination-endpoints.md",
+        "/Volumes/Coding/Hermes agent for mine/tests/smoke.sh",
+        "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-independent-skeptic-dispatch-v1-lead-to-expert-a.md",
+        "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-independent-skeptic-dispatch-v1-lead-to-expert-b.md",
+        "/Volumes/Coding/Hermes agent for mine/workspace/state/dd-hermes-independent-skeptic-dispatch-v1/context-executor-expert-a.json",
+        "/Volumes/Coding/Hermes agent for mine/workspace/state/dd-hermes-independent-skeptic-dispatch-v1/runtime-executor-expert-a.json",
+        "/Volumes/Coding/Hermes agent for mine/workspace/state/dd-hermes-independent-skeptic-dispatch-v1/context-skeptic-expert-b.json",
+        "/Volumes/Coding/Hermes agent for mine/workspace/state/dd-hermes-independent-skeptic-dispatch-v1/runtime-skeptic-expert-b.json"
+      ]
+    },
+    "runtime": {
+      "preferred_surface": "repo-first",
+      "worktree_strategy": "isolated",
+      "last_context_path": "/Volumes/Coding/Hermes agent for mine/workspace/state/dd-hermes-independent-skeptic-dispatch-v1/context.json",
+      "last_runtime_report_path": "/Volumes/Coding/Hermes agent for mine/workspace/state/dd-hermes-independent-skeptic-dispatch-v1/runtime.json",
+      "last_worktree_path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-independent-skeptic-dispatch-v1-expert-a"
+    },
+    "lease": {
+      "goal": "Materialize an actually independent skeptic review lane in DD Hermes so a separate quality seat can be dispatched, contextualized, and audited instead of existing only as role metadata.",
+      "status": "running",
+      "duration_hours": 0,
+      "started_at": "",
+      "deadline_at": "",
+      "paused_at": "",
+      "pause_reason": "",
+      "resume_after": "",
+      "resume_checkpoint": "",
+      "dispatch_cursor": ""
+    },
+    "memory": {
+      "reads": [
+        "memory/world/no-destruction-without-confirmation.md"
+      ],
+      "writes": [
+        "memory/task/dd-hermes-independent-skeptic-dispatch-v1.md"
+      ],
+      "last_selected_ids": [
+        "no-destruction-without-confirmation",
+        "user-pref-no-manual-generator-commands",
+        "dd-hermes-multi-agent-dispatch",
+        "dd-hermes-experience-demo-v1",
+        "dd-hermes-endpoint-router-v1",
+        "dd-hermes-demo-entry-v1",
+        "worktree-first",
+        "tool-selection-drift"
+      ]
+    },
+    "product": {
+      "anchor": "lead",
+      "goal": "Materialize an actually independent skeptic review lane in DD Hermes so a separate quality seat can be dispatched, contextualized, and audited instead of existing only as role metadata.",
+      "user_value": "Let a DD Hermes maintainer tell when quality supervision is backed by a real separate skeptic lane rather than only by independent_skeptic=true and role names in state.",
+      "non_goals": [
+        "Do not redesign the runtime, provider, or user-facing thread model.",
+        "Do not reopen archived quality-seat semantics, escalation-rule, or verdict-persistence tasks.",
+        "Do not change the existing T0/T1/T2 => degraded-allowed and T3/T4 => requires-independent policy matrix.",
+        "Do not require users to manually manage multiple visible chat threads."
+      ],
+      "product_acceptance": [
+        "When a separate skeptic is assigned for a requires-independent task, DD Hermes materializes a skeptic review lane rather than only exposing role metadata.",
+        "Shared control-plane surfaces can distinguish named independent skepticism from actually dispatched skeptical review.",
+        "Degraded fallback remains explicit and truthful when an independent skeptic lane is absent."
+      ],
+      "drift_risk": "This task could drift into abstract staffing theory or broad orchestration redesign if it stops improving the maintainer-visible truth around actual independent review.",
+      "goal_status": "defined",
+      "goal_drift_flags": [],
+      "last_product_review_at": "2026-04-17T17:03:09Z",
+      "task_class": "T3",
+      "quality_requirement": "requires-independent",
+      "task_class_rationale": "控制面与多角色治理主线；需要把真实独立 skeptic 从命名真相推进到可派发、可审查、可验收的运行面。"
+    },
+    "quality": {
+      "anchor": "expert-b",
+      "review_status": "pending",
+      "review_findings": [],
+      "review_examples": [],
+      "last_review_at": ""
+    },
+    "textbook": {
+      "last_entry_path": "",
+      "last_summary_path": "",
+      "last_summary_at": ""
+    },
+    "notes": [
+      {
+        "timestamp": "2026-04-17T16:56:20Z",
+        "text": "anchor governance initialized",
+        "product_gate_ready": true,
+        "quality_anchor_ready": true,
+        "quality_review_ready": false,
+        "degraded_ack_ready": false
+      },
+      {
+        "timestamp": "2026-04-17T17:03:09Z",
+        "text": "independent skeptic dispatch promoted to the active mainline after successor triage",
+        "product_gate_ready": true,
+        "quality_anchor_ready": true,
+        "quality_review_ready": false,
+        "degraded_ack_ready": false
+      },
+      {
+        "timestamp": "2026-04-17T17:05:11Z",
+        "text": "new active mainline verified as planning-valid and execution-blocked for honest independent-skeptic reasons",
+        "product_gate_ready": true,
+        "quality_anchor_ready": true,
+        "quality_review_ready": false,
+        "degraded_ack_ready": false
+      },
+      {
+        "timestamp": "2026-04-17T17:27:41Z",
+        "text": "shared skeptic lane slice landed and verified; current task remains blocked on git baseline before honest lane dispatch",
+        "product_gate_ready": true,
+        "quality_anchor_ready": true,
+        "quality_review_ready": false,
+        "degraded_ack_ready": false
+      },
+      {
+        "timestamp": "2026-04-17T17:32:28Z",
+        "text": "assigned expert-b as the intended independent skeptic / quality anchor for the current mainline before baseline anchoring",
+        "product_gate_ready": true,
+        "quality_anchor_ready": true,
+        "quality_review_ready": false,
+        "degraded_ack_ready": true
+      },
+      {
+        "timestamp": "2026-04-17T17:33:58Z",
+        "text": "lead recorded baseline commit a0f30fd139f8a4ceae67edace602faee23335a37 so task-local lanes can now be created from current repo truth",
+        "product_gate_ready": true,
+        "quality_anchor_ready": true,
+        "quality_review_ready": false,
+        "degraded_ack_ready": true
+      },
+      {
+        "timestamp": "2026-04-17T17:34:53Z",
+        "text": "materialized expert-a executor lane and expert-b skeptic lane from baseline commit a0f30fd; task is now execution-ready and blocked only on real execution/quality-review evidence, not missing independent supervision",
+        "product_gate_ready": true,
+        "quality_anchor_ready": true,
+        "quality_review_ready": false,
+        "degraded_ack_ready": true
+      },
+      {
+        "timestamp": "2026-04-17T17:35:55Z",
+        "text": "backfilled baseline_commit after fixing state-update to treat blank baseline anchors as missing",
+        "product_gate_ready": true,
+        "quality_anchor_ready": true,
+        "quality_review_ready": false,
+        "degraded_ack_ready": true
+      }
+    ],
+    "task_id": "dd-hermes-independent-skeptic-dispatch-v1",
+    "status": "active",
+    "mode": "execution",
+    "current_focus": "expert-a execution lane and expert-b skeptic lane are materialized; next step is to produce the first task-local execution slice and independent quality review from those lanes",
+    "owner": "lead",
+    "experts": [
+      "expert-a"
+    ],
+    "active_expert": "expert-a",
+    "blocked_reason": "",
+    "contract_path": "/Volumes/Coding/Hermes agent for mine/workspace/contracts/dd-hermes-independent-skeptic-dispatch-v1.md",
+    "handoff_paths": [
+      "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-independent-skeptic-dispatch-v1-lead-to-expert-a.md",
+      "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-independent-skeptic-dispatch-v1-lead-to-expert-b.md"
+    ],
+    "exploration_paths": [
+      "/Volumes/Coding/Hermes agent for mine/workspace/exploration/exploration-lead-dd-hermes-independent-skeptic-dispatch-v1.md"
+    ],
+    "openspec": {
+      "stage": "task",
+      "proposal_path": "/Volumes/Coding/Hermes agent for mine/openspec/proposals/dd-hermes-independent-skeptic-dispatch-v1.md",
+      "design_path": "/Volumes/Coding/Hermes agent for mine/openspec/designs/dd-hermes-independent-skeptic-dispatch-v1.md",
+      "task_path": "/Volumes/Coding/Hermes agent for mine/openspec/tasks/dd-hermes-independent-skeptic-dispatch-v1.md",
+      "archive_path": ""
+    },
+    "team": {
+      "supervisor_min_count": 1,
+      "supervisors": [
+        "lead"
+      ],
+      "executors": [
+        "expert-a"
+      ],
+      "skeptics": [
+        "expert-b"
+      ],
+      "product_anchors": [
+        "lead"
+      ],
+      "quality_anchors": [
+        "expert-b"
+      ],
+      "anchor_policy": {
+        "product_anchor_role": "supervisor",
+        "quality_anchor_role": "skeptic",
+        "constant_anchor_seats": true
+      },
+      "high_risk_mode": false,
+      "integration_pressure": false,
+      "scale_out_recommended": false,
+      "scale_out_triggers": [],
+      "role_integrity": {
+        "independent_skeptic": true,
+        "degraded": false,
+        "role_conflicts": [],
+        "role_overlap": {
+          "supervisor_executor_overlap": [],
+          "supervisor_skeptic_overlap": [],
+          "executor_skeptic_overlap": []
+        },
+        "degraded_ack_by": "",
+        "degraded_ack_at": ""
+      }
+    },
+    "updated_at": "2026-04-17T17:38:15Z",
+    "verdicts": {
+      "updated_at": "2026-04-17T17:38:15Z",
+      "task_policy": {
+        "status": "ready",
+        "ready": true,
+        "reasons": [],
+        "updated_at": "2026-04-17T17:38:15Z",
+        "task_class": "T3",
+        "task_class_bucket": "strict-execution",
+        "quality_requirement": "requires-independent",
+        "quality_requirement_source": "task_class_default",
+        "manual_escalation_required": false,
+        "manual_escalation_reasons": []
+      },
+      "product_gate": {
+        "status": "ready",
+        "ready": true,
+        "reasons": [],
+        "updated_at": "2026-04-17T17:38:15Z",
+        "anchor": "lead",
+        "goal": "Materialize an actually independent skeptic review lane in DD Hermes so a separate quality seat can be dispatched, contextualized, and audited instead of existing only as role metadata.",
+        "goal_status": "defined"
+      },
+      "quality_anchor": {
+        "status": "ready",
+        "ready": true,
+        "reasons": [],
+        "updated_at": "2026-04-17T17:38:15Z",
+        "anchor": "expert-b"
+      },
+      "quality_review": {
+        "status": "blocked",
+        "ready": false,
+        "reasons": [
+          "quality_review_status_pending",
+          "quality_review_timestamp_missing"
+        ],
+        "updated_at": "2026-04-17T17:38:15Z",
+        "anchor": "expert-b",
+        "review_status": "pending",
+        "last_review_at": ""
+      },
+      "degraded_ack": {
+        "status": "not-required",
+        "ready": true,
+        "reasons": [],
+        "updated_at": "2026-04-17T17:38:15Z",
+        "required": false,
+        "ack_by": "",
+        "ack_at": ""
+      },
+      "quality_seat_execution": {
+        "status": "ready",
+        "ready": true,
+        "reasons": [],
+        "updated_at": "2026-04-17T17:38:15Z",
+        "mode": "independent"
+      },
+      "quality_seat_completion": {
+        "status": "blocked",
+        "ready": false,
+        "reasons": [
+          "quality_review_status_pending",
+          "quality_review_timestamp_missing"
+        ],
+        "updated_at": "2026-04-17T17:38:15Z",
+        "mode": "independent"
+      },
+      "execution_closeout": {
+        "status": "blocked",
+        "ready": false,
+        "reasons": [
+          "execution_commit_missing",
+          "quality_review_status_pending",
+          "quality_findings_summary_incomplete"
+        ],
+        "updated_at": "2026-04-17T17:38:15Z",
+        "closeout_path": "/Volumes/Coding/Hermes agent for mine/workspace/closeouts/dd-hermes-independent-skeptic-dispatch-v1-expert-a.md",
+        "selected_by": "active_expert",
+        "candidate_count": 1,
+        "semantic_valid": false,
+        "ready_for_execution_slice_done": false,
+        "execution_commit": "",
+        "quality_review_status": "pending",
+        "verified_step_count": 1,
+        "verified_file_count": 1,
+        "quality_findings_count": 1
+      },
+      "skeptic_lane": {
+        "status": "ready",
+        "ready": true,
+        "reasons": [],
+        "updated_at": "2026-04-17T17:38:15Z",
+        "required": true,
+        "independent_skeptic": true,
+        "lane_count": 1,
+        "ready_lane_count": 1,
+        "lanes": [
+          {
+            "agent_id": "expert-b",
+            "ready": true,
+            "reasons": [],
+            "handoff_path": "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-independent-skeptic-dispatch-v1-lead-to-expert-b.md",
+            "worktree_path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-independent-skeptic-dispatch-v1-expert-b",
+            "context_path": "/Volumes/Coding/Hermes agent for mine/workspace/state/dd-hermes-independent-skeptic-dispatch-v1/context-skeptic-expert-b.json",
+            "runtime_path": "/Volumes/Coding/Hermes agent for mine/workspace/state/dd-hermes-independent-skeptic-dispatch-v1/runtime-skeptic-expert-b.json"
+          }
+        ]
+      }
+    }
+  },
+  "memory": {
+    "matches": [
+      {
+        "memory_id": "no-destruction-without-confirmation",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/world/no-destruction-without-confirmation.md",
+        "score": 126.0,
+        "token_score": 11,
+        "confidence": 1.0,
+        "recency_bonus": 5.0,
+        "type": "constraint",
+        "status": "active"
+      },
+      {
+        "memory_id": "user-pref-no-manual-generator-commands",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/user/user-pref-no-manual-generator-commands.md",
+        "score": 44.0,
+        "token_score": 29,
+        "confidence": 1.0,
+        "recency_bonus": 5.0,
+        "type": "preference",
+        "status": "active"
+      },
+      {
+        "memory_id": "dd-hermes-multi-agent-dispatch",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/dd-hermes-multi-agent-dispatch.md",
+        "score": 43.0,
+        "token_score": 29,
+        "confidence": 0.9,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "dd-hermes-experience-demo-v1",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/dd-hermes-experience-demo-v1.md",
+        "score": 42.5,
+        "token_score": 28,
+        "confidence": 0.95,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "dd-hermes-endpoint-router-v1",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/dd-hermes-endpoint-router-v1.md",
+        "score": 40.0,
+        "token_score": 26,
+        "confidence": 0.9,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "dd-hermes-demo-entry-v1",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/dd-hermes-demo-entry-v1.md",
+        "score": 39.5,
+        "token_score": 25,
+        "confidence": 0.95,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "worktree-first",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/worktree-first.md",
+        "score": 38.0,
+        "token_score": 23,
+        "confidence": 1.0,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "tool-selection-drift",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/self/tool-selection-drift.md",
+        "score": 30.5,
+        "token_score": 19,
+        "confidence": 0.65,
+        "recency_bonus": 5.0,
+        "type": "belief",
+        "status": "active"
+      }
+    ],
+    "scored_candidates": [
+      {
+        "memory_id": "no-destruction-without-confirmation",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/world/no-destruction-without-confirmation.md",
+        "score": 126.0,
+        "token_score": 11,
+        "confidence": 1.0,
+        "recency_bonus": 5.0,
+        "type": "constraint",
+        "status": "active"
+      },
+      {
+        "memory_id": "user-pref-no-manual-generator-commands",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/user/user-pref-no-manual-generator-commands.md",
+        "score": 44.0,
+        "token_score": 29,
+        "confidence": 1.0,
+        "recency_bonus": 5.0,
+        "type": "preference",
+        "status": "active"
+      },
+      {
+        "memory_id": "dd-hermes-multi-agent-dispatch",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/dd-hermes-multi-agent-dispatch.md",
+        "score": 43.0,
+        "token_score": 29,
+        "confidence": 0.9,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "dd-hermes-experience-demo-v1",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/dd-hermes-experience-demo-v1.md",
+        "score": 42.5,
+        "token_score": 28,
+        "confidence": 0.95,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "dd-hermes-endpoint-router-v1",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/dd-hermes-endpoint-router-v1.md",
+        "score": 40.0,
+        "token_score": 26,
+        "confidence": 0.9,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "dd-hermes-demo-entry-v1",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/dd-hermes-demo-entry-v1.md",
+        "score": 39.5,
+        "token_score": 25,
+        "confidence": 0.95,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "worktree-first",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/worktree-first.md",
+        "score": 38.0,
+        "token_score": 23,
+        "confidence": 1.0,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "tool-selection-drift",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/self/tool-selection-drift.md",
+        "score": 30.5,
+        "token_score": 19,
+        "confidence": 0.65,
+        "recency_bonus": 5.0,
+        "type": "belief",
+        "status": "active"
+      },
+      {
+        "memory_id": "plotly-preference",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/user/plotly-preference.md",
+        "score": 28.0,
+        "token_score": 15,
+        "confidence": 0.8,
+        "recency_bonus": 5.0,
+        "type": "belief",
+        "status": "active"
+      },
+      {
+        "memory_id": "user-pref-single-command-thread",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/user/user-pref-single-command-thread.md",
+        "score": 21.0,
+        "token_score": 6,
+        "confidence": 1.0,
+        "recency_bonus": 5.0,
+        "type": "preference",
+        "status": "active"
+      }
+    ],
+    "conflicts": [],
+    "expired": [],
+    "explanation": "constraint-first lexical match weighted by confidence and recency"
+  },
+  "discussion": {
+    "policy": "3-explorer-then-execute",
+    "decision_id": "independent-skeptic-dispatch-routing",
+    "explorer_queue": [
+      "architecture",
+      "delivery",
+      "curriculum"
+    ],
+    "explorer_findings": [
+      "/Volumes/Coding/Hermes agent for mine/workspace/decisions/independent-skeptic-dispatch-routing/architecture.md",
+      "/Volumes/Coding/Hermes agent for mine/workspace/decisions/independent-skeptic-dispatch-routing/delivery.md",
+      "/Volumes/Coding/Hermes agent for mine/workspace/decisions/independent-skeptic-dispatch-routing/curriculum.md"
+    ],
+    "synthesis_path": "/Volumes/Coding/Hermes agent for mine/workspace/decisions/independent-skeptic-dispatch-routing/synthesis.md",
+    "current_executor": "expert-a"
+  },
+  "product": {
+    "anchor": "lead",
+    "goal": "Materialize an actually independent skeptic review lane in DD Hermes so a separate quality seat can be dispatched, contextualized, and audited instead of existing only as role metadata.",
+    "user_value": "Let a DD Hermes maintainer tell when quality supervision is backed by a real separate skeptic lane rather than only by independent_skeptic=true and role names in state.",
+    "non_goals": [
+      "Do not redesign the runtime, provider, or user-facing thread model.",
+      "Do not reopen archived quality-seat semantics, escalation-rule, or verdict-persistence tasks.",
+      "Do not change the existing T0/T1/T2 => degraded-allowed and T3/T4 => requires-independent policy matrix.",
+      "Do not require users to manually manage multiple visible chat threads."
+    ],
+    "product_acceptance": [
+      "When a separate skeptic is assigned for a requires-independent task, DD Hermes materializes a skeptic review lane rather than only exposing role metadata.",
+      "Shared control-plane surfaces can distinguish named independent skepticism from actually dispatched skeptical review.",
+      "Degraded fallback remains explicit and truthful when an independent skeptic lane is absent."
+    ],
+    "drift_risk": "This task could drift into abstract staffing theory or broad orchestration redesign if it stops improving the maintainer-visible truth around actual independent review.",
+    "goal_status": "defined",
+    "goal_drift_flags": [],
+    "last_product_review_at": "2026-04-17T17:03:09Z",
+    "task_class": "T3",
+    "quality_requirement": "requires-independent",
+    "task_class_rationale": "控制面与多角色治理主线；需要把真实独立 skeptic 从命名真相推进到可派发、可审查、可验收的运行面。"
+  },
+  "quality": {
+    "anchor": "expert-b",
+    "review_status": "pending",
+    "review_findings": [],
+    "review_examples": [],
+    "last_review_at": ""
+  },
+  "continuation": {
+    "goal": "Materialize an actually independent skeptic review lane in DD Hermes so a separate quality seat can be dispatched, contextualized, and audited instead of existing only as role metadata.",
+    "lease": {
+      "goal": "Materialize an actually independent skeptic review lane in DD Hermes so a separate quality seat can be dispatched, contextualized, and audited instead of existing only as role metadata.",
+      "status": "running",
+      "duration_hours": 0,
+      "started_at": "",
+      "deadline_at": "",
+      "paused_at": "",
+      "pause_reason": "",
+      "resume_after": "",
+      "resume_checkpoint": "",
+      "dispatch_cursor": ""
+    },
+    "current_focus": "expert-a execution lane and expert-b skeptic lane are materialized; next step is to produce the first task-local execution slice and independent quality review from those lanes",
+    "active_expert": "expert-a",
+    "blocked_reason": "",
+    "current_executor": "expert-a"
+  },
+  "documents": {
+    "contract": {
+      "path": "/Volumes/Coding/Hermes agent for mine/workspace/contracts/dd-hermes-independent-skeptic-dispatch-v1.md",
+      "text": "---\nschema_version: 2\ntask_id: dd-hermes-independent-skeptic-dispatch-v1\nowner: lead\nexperts:\n  - expert-a\nproduct_goal: Materialize an actually independent skeptic review lane in DD Hermes so a separate quality seat can be dispatched, contextualized, and audited instead of existing only as role metadata.\nuser_value: Let a DD Hermes maintainer tell when quality supervision is backed by a real separate skeptic lane rather than only by `independent_skeptic=true` and role names in state.\ntask_class: T3\nquality_requirement: requires-independent\ntask_class_rationale: 控制面与多角色治理主线；需要把真实独立 skeptic 从命名真相推进到可派发、可审查、可验收的运行面。\nnon_goals:\n  - Do not redesign the runtime, provider, or user-facing thread model.\n  - Do not reopen archived quality-seat semantics, escalation-rule, or verdict-persistence tasks.\n  - Do not change the existing `T0/T1/T2 => degraded-allowed` and `T3/T4 => requires-independent` policy matrix.\n  - Do not require users to manually manage multiple visible chat threads.\nproduct_acceptance:\n  - When a separate skeptic is assigned for a `requires-independent` task, DD Hermes materializes a skeptic review lane rather than only exposing role metadata.\n  - Shared control-plane surfaces can distinguish named independent skepticism from actually dispatched skeptical review.\n  - Degraded fallback remains explicit and truthful when an independent skeptic lane is absent.\ndrift_risk: This task could drift into abstract staffing theory or broad orchestration redesign if it stops improving the maintainer-visible truth around actual independent review.\nacceptance:\n  - Complete sprint artifacts and verification.\nblocked_if:\n  - Missing evidence that operational independent-skeptic dispatch is the remaining narrow gap.\n  - Scope expands into runtime/provider work or reopens archived governance proofs.\nmemory_reads:\n  - memory/world/no-destruction-without-confirmation.md\nmemory_writes:\n  - memory/task/dd-hermes-independent-skeptic-dispatch-v1.md\n---\n\n# Sprint Contract\n\n## Context\n\nArchived phase-2 work already proved three separate truths: quality-seat semantics, task-class escalation policy, and explicit verdict persistence. The remaining gap is operational. `dispatch-create.sh` materializes executor worktrees, but a separate skeptic still does not get an equivalent review lane, even though archived closeouts repeatedly identify a real independent skeptic assignee as the next proof point.\n\n## Scope\n\n- In scope: skeptic-lane dispatch/context/handoff/worktree/gate surfaces for tasks that already require independent quality supervision.\n- Out of scope: runtime/provider redesign, user-facing multi-thread UX changes, and reopening archived proof scope.\n\n## Required Fields\n\n- `task_id`\n- `owner`\n- `experts`\n- `product_goal`\n- `user_value`\n- `task_class`\n- `quality_requirement`\n- `task_class_rationale`\n- `non_goals`\n- `product_acceptance`\n- `drift_risk`\n- `acceptance`\n- `blocked_if`\n- `memory_reads`\n- `memory_writes`\n\n## Acceptance\n\n- The mainline package is internally consistent and tied to one clear operational gap.\n- The task can explain why archived policy/verdict work is not the remaining gap.\n- The slice stays bounded to actual independent skeptic materialization.\n\n## Product Gate\n\n- The task must improve the maintainer experience of trusting independent supervision, not just add more role metadata.\n- The slice stays inside shared governance/dispatch artifacts and does not reopen older policy or verdict layers.\n- If the work stops helping the system answer “is there a real separate skeptic lane here, or only a named seat?”, stop and recalibrate.\n\n## Verification\n\n- Commands: `scripts/test-workflow.sh --task-id dd-hermes-independent-skeptic-dispatch-v1`\n- Commands: `scripts/context-build.sh --task-id dd-hermes-independent-skeptic-dispatch-v1 --agent-role commander`\n- Commands: `scripts/check-artifact-schemas.sh --task-id dd-hermes-independent-skeptic-dispatch-v1`\n- Commands: `scripts/demo-entry.sh`\n- User-visible proof: DD Hermes points to this task as the active mainline and the task package explains why operational independent skepticism, not more policy/verdict work, is the next bounded slice.\n\n## Open Questions\n\n- The first implementation slice is resolved to materialize both: an isolated skeptic worktree plus a skeptic-specific handoff/context/runtime packet, so independent review is operational instead of nominal.\n"
+    },
+    "handoffs": [
+      {
+        "path": "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-independent-skeptic-dispatch-v1-lead-to-expert-a.md",
+        "text": "---\nschema_version: 2\nfrom: lead\nto: expert-a\nscope: dd-hermes-independent-skeptic-dispatch-v1 first execution slice\nproduct_rationale: Turn the repeated “real independent skeptic assignee” follow-up into one explicit mainline with a bounded implementation surface.\ngoal_drift_risk: The slice could drift into staffing theory or generic orchestration cleanup if it stops improving the maintainer-visible truth around real independent review.\nuser_visible_outcome: A maintainer can see that DD Hermes already has a real skeptic lane, and is now waiting for task-local execution and quality-review evidence rather than more policy work.\nfiles:\n  - workspace/contracts/dd-hermes-independent-skeptic-dispatch-v1.md\n  - openspec/proposals/dd-hermes-independent-skeptic-dispatch-v1.md\n  - openspec/designs/dd-hermes-independent-skeptic-dispatch-v1.md\n  - openspec/tasks/dd-hermes-independent-skeptic-dispatch-v1.md\n  - workspace/decisions/independent-skeptic-dispatch-routing/synthesis.md\n  - workspace/state/dd-hermes-independent-skeptic-dispatch-v1/state.json\ndecisions:\n  - Keep the mainline focused on operational independent skepticism, not on redoing escalation rules or verdict persistence.\n  - Preserve the one-thread outward UX; any separate skeptic lane remains internal to DD Hermes.\n  - Reuse existing dispatch/context/gate surfaces instead of inventing a parallel workflow.\n  - Baseline commit `a0f30fd139f8a4ceae67edace602faee23335a37` is now the truthful anchor for this task package.\n  - `expert-a` executor lane and `expert-b` skeptic lane are already materialized; the next slice is execution evidence, not more dispatch plumbing.\nrisks:\n  - Do not mistake lane materialization for task completion; execution closeout is still empty.\n  - Do not expand into runtime/provider work.\n  - Keep `expert-b` review independent; do not let lead re-absorb the quality seat.\nnext_checks:\n  - Run `./scripts/context-build.sh --task-id dd-hermes-independent-skeptic-dispatch-v1 --agent-role executor --agent-id expert-a --worktree '/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-independent-skeptic-dispatch-v1-expert-a'`.\n  - Produce the first bounded execution slice from `expert-a` and record an execution commit.\n  - Hand execution evidence back through `workspace/closeouts/dd-hermes-independent-skeptic-dispatch-v1-expert-a.md`.\n  - Let `expert-b` review that slice independently and write the quality-review conclusion before lead integration.\n---\n\n# Lead Handoff\n\n## Context\n\nExpert expert-a now owns the first execution slice on top of an already materialized independent skeptic lane. The task is no longer “make the lane exist”; it is “use that lane to produce real execution and review evidence.”\n\n## Required Fields\n\n- `from`\n- `to`\n- `scope`\n- `product_rationale`\n- `goal_drift_risk`\n- `user_visible_outcome`\n- `files`\n- `decisions`\n- `risks`\n- `next_checks`\n\n## Acceptance\n\n- Keep the mainline task-bound, product-bound, and move it from execution-ready into real execution evidence.\n\n## Product Check\n\n- Confirm the slice still serves the stated product goal and does not expand into staffing theory, runtime work, or user-visible thread proliferation.\n\n## Verification\n\n- State commands and evidence expected from expert before handoff return.\n- At minimum, include the execution commit, changed file list, closeout update, and the exact verification commands used for the slice.\n\n## Open Questions\n\n- None. Lane materialization is done; the open work is execution and review evidence.\n"
+      },
+      {
+        "path": "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-independent-skeptic-dispatch-v1-lead-to-expert-b.md",
+        "text": "---\nschema_version: 2\nfrom: lead\nto: expert-b\nscope: dd-hermes-independent-skeptic-dispatch-v1 skeptic review lane\nproduct_rationale: Keep dd-hermes-independent-skeptic-dispatch-v1 tied to the declared product goal while materializing a real skeptic lane.\ngoal_drift_risk: This slice could drift into generic orchestration cleanup if it stops improving task-bound traceability.\nuser_visible_outcome: A maintainer can see that skeptical review is running in its own lane with explicit artifacts.\nfiles:\n  - workspace/contracts/dd-hermes-independent-skeptic-dispatch-v1.md\n  - workspace/state/dd-hermes-independent-skeptic-dispatch-v1/state.json\ndecisions:\n  - Follow the existing contract, state, and gate surfaces.\n  - Keep the separate lane internal to DD Hermes instead of exposing a new user-facing thread.\nrisks:\n  - Do not overclaim independent review before its artifacts are materialized.\n  - Keep degraded fallback explicit when the lane is not available.\nnext_checks:\n  - Run context-build for this lane.\n  - Verify dispatch, gate, and state surfaces expose the lane truth.\n---\n\n# Lead Handoff\n\n## Context\n\nThis handoff materializes the `skeptic` lane for `dd-hermes-independent-skeptic-dispatch-v1`. Reuse the existing control-plane surfaces and keep the slice bounded to traceable task artifacts.\n\n## Required Fields\n\n- `from`\n- `to`\n- `scope`\n- `product_rationale`\n- `goal_drift_risk`\n- `user_visible_outcome`\n- `files`\n- `decisions`\n- `risks`\n- `next_checks`\n\n## Acceptance\n\n- The `skeptic` lane has its own handoff, context packet, and worktree truth where applicable.\n\n## Product Check\n\n- Confirm the lane still serves the declared product goal and does not expand into runtime/provider redesign.\n\n## Verification\n\n- Include the dispatch result, the lane-specific context path, and the gate result.\n\n## Open Questions\n\n- None for this materialized lane.\n"
+      }
+    ],
+    "exploration": [
+      {
+        "path": "/Volumes/Coding/Hermes agent for mine/workspace/exploration/exploration-lead-dd-hermes-independent-skeptic-dispatch-v1.md",
+        "text": "# Exploration Log\n\n## Context\n\n- Task: dd-hermes-independent-skeptic-dispatch-v1\n- Role: lead\n- Status: IN_PROGRESS\n\n## Facts\n\n- `dd-hermes-independent-quality-seat-v1` already archived the first quality-seat proof and explicitly said future work must not infer that degraded supervision is universally acceptable.\n- `dd-hermes-quality-seat-escalation-rules-v1` already froze the task-class matrix that decides when degraded vs independent supervision is allowed.\n- `dd-hermes-explicit-gate-verdicts-v1` already archived persisted verdict truth across state/read/context/gates.\n- `scripts/dispatch-create.sh` still creates isolated worktrees only for executors; skeptics receive a repo-root packet with no equivalent review lane.\n- Multiple archived closeouts and handoffs call for a real independent skeptic assignee as the next proof point.\n\n## Hypotheses\n\n- The narrowest remaining phase-2 gap is operational independent skepticism, not more policy or more persisted truth.\n- The first bounded slice should stay on dispatch/context/handoff/worktree surfaces rather than expanding into runtime or scheduler design.\n\n## Evidence\n\n- `workspace/handoffs/dd-hermes-execution-bootstrap-expert-a-to-lead.md`\n- `workspace/closeouts/dd-hermes-anchor-governance-v1-expert-a.md`\n- `workspace/closeouts/dd-hermes-independent-quality-seat-v1-expert-a.md`\n- `openspec/archive/dd-hermes-independent-quality-seat-v1.md`\n- `openspec/archive/dd-hermes-multi-agent-dispatch.md`\n- `scripts/dispatch-create.sh`\n\n## Acceptance\n\n- Establish why this is the next bounded mainline and not a reopened archived proof.\n- Keep the slice product-bound to actual independent skeptic dispatch.\n\n## Verification\n\n- `./scripts/test-workflow.sh --task-id dd-hermes-independent-skeptic-dispatch-v1`\n- `./scripts/context-build.sh --task-id dd-hermes-independent-skeptic-dispatch-v1 --agent-role commander`\n- `./scripts/check-artifact-schemas.sh --task-id dd-hermes-independent-skeptic-dispatch-v1`\n- `./scripts/demo-entry.sh`\n\n## Open Questions\n\n- Which artifact should carry skeptical review evidence first: a skeptic handoff, a skeptic worktree, or both?\n"
+      }
+    ],
+    "openspec": {
+      "proposal": {
+        "path": "/Volumes/Coding/Hermes agent for mine/openspec/proposals/dd-hermes-independent-skeptic-dispatch-v1.md",
+        "text": "---\nstatus: active\nowner: lead\nscope: dd-hermes-independent-skeptic-dispatch-v1\ndecision_log:\n  - Choose independent skeptic dispatch as the next mainline because quality-seat semantics, escalation policy, and verdict persistence are already archived proofs.\n  - Treat the remaining gap as operational: a separate skeptic can be named in state, but DD Hermes still does not materialize a real review lane for that seat.\nchecks:\n  - ./scripts/test-workflow.sh --task-id dd-hermes-independent-skeptic-dispatch-v1\n  - ./scripts/context-build.sh --task-id dd-hermes-independent-skeptic-dispatch-v1 --agent-role commander\n  - ./scripts/check-artifact-schemas.sh --task-id dd-hermes-independent-skeptic-dispatch-v1\n  - ./scripts/demo-entry.sh\nlinks:\n  - workspace/contracts/dd-hermes-independent-skeptic-dispatch-v1.md\n  - workspace/decisions/independent-skeptic-dispatch-routing/synthesis.md\n  - 指挥文档/04-任务重校准与线程策略.md\n---\n\n# Proposal\n\n## What\n\nMake DD Hermes dispatch an actually independent skeptic lane instead of stopping at `independent_skeptic=true` as a state-level truth claim.\n\n## Why\n\nArchived proofs already closed three earlier gaps:\n\n- `dd-hermes-independent-quality-seat-v1` proved quality-seat truth.\n- `dd-hermes-quality-seat-escalation-rules-v1` froze when degraded vs independent supervision is allowed.\n- `dd-hermes-explicit-gate-verdicts-v1` persisted that truth into state.\n\nThe remaining maintainer-facing gap is operational. `dispatch-create` gives executors isolated worktrees, but skeptics still receive only a repo-root packet with no equivalent review lane. Multiple archived closeouts explicitly call for a real independent skeptic assignee rather than more metadata tweaks.\n\n## Non-goals\n\n- Redesigning runtime/provider layers.\n- Reopening archived quality-seat, escalation-rule, or verdict-persistence proofs.\n- Requiring the user to manage multiple visible chat threads.\n- Changing the `T0/T1/T2 => degraded-allowed` and `T3/T4 => requires-independent` policy matrix.\n\n## Acceptance\n\n- The repo names `dd-hermes-independent-skeptic-dispatch-v1` as the current active mainline under a new task id.\n- The proposal explains why operational skeptic dispatch is now the narrowest unresolved gap.\n- The new mainline stays bounded to skeptic dispatch/review-lane materialization rather than reopening older governance slices.\n\n## Verification\n\n- `./scripts/test-workflow.sh --task-id dd-hermes-independent-skeptic-dispatch-v1`\n- `./scripts/context-build.sh --task-id dd-hermes-independent-skeptic-dispatch-v1 --agent-role commander`\n- `./scripts/check-artifact-schemas.sh --task-id dd-hermes-independent-skeptic-dispatch-v1`\n- `./scripts/demo-entry.sh`\n"
+      },
+      "design": {
+        "path": "/Volumes/Coding/Hermes agent for mine/openspec/designs/dd-hermes-independent-skeptic-dispatch-v1.md",
+        "text": "---\nstatus: design\nowner: lead\nscope: dd-hermes-independent-skeptic-dispatch-v1\ndecision_log: []\nchecks:\n  - ./scripts/context-build.sh --task-id dd-hermes-independent-skeptic-dispatch-v1 --agent-role commander\n  - ./scripts/demo-entry.sh\nlinks:\n  - workspace/contracts/dd-hermes-independent-skeptic-dispatch-v1.md\n  - workspace/decisions/independent-skeptic-dispatch-routing/synthesis.md\n---\n\n# Design\n\n## Summary\n\nDD Hermes already exposes whether the quality seat is degraded or independent. This task adds the missing operational layer: when the skeptic seat is truly independent, dispatch should materialize a real skeptic review lane instead of only a name in state.\n\n## Interfaces\n\n- `scripts/dispatch-create.sh`\n- `scripts/context-build.sh`\n- `scripts/state-read.sh`\n- `hooks/thread-switch-gate.sh`\n- `hooks/quality-gate.sh`\n- `docs/coordination-endpoints.md`\n- `docs/artifact-schemas.md`\n- `tests/smoke.sh`\n\n## Data Flow\n\n1. Read `task_class / quality_requirement / team.role_integrity / quality_seat`.\n2. If a separate skeptic seat is present for a `requires-independent` task, dispatch emits skeptic-specific artifacts instead of a repo-root placeholder packet.\n3. The first bounded slice materializes both the skeptic worktree and the skeptic-specific handoff/context/runtime packet.\n4. Context and summaries expose whether skeptical review is only named or fully materialized.\n5. Gates and completion truth can later consume the same skeptic-lane evidence without inferring independence from state names alone.\n\n## Edge Cases\n\n- `T0/T1` no-execution tasks must keep `execution_closeout = not-required`; this task must not reintroduce fake execution requirements.\n- Degraded fallback remains legal where policy allows it; the slice must keep that path explicit instead of treating independent skepticism as universal default.\n- User-facing interaction still stays on one primary thread; skeptic materialization is an internal execution/review surface only.\n\n## Acceptance\n\n- The design distinguishes “independent skeptic named in state” from “independent skeptic lane actually materialized”.\n- The slice stays inside dispatch/context/handoff/worktree/gate surfaces.\n- The design does not reopen policy-matrix work that is already archived.\n\n## Verification\n\n- `./scripts/context-build.sh --task-id dd-hermes-independent-skeptic-dispatch-v1 --agent-role commander`\n- `./scripts/demo-entry.sh`\n"
+      },
+      "task": {
+        "path": "/Volumes/Coding/Hermes agent for mine/openspec/tasks/dd-hermes-independent-skeptic-dispatch-v1.md",
+        "text": "---\nstatus: active\nowner: lead\nscope: dd-hermes-independent-skeptic-dispatch-v1\ndecision_log: []\nchecks:\n  - ./scripts/test-workflow.sh --task-id dd-hermes-independent-skeptic-dispatch-v1\n  - ./scripts/context-build.sh --task-id dd-hermes-independent-skeptic-dispatch-v1 --agent-role commander\n  - ./scripts/check-artifact-schemas.sh --task-id dd-hermes-independent-skeptic-dispatch-v1\n  - ./scripts/demo-entry.sh\nlinks:\n  - workspace/contracts/dd-hermes-independent-skeptic-dispatch-v1.md\n  - workspace/decisions/independent-skeptic-dispatch-routing/synthesis.md\n---\n\n# Task\n\n## Steps\n\n1. Freeze successor triage and point commander truth sources to this new mainline.\n2. Define the real lane as a paired skeptic worktree plus skeptic-specific handoff/context/runtime packet.\n3. Materialize that lane through dispatch/context/handoff/worktree surfaces without changing the user-facing single-thread model.\n4. Keep degraded fallback explicit for tasks that still do not have a separate skeptic seat.\n5. Prove the new lane with bounded verification and smoke coverage.\n\n## Dependencies\n\n- `workspace/decisions/successor-triage-routing/synthesis.md`\n- `openspec/archive/dd-hermes-independent-quality-seat-v1.md`\n- `openspec/archive/dd-hermes-quality-seat-escalation-rules-v1.md`\n- `openspec/archive/dd-hermes-explicit-gate-verdicts-v1.md`\n\n## Done Definition\n\nDD Hermes can point to a real independent skeptic lane, not only a role-integrity boolean.\n\n## Acceptance\n\n- The slice stays about independent skeptic dispatch/review-lane materialization, not generic role theory.\n- The new lane remains internal to DD Hermes and does not require user-managed external chat threads.\n- Archived policy and verdict proofs remain archived.\n\n## Verification\n\n- `./scripts/test-workflow.sh --task-id dd-hermes-independent-skeptic-dispatch-v1`\n- `./scripts/context-build.sh --task-id dd-hermes-independent-skeptic-dispatch-v1 --agent-role commander`\n- `./scripts/check-artifact-schemas.sh --task-id dd-hermes-independent-skeptic-dispatch-v1`\n- `./scripts/demo-entry.sh`\n"
+      },
+      "archive": null
+    }
+  },
+  "context_summary": {
+    "memory_ids": [
+      "no-destruction-without-confirmation",
+      "user-pref-no-manual-generator-commands",
+      "dd-hermes-multi-agent-dispatch",
+      "dd-hermes-experience-demo-v1",
+      "dd-hermes-endpoint-router-v1",
+      "dd-hermes-demo-entry-v1",
+      "worktree-first",
+      "tool-selection-drift"
+    ],
+    "handoff_count": 2,
+    "exploration_count": 1,
+    "has_design": true,
+    "has_task": true,
+    "lease_status": "running",
+    "resume_checkpoint": "",
+    "discussion_policy": "3-explorer-then-execute",
+    "decision_id": "independent-skeptic-dispatch-routing",
+    "runtime_generated_at": "2026-04-17T17:38:15Z",
+    "runtime_stale_warning": "",
+    "supervisor_count": 1,
+    "product_anchor_count": 1,
+    "quality_anchor_count": 1,
+    "product_anchor_name": "lead",
+    "product_anchor_role": "supervisor",
+    "quality_anchor_name": "expert-b",
+    "quality_anchor_role": "skeptic",
+    "product_goal": "Materialize an actually independent skeptic review lane in DD Hermes so a separate quality seat can be dispatched, contextualized, and audited instead of existing only as role metadata.",
+    "product_goal_status": "defined",
+    "goal_drift_flags": [],
+    "quality_review_status": "pending",
+    "independent_skeptic": true,
+    "role_integrity_degraded": false,
+    "role_conflicts": [],
+    "scale_out_recommended": false,
+    "scale_out_triggers": [],
+    "degraded_ack_required": false,
+    "degraded_ack_ready": true,
+    "degraded_ack_status": "not-required",
+    "degraded_ack_by": "",
+    "degraded_ack_at": "",
+    "product_user_value": "Let a DD Hermes maintainer tell when quality supervision is backed by a real separate skeptic lane rather than only by independent_skeptic=true and role names in state.",
+    "product_non_goals": [
+      "Do not redesign the runtime, provider, or user-facing thread model.",
+      "Do not reopen archived quality-seat semantics, escalation-rule, or verdict-persistence tasks.",
+      "Do not change the existing T0/T1/T2 => degraded-allowed and T3/T4 => requires-independent policy matrix.",
+      "Do not require users to manually manage multiple visible chat threads."
+    ],
+    "product_acceptance": [
+      "When a separate skeptic is assigned for a requires-independent task, DD Hermes materializes a skeptic review lane rather than only exposing role metadata.",
+      "Shared control-plane surfaces can distinguish named independent skepticism from actually dispatched skeptical review.",
+      "Degraded fallback remains explicit and truthful when an independent skeptic lane is absent."
+    ],
+    "product_drift_risk": "This task could drift into abstract staffing theory or broad orchestration redesign if it stops improving the maintainer-visible truth around actual independent review.",
+    "task_class": "T3",
+    "task_class_bucket": "strict-execution",
+    "task_class_rationale": "控制面与多角色治理主线；需要把真实独立 skeptic 从命名真相推进到可派发、可审查、可验收的运行面。",
+    "quality_requirement": "requires-independent",
+    "quality_requirement_source": "task_class_default",
+    "quality_requirement_ready": true,
+    "quality_requirement_reasons": [],
+    "task_policy_status": "ready",
+    "manual_escalation_required": false,
+    "manual_escalation_reasons": [],
+    "product_gate_ready": true,
+    "product_gate_reasons": [],
+    "product_gate_status": "ready",
+    "quality_anchor_ready": true,
+    "quality_anchor_reasons": [],
+    "quality_anchor_status": "ready",
+    "quality_review_ready": false,
+    "quality_review_reasons": [
+      "quality_review_status_pending",
+      "quality_review_timestamp_missing"
+    ],
+    "quality_review_gate_status": "blocked",
+    "quality_seat_mode": "independent",
+    "quality_seat_ready": true,
+    "quality_seat_status": "ready",
+    "quality_seat_reasons": [],
+    "quality_seat_completion_ready": false,
+    "quality_seat_completion_status": "blocked",
+    "quality_seat_completion_reasons": [
+      "quality_review_status_pending",
+      "quality_review_timestamp_missing"
+    ],
+    "skeptic_lane_ready": true,
+    "skeptic_lane_status": "ready",
+    "skeptic_lane_reasons": [],
+    "execution_closeout_ready": false,
+    "execution_closeout_status": "blocked",
+    "execution_closeout_reasons": [
+      "execution_commit_missing",
+      "quality_review_status_pending",
+      "quality_findings_summary_incomplete"
+    ],
+    "execution_closeout_path": "/Volumes/Coding/Hermes agent for mine/workspace/closeouts/dd-hermes-independent-skeptic-dispatch-v1-expert-a.md",
+    "execution_closeout_selected_by": "active_expert",
+    "execution_closeout_candidate_count": 1,
+    "execution_closeout_semantic_valid": false,
+    "ready_for_execution_slice_done": false,
+    "verdicts_updated_at": "2026-04-17T17:38:15Z",
+    "quality_review_findings": [],
+    "quality_review_examples": [],
+    "anchor_policy": {
+      "product_anchor_role": "supervisor",
+      "quality_anchor_role": "skeptic",
+      "constant_anchor_seats": true
+    }
+  }
+}

@@ -191,7 +191,9 @@ if "dispatch_cursor" in data:
 state.setdefault("git", {})
 if "commit_sha" in data:
     state["git"]["latest_commit"] = data["commit_sha"]
-    state["git"].setdefault("baseline_commit", data["commit_sha"])
+    baseline_commit = state["git"].get("baseline_commit", "")
+    if not isinstance(baseline_commit, str) or not baseline_commit.strip():
+        state["git"]["baseline_commit"] = data["commit_sha"]
 if "commit_branch" in data:
     state["git"]["latest_branch"] = data["commit_branch"]
 if "commit_upstream" in data:

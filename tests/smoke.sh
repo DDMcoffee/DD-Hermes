@@ -262,7 +262,7 @@ run_git_management() {
 
   local state_after_commit
   state_after_commit=$("$ROOT/scripts/state-read.sh" --task-id smoke-sprint)
-  assert_json_field "$state_after_commit" "len(data['state']['git']['latest_commit']) == 40 and data['state']['git']['latest_branch'] == 'smoke-sprint-expert-a'"
+  assert_json_field "$state_after_commit" "len(data['state']['git']['latest_commit']) == 40 and len(data['state']['git']['baseline_commit']) == 40 and data['state']['git']['latest_branch'] == 'smoke-sprint-expert-a'"
 
   local removal
   removal=$("$ROOT/scripts/worktree-remove.sh" --task-id smoke-sprint --expert expert-a --delete-branch)

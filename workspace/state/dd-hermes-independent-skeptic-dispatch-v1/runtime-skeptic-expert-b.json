@@ -1,0 +1,118 @@
+{
+  "timestamp": "2026-04-17T17:38:15Z",
+  "repo_root": "/Volumes/Coding/Hermes agent for mine",
+  "worktree": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-independent-skeptic-dispatch-v1-expert-b",
+  "agent_role": "skeptic",
+  "shell": "/bin/zsh",
+  "git": {
+    "repo_root": "/Volumes/Coding/Hermes agent for mine",
+    "worktree": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-independent-skeptic-dispatch-v1-expert-b",
+    "has_head": true,
+    "head": "a0f30fd139f8a4ceae67edace602faee23335a37",
+    "branch": "dd-hermes-independent-skeptic-dispatch-v1-expert-b",
+    "upstream": "",
+    "ahead": 0,
+    "behind": 0,
+    "clean": true,
+    "dirty_files": [],
+    "remote_urls": {},
+    "known_worktrees": [
+      {
+        "path": "/Volumes/Coding/Hermes agent for mine",
+        "head": "a0f30fd139f8a4ceae67edace602faee23335a37",
+        "branch": "main"
+      },
+      {
+        "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-anchor-governance-v1-expert-a",
+        "head": "f9d89194b97c5cb630472c1a025d35576d3785af",
+        "branch": "dd-hermes-anchor-governance-v1-expert-a"
+      },
+      {
+        "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-execution-bootstrap-expert-a",
+        "head": "4ea93ab8c265585b3de3555c8ecdd1e60311a70e",
+        "branch": "dd-hermes-execution-bootstrap-expert-a"
+      },
+      {
+        "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-explicit-gate-verdicts-v1-expert-a",
+        "head": "1af20f9f046b4533b8ee65096142715016180bc3",
+        "branch": "dd-hermes-explicit-gate-verdicts-v1-expert-a"
+      },
+      {
+        "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-independent-quality-seat-v1-expert-a",
+        "head": "bfe1739a7b49ced241cc98817423cde1606d1d3b",
+        "branch": "dd-hermes-independent-quality-seat-v1-expert-a"
+      },
+      {
+        "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-independent-skeptic-dispatch-v1-expert-a",
+        "head": "a0f30fd139f8a4ceae67edace602faee23335a37",
+        "branch": "dd-hermes-independent-skeptic-dispatch-v1-expert-a"
+      },
+      {
+        "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-independent-skeptic-dispatch-v1-expert-b",
+        "head": "a0f30fd139f8a4ceae67edace602faee23335a37",
+        "branch": "dd-hermes-independent-skeptic-dispatch-v1-expert-b"
+      },
+      {
+        "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-legacy-archive-normalization-v1-expert-a",
+        "head": "c0237e5163a9cb8d5477765b586f8571bb7370d6",
+        "branch": "dd-hermes-legacy-archive-normalization-v1-expert-a"
+      },
+      {
+        "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-quality-seat-escalation-rules-v1-expert-a",
+        "head": "7b39e070cfab9aac46e37afe3655d5fe3208ba43",
+        "branch": "dd-hermes-quality-seat-escalation-rules-v1-expert-a"
+      },
+      {
+        "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-s5-2expert-20260416-expert-a",
+        "head": "f2282ca3d6fa13e94f18a13065b226a5dd8aea11",
+        "branch": "dd-hermes-s5-2expert-20260416-expert-a"
+      },
+      {
+        "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-s5-2expert-20260416-expert-b",
+        "head": "f2282ca3d6fa13e94f18a13065b226a5dd8aea11",
+        "branch": "dd-hermes-s5-2expert-20260416-expert-b"
+      },
+      {
+        "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-successor-triage-v1-expert-a",
+        "head": "dfd6652eae7d080173f445e4ebccfa66deda1fe7",
+        "branch": "dd-hermes-successor-triage-v1-expert-a"
+      }
+    ]
+  },
+  "hooks": {
+    "events": [
+      "PreToolUse",
+      "PostToolUse",
+      "Stop",
+      "SessionEnd"
+    ],
+    "available": [
+      "guard-dangerous-ops.sh",
+      "peon-ping.sh",
+      "post-edit-typecheck.sh",
+      "quality-gate.sh",
+      "session-end-log.sh",
+      "thread-switch-gate.sh"
+    ]
+  },
+  "skills": [
+    "auto-verify",
+    "coding-harness",
+    "deep-research",
+    "spec-first"
+  ],
+  "tests": [
+    "test-artifact-schemas.sh",
+    "test-coordination-endpoint.sh",
+    "test-hooks.sh",
+    "test-memory.sh",
+    "test-schema.sh",
+    "test-verify-loop.sh",
+    "test-workflow.sh",
+    "tests/smoke.sh"
+  ],
+  "task_surfaces": {
+    "contract_path": "/Volumes/Coding/Hermes agent for mine/workspace/contracts/dd-hermes-independent-skeptic-dispatch-v1.md",
+    "state_path": "/Volumes/Coding/Hermes agent for mine/workspace/state/dd-hermes-independent-skeptic-dispatch-v1/state.json"
+  }
+}
