@@ -1,25 +1,29 @@
 {
-  "timestamp": "2026-04-17T17:38:15Z",
+  "timestamp": "2026-04-17T17:54:50Z",
   "repo_root": "/Volumes/Coding/Hermes agent for mine",
   "worktree": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-independent-skeptic-dispatch-v1-expert-a",
   "agent_role": "executor",
   "shell": "/bin/zsh",
   "git": {
-    "repo_root": "/Volumes/Coding/Hermes agent for mine",
+    "repo_root": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-independent-skeptic-dispatch-v1-expert-a",
     "worktree": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-independent-skeptic-dispatch-v1-expert-a",
     "has_head": true,
-    "head": "a0f30fd139f8a4ceae67edace602faee23335a37",
+    "head": "627f302fc7d1999c3ac3ec0aa910595fe2e3f233",
     "branch": "dd-hermes-independent-skeptic-dispatch-v1-expert-a",
     "upstream": "",
     "ahead": 0,
     "behind": 0,
-    "clean": true,
-    "dirty_files": [],
+    "clean": false,
+    "dirty_files": [
+      "ocs/coordination-endpoints.md",
+      "scripts/dispatch-create.sh",
+      "tests/smoke.sh"
+    ],
     "remote_urls": {},
     "known_worktrees": [
       {
         "path": "/Volumes/Coding/Hermes agent for mine",
-        "head": "a0f30fd139f8a4ceae67edace602faee23335a37",
+        "head": "73c782dc3eeec3c54e2a25f68a395ab3a365a63c",
         "branch": "main"
       },
       {
@@ -44,12 +48,12 @@
       },
       {
         "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-independent-skeptic-dispatch-v1-expert-a",
-        "head": "a0f30fd139f8a4ceae67edace602faee23335a37",
+        "head": "627f302fc7d1999c3ac3ec0aa910595fe2e3f233",
         "branch": "dd-hermes-independent-skeptic-dispatch-v1-expert-a"
       },
       {
         "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-independent-skeptic-dispatch-v1-expert-b",
-        "head": "a0f30fd139f8a4ceae67edace602faee23335a37",
+        "head": "73c782dc3eeec3c54e2a25f68a395ab3a365a63c",
         "branch": "dd-hermes-independent-skeptic-dispatch-v1-expert-b"
       },
       {
