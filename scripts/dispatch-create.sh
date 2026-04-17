@@ -30,10 +30,7 @@ if [[ ! -f "$repo/workspace/state/$task_id/state.json" ]]; then
   "$SCRIPT_DIR/state-init.sh" --task-id "$task_id" >/dev/null
 fi
 
-state_json=$("$SCRIPT_DIR/state-read.sh" --task-id "$task_id")
-context_json=$("$SCRIPT_DIR/context-build.sh" --task-id "$task_id" --agent-role commander)
-
-payload=$(STATE_JSON="$state_json" CONTEXT_JSON="$context_json" python3 - <<'PY' "$repo" "$task_id" "$SCRIPT_DIR"
+payload=$(python3 - <<'PY' "$repo" "$task_id" "$SCRIPT_DIR"
 import json
 import os
 import shlex
@@ -45,17 +42,41 @@ repo = Path(sys.argv[1]).resolve()
 task_id = sys.argv[2]
 script_dir = Path(sys.argv[3]).resolve()
 sys.path.insert(0, str(script_dir))
-state_wrapper = json.loads(os.environ["STATE_JSON"])
-context_wrapper = json.loads(os.environ["CONTEXT_JSON"])
-state = state_wrapper["state"]
-context_path = context_wrapper["context_path"]
-runtime_path = context_wrapper["runtime_path"]
-state_path = context_wrapper["state_path"]
 
 from team_governance import (
     governance_snapshot,
 )
 from artifact_semantics import lane_artifact_paths, skeptic_lane_verdict
+
+state = {}
+context_path = ""
+runtime_path = ""
+state_path = str(repo / "workspace" / "state" / task_id / "state.json")
+task_policy = {"task_class": "", "quality_requirement": ""}
+verdicts = {
+    "task_policy": {"status": ""},
+    "product_gate": {"status": ""},
+    "quality_anchor": {"status": ""},
+    "degraded_ack": {"status": ""},
+}
+quality_seat = {
+    "mode": "",
+    "execution_status": "",
+    "execution_reasons": [],
+}
+
+
+class MaterializationFailure(Exception):
+    def __init__(self, *, stage, role, agent_id, cmd, returncode, stdout, stderr, parsed=None):
+        self.stage = stage
+        self.role = role
+        self.agent_id = agent_id
+        self.cmd = list(cmd)
+        self.returncode = returncode
+        self.stdout = stdout
+        self.stderr = stderr
+        self.parsed = parsed if isinstance(parsed, dict) else None
+        super().__init__(f"{stage} failed for {role}:{agent_id}")
 
 
 def handoff_for(agent_id):
@@ -65,15 +86,102 @@ def handoff_for(agent_id):
     return ""
 
 
-def run_json(cmd):
+def run_json(cmd, *, stage, role, agent_id):
     proc = subprocess.run(
         cmd,
         cwd=str(repo),
         capture_output=True,
         text=True,
-        check=True,
     )
-    return json.loads(proc.stdout)
+    stdout = proc.stdout.strip()
+    stderr = proc.stderr.strip()
+    parsed = None
+    if stdout:
+        try:
+            parsed = json.loads(stdout)
+        except json.JSONDecodeError:
+            parsed = None
+
+    if proc.returncode != 0:
+        raise MaterializationFailure(
+            stage=stage,
+            role=role,
+            agent_id=agent_id,
+            cmd=cmd,
+            returncode=proc.returncode,
+            stdout=stdout,
+            stderr=stderr,
+            parsed=parsed,
+        )
+    if parsed is None:
+        raise MaterializationFailure(
+            stage=stage,
+            role=role,
+            agent_id=agent_id,
+            cmd=cmd,
+            returncode=proc.returncode,
+            stdout=stdout,
+            stderr=stderr or "command did not return valid JSON",
+            parsed=parsed,
+        )
+    return parsed
+
+
+def dispatch_blocked_payload(error):
+    role_scope = f"{error.role} lane for {error.agent_id}"
+    suggested_next_commands = []
+    if error.stage == "worktree_create":
+        suggested_next_commands.append(
+            f"./scripts/worktree-create.sh --task-id {task_id} --expert {error.agent_id}"
+        )
+        suggested_next_commands.append(
+            f"./scripts/dispatch-create.sh --task-id {task_id}"
+        )
+    elif error.stage == "context_build":
+        context_cmd = [
+            f"./scripts/context-build.sh --task-id {task_id} --agent-role {error.role}"
+        ]
+        if error.role != "commander" and error.agent_id and error.agent_id != error.role:
+            context_cmd[0] += f" --agent-id {error.agent_id}"
+        suggested_next_commands.append(
+            context_cmd[0]
+        )
+    elif error.stage == "state_read":
+        suggested_next_commands.append(
+            f"./scripts/state-read.sh --task-id {task_id}"
+        )
+    if not suggested_next_commands:
+        suggested_next_commands.append(" ".join(shlex.quote(part) for part in error.cmd))
+
+    payload = {
+        "error": f"dispatch blocked while materializing {role_scope}: {error.stage}",
+        "blocked": True,
+        "stage": error.stage,
+        "role": error.role,
+        "agent_id": error.agent_id,
+        "task_id": task_id,
+        "task_class": task_policy["task_class"],
+        "quality_requirement": task_policy["quality_requirement"],
+        "task_policy_status": verdicts["task_policy"]["status"],
+        "product_gate_status": verdicts["product_gate"]["status"],
+        "quality_anchor_status": verdicts["quality_anchor"]["status"],
+        "degraded_ack_status": verdicts["degraded_ack"]["status"],
+        "quality_seat_mode": quality_seat["mode"],
+        "quality_seat_status": quality_seat["execution_status"],
+        "quality_seat_reasons": quality_seat["execution_reasons"],
+        "child_command": " ".join(shlex.quote(part) for part in error.cmd),
+        "child_exit_code": error.returncode,
+        "child_stdout": error.stdout,
+        "child_stderr": error.stderr,
+        "suggested_next_commands": suggested_next_commands,
+    }
+    if error.parsed:
+        payload["child_payload"] = error.parsed
+        if isinstance(error.parsed.get("error"), str) and error.parsed["error"]:
+            payload["child_error"] = error.parsed["error"]
+        if "blocked" in error.parsed:
+            payload["child_blocked"] = bool(error.parsed["blocked"])
+    return payload
 
 
 def ensure_handoff(agent_id, role):
@@ -160,200 +268,232 @@ def build_context(agent_role, agent_id="", worktree_path=""):
         cmd.extend(["--agent-id", agent_id])
     if worktree_path:
         cmd.extend(["--worktree", worktree_path])
-    return run_json(cmd)
+    return run_json(cmd, stage="context_build", role=agent_role, agent_id=agent_id or agent_role)
 
-
-team = state.get("team", {}) if isinstance(state.get("team"), dict) else {}
-product = state.get("product", {}) if isinstance(state.get("product"), dict) else {}
-quality = state.get("quality", {}) if isinstance(state.get("quality"), dict) else {}
-governance = governance_snapshot(state)
-supervisors = governance["supervisors"]
-executors = governance["executors"]
-skeptics = governance["skeptics"]
-product_anchors = governance["product_anchors"]
-quality_anchors = governance["quality_anchors"]
-scale_out_triggers = governance["scale_out_triggers"]
-task_policy = governance["task_policy"]
-role_integrity = governance["role_integrity"]
-product_gate = governance["product_gate"]
-quality_anchor = governance["quality_anchor"]
-degraded_ack = governance["degraded_ack"]
-quality_seat = governance["quality_seat"]
-verdicts = governance["verdicts"]
-
-if not supervisors:
-    print(json.dumps({"error": "dispatch requires at least one supervisor", "blocked": True}, ensure_ascii=False))
-    raise SystemExit(2)
-if not executors:
-    print(json.dumps({"error": "dispatch requires at least one executor", "blocked": True}, ensure_ascii=False))
-    raise SystemExit(2)
-if not skeptics:
-    print(json.dumps({"error": "dispatch requires at least one skeptic", "blocked": True}, ensure_ascii=False))
-    raise SystemExit(2)
-if not product_gate["ready"]:
-    print(json.dumps({
-        "error": f"dispatch blocked by product gate: {', '.join(product_gate['reasons'])}",
-        "blocked": True,
-        "product_gate_reasons": product_gate["reasons"],
-    }, ensure_ascii=False))
-    raise SystemExit(2)
-if not task_policy["ready"]:
-    print(json.dumps({
-        "error": f"dispatch blocked by task classification: {', '.join(task_policy['reasons'])}",
-        "blocked": True,
-        "task_class": task_policy["task_class"],
-        "quality_requirement": task_policy["quality_requirement"],
-        "task_policy_reasons": task_policy["reasons"],
-    }, ensure_ascii=False))
-    raise SystemExit(2)
-if product.get("goal_status") in {"drifted", "blocked"}:
-    print(json.dumps({"error": f"dispatch blocked by product.goal_status={product.get('goal_status')}", "blocked": True}, ensure_ascii=False))
-    raise SystemExit(2)
-if not quality_anchor["ready"]:
-    print(json.dumps({
-        "error": f"dispatch blocked by quality anchor: {', '.join(quality_anchor['reasons'])}",
-        "blocked": True,
-        "quality_anchor_reasons": quality_anchor["reasons"],
-        "quality_seat_mode": quality_seat["mode"],
-        "quality_seat_status": quality_seat["execution_status"],
-        "quality_seat_reasons": quality_seat["execution_reasons"],
-    }, ensure_ascii=False))
-    raise SystemExit(2)
-if not degraded_ack["ready"]:
-    print(json.dumps({
-        "error": f"dispatch blocked by degraded supervision: {', '.join(degraded_ack['reasons'])}",
-        "blocked": True,
-        "degraded_ack_reasons": degraded_ack["reasons"],
-        "quality_seat_mode": quality_seat["mode"],
-        "quality_seat_status": quality_seat["execution_status"],
-        "quality_seat_reasons": quality_seat["execution_reasons"],
-    }, ensure_ascii=False))
-    raise SystemExit(2)
-if not quality_seat["execution_ready"]:
-    print(json.dumps({
-        "error": f"dispatch blocked by quality seat policy: {', '.join(quality_seat['execution_reasons'])}",
-        "blocked": True,
-        "task_class": task_policy["task_class"],
-        "quality_requirement": task_policy["quality_requirement"],
-        "task_policy_reasons": task_policy["reasons"],
-        "quality_seat_mode": quality_seat["mode"],
-        "quality_seat_status": quality_seat["execution_status"],
-        "quality_seat_reasons": quality_seat["execution_reasons"],
-    }, ensure_ascii=False))
-    raise SystemExit(2)
 
 assignments = []
 created_worktrees = []
 existing_worktrees = []
 
-for agent_id in supervisors:
-    assignments.append({
-        "agent_id": agent_id,
-        "role": "supervisor",
-        "anchor_role": "product_anchor" if agent_id in product_anchors else "",
-        "status": "ready",
-        "worktree_required": False,
-        "worktree_path": "",
-        "branch": "",
-        "handoff_path": "",
-        "artifacts": {
-            "contract_path": state.get("contract_path", ""),
-            "state_path": state_path,
-            "context_path": context_path,
-            "runtime_path": runtime_path,
-        },
-        "next_commands": [
-            f"cd {shlex.quote(str(repo))}",
-            f"./scripts/state-read.sh --task-id {task_id}",
-            f"./scripts/context-build.sh --task-id {task_id} --agent-role supervisor",
-        ],
-    })
+try:
+    state_wrapper = run_json(
+        [str(script_dir / "state-read.sh"), "--task-id", task_id],
+        stage="state_read",
+        role="commander",
+        agent_id="lead",
+    )
+    state = state_wrapper["state"]
 
-for agent_id in executors:
-    expected_worktree = repo / ".worktrees" / f"{task_id}-{agent_id}"
-    branch = f"{task_id}-{agent_id}"
-    status = "existing"
-    if expected_worktree.exists():
-        existing_worktrees.append(str(expected_worktree))
-    else:
-        created = run_json([str(script_dir / "worktree-create.sh"), "--task-id", task_id, "--expert", agent_id])
-        expected_worktree = Path(created["worktree_path"]).resolve()
-        branch = created["branch"]
-        status = "created"
-        created_worktrees.append(str(expected_worktree))
-    executor_context = build_context("executor", agent_id=agent_id, worktree_path=str(expected_worktree))
-    assignments.append({
-        "agent_id": agent_id,
-        "role": "executor",
-        "anchor_role": "",
-        "status": status,
-        "worktree_required": True,
-        "worktree_path": str(expected_worktree),
-        "branch": branch,
-        "handoff_path": handoff_for(agent_id),
-        "artifacts": {
-            "contract_path": state.get("contract_path", ""),
-            "state_path": state_path,
-            "context_path": executor_context["context_path"],
-            "runtime_path": executor_context["runtime_path"],
-        },
-        "next_commands": [
-            f"cd {shlex.quote(str(expected_worktree))}",
-            "git status --short",
-            f"./scripts/context-build.sh --task-id {task_id} --agent-role executor --agent-id {agent_id} --worktree {shlex.quote(str(expected_worktree))}",
-        ],
-    })
+    team = state.get("team", {}) if isinstance(state.get("team"), dict) else {}
+    product = state.get("product", {}) if isinstance(state.get("product"), dict) else {}
+    quality = state.get("quality", {}) if isinstance(state.get("quality"), dict) else {}
+    governance = governance_snapshot(state)
+    supervisors = governance["supervisors"]
+    executors = governance["executors"]
+    skeptics = governance["skeptics"]
+    product_anchors = governance["product_anchors"]
+    quality_anchors = governance["quality_anchors"]
+    scale_out_triggers = governance["scale_out_triggers"]
+    task_policy = governance["task_policy"]
+    role_integrity = governance["role_integrity"]
+    product_gate = governance["product_gate"]
+    quality_anchor = governance["quality_anchor"]
+    degraded_ack = governance["degraded_ack"]
+    quality_seat = governance["quality_seat"]
+    verdicts = governance["verdicts"]
 
-for agent_id in skeptics:
-    skeptic_independent = role_integrity["independent_skeptic"] and agent_id not in executors and agent_id not in supervisors
-    skeptic_worktree = repo / ".worktrees" / f"{task_id}-{agent_id}"
-    skeptic_branch = f"{task_id}-{agent_id}"
-    skeptic_status = "ready"
-    skeptic_handoff = ""
-    skeptic_context_path = context_path
-    skeptic_runtime_path = runtime_path
-    skeptic_next_commands = [
-        f"cd {shlex.quote(str(repo))}",
-        f"./scripts/context-build.sh --task-id {task_id} --agent-role skeptic",
-        f"./scripts/state-read.sh --task-id {task_id}",
-    ]
-    if skeptic_independent:
-        skeptic_handoff = ensure_handoff(agent_id, "skeptic")
-        if skeptic_worktree.exists():
-            existing_worktrees.append(str(skeptic_worktree))
-            skeptic_status = "existing"
+    commander_context = run_json(
+        [str(script_dir / "context-build.sh"), "--task-id", task_id, "--agent-role", "commander"],
+        stage="context_build",
+        role="commander",
+        agent_id="lead",
+    )
+    context_path = commander_context["context_path"]
+    runtime_path = commander_context["runtime_path"]
+    state_path = commander_context["state_path"]
+
+    if not supervisors:
+        print(json.dumps({"error": "dispatch requires at least one supervisor", "blocked": True}, ensure_ascii=False))
+        raise SystemExit(2)
+    if not executors:
+        print(json.dumps({"error": "dispatch requires at least one executor", "blocked": True}, ensure_ascii=False))
+        raise SystemExit(2)
+    if not skeptics:
+        print(json.dumps({"error": "dispatch requires at least one skeptic", "blocked": True}, ensure_ascii=False))
+        raise SystemExit(2)
+    if not product_gate["ready"]:
+        print(json.dumps({
+            "error": f"dispatch blocked by product gate: {', '.join(product_gate['reasons'])}",
+            "blocked": True,
+            "product_gate_reasons": product_gate["reasons"],
+        }, ensure_ascii=False))
+        raise SystemExit(2)
+    if not task_policy["ready"]:
+        print(json.dumps({
+            "error": f"dispatch blocked by task classification: {', '.join(task_policy['reasons'])}",
+            "blocked": True,
+            "task_class": task_policy["task_class"],
+            "quality_requirement": task_policy["quality_requirement"],
+            "task_policy_reasons": task_policy["reasons"],
+        }, ensure_ascii=False))
+        raise SystemExit(2)
+    if product.get("goal_status") in {"drifted", "blocked"}:
+        print(json.dumps({"error": f"dispatch blocked by product.goal_status={product.get('goal_status')}", "blocked": True}, ensure_ascii=False))
+        raise SystemExit(2)
+    if not quality_anchor["ready"]:
+        print(json.dumps({
+            "error": f"dispatch blocked by quality anchor: {', '.join(quality_anchor['reasons'])}",
+            "blocked": True,
+            "quality_anchor_reasons": quality_anchor["reasons"],
+            "quality_seat_mode": quality_seat["mode"],
+            "quality_seat_status": quality_seat["execution_status"],
+            "quality_seat_reasons": quality_seat["execution_reasons"],
+        }, ensure_ascii=False))
+        raise SystemExit(2)
+    if not degraded_ack["ready"]:
+        print(json.dumps({
+            "error": f"dispatch blocked by degraded supervision: {', '.join(degraded_ack['reasons'])}",
+            "blocked": True,
+            "degraded_ack_reasons": degraded_ack["reasons"],
+            "quality_seat_mode": quality_seat["mode"],
+            "quality_seat_status": quality_seat["execution_status"],
+            "quality_seat_reasons": quality_seat["execution_reasons"],
+        }, ensure_ascii=False))
+        raise SystemExit(2)
+    if not quality_seat["execution_ready"]:
+        print(json.dumps({
+            "error": f"dispatch blocked by quality seat policy: {', '.join(quality_seat['execution_reasons'])}",
+            "blocked": True,
+            "task_class": task_policy["task_class"],
+            "quality_requirement": task_policy["quality_requirement"],
+            "task_policy_reasons": task_policy["reasons"],
+            "quality_seat_mode": quality_seat["mode"],
+            "quality_seat_status": quality_seat["execution_status"],
+            "quality_seat_reasons": quality_seat["execution_reasons"],
+        }, ensure_ascii=False))
+        raise SystemExit(2)
+
+    for agent_id in supervisors:
+        assignments.append({
+            "agent_id": agent_id,
+            "role": "supervisor",
+            "anchor_role": "product_anchor" if agent_id in product_anchors else "",
+            "status": "ready",
+            "worktree_required": False,
+            "worktree_path": "",
+            "branch": "",
+            "handoff_path": "",
+            "artifacts": {
+                "contract_path": state.get("contract_path", ""),
+                "state_path": state_path,
+                "context_path": context_path,
+                "runtime_path": runtime_path,
+            },
+            "next_commands": [
+                f"cd {shlex.quote(str(repo))}",
+                f"./scripts/state-read.sh --task-id {task_id}",
+                f"./scripts/context-build.sh --task-id {task_id} --agent-role supervisor",
+            ],
+        })
+
+    for agent_id in executors:
+        expected_worktree = repo / ".worktrees" / f"{task_id}-{agent_id}"
+        branch = f"{task_id}-{agent_id}"
+        status = "existing"
+        if expected_worktree.exists():
+            existing_worktrees.append(str(expected_worktree))
         else:
-            created = run_json([str(script_dir / "worktree-create.sh"), "--task-id", task_id, "--expert", agent_id])
-            skeptic_worktree = Path(created["worktree_path"]).resolve()
-            skeptic_branch = created["branch"]
-            skeptic_status = "created"
-            created_worktrees.append(str(skeptic_worktree))
-        skeptic_context = build_context("skeptic", agent_id=agent_id, worktree_path=str(skeptic_worktree))
-        skeptic_context_path = skeptic_context["context_path"]
-        skeptic_runtime_path = skeptic_context["runtime_path"]
+            created = run_json(
+                [str(script_dir / "worktree-create.sh"), "--task-id", task_id, "--expert", agent_id],
+                stage="worktree_create",
+                role="executor",
+                agent_id=agent_id,
+            )
+            expected_worktree = Path(created["worktree_path"]).resolve()
+            branch = created["branch"]
+            status = "created"
+            created_worktrees.append(str(expected_worktree))
+        executor_context = build_context("executor", agent_id=agent_id, worktree_path=str(expected_worktree))
+        assignments.append({
+            "agent_id": agent_id,
+            "role": "executor",
+            "anchor_role": "",
+            "status": status,
+            "worktree_required": True,
+            "worktree_path": str(expected_worktree),
+            "branch": branch,
+            "handoff_path": handoff_for(agent_id),
+            "artifacts": {
+                "contract_path": state.get("contract_path", ""),
+                "state_path": state_path,
+                "context_path": executor_context["context_path"],
+                "runtime_path": executor_context["runtime_path"],
+            },
+            "next_commands": [
+                f"cd {shlex.quote(str(expected_worktree))}",
+                "git status --short",
+                f"./scripts/context-build.sh --task-id {task_id} --agent-role executor --agent-id {agent_id} --worktree {shlex.quote(str(expected_worktree))}",
+            ],
+        })
+
+    for agent_id in skeptics:
+        skeptic_independent = role_integrity["independent_skeptic"] and agent_id not in executors and agent_id not in supervisors
+        skeptic_worktree = repo / ".worktrees" / f"{task_id}-{agent_id}"
+        skeptic_branch = f"{task_id}-{agent_id}"
+        skeptic_status = "ready"
+        skeptic_handoff = ""
+        skeptic_context_path = context_path
+        skeptic_runtime_path = runtime_path
         skeptic_next_commands = [
-            f"cd {shlex.quote(str(skeptic_worktree))}",
-            "git status --short",
-            f"./scripts/context-build.sh --task-id {task_id} --agent-role skeptic --agent-id {agent_id} --worktree {shlex.quote(str(skeptic_worktree))}",
+            f"cd {shlex.quote(str(repo))}",
+            f"./scripts/context-build.sh --task-id {task_id} --agent-role skeptic",
             f"./scripts/state-read.sh --task-id {task_id}",
         ]
-    assignments.append({
-        "agent_id": agent_id,
-        "role": "skeptic",
-        "anchor_role": "quality_anchor" if agent_id in quality_anchors else "",
-        "status": skeptic_status,
-        "worktree_required": skeptic_independent,
-        "worktree_path": str(skeptic_worktree) if skeptic_independent else "",
-        "branch": skeptic_branch if skeptic_independent else "",
-        "handoff_path": skeptic_handoff,
-        "artifacts": {
-            "contract_path": state.get("contract_path", ""),
-            "state_path": state_path,
-            "context_path": skeptic_context_path,
-            "runtime_path": skeptic_runtime_path,
-        },
-        "next_commands": skeptic_next_commands,
-    })
+        if skeptic_independent:
+            skeptic_handoff = ensure_handoff(agent_id, "skeptic")
+            if skeptic_worktree.exists():
+                existing_worktrees.append(str(skeptic_worktree))
+                skeptic_status = "existing"
+            else:
+                created = run_json(
+                    [str(script_dir / "worktree-create.sh"), "--task-id", task_id, "--expert", agent_id],
+                    stage="worktree_create",
+                    role="skeptic",
+                    agent_id=agent_id,
+                )
+                skeptic_worktree = Path(created["worktree_path"]).resolve()
+                skeptic_branch = created["branch"]
+                skeptic_status = "created"
+                created_worktrees.append(str(skeptic_worktree))
+            skeptic_context = build_context("skeptic", agent_id=agent_id, worktree_path=str(skeptic_worktree))
+            skeptic_context_path = skeptic_context["context_path"]
+            skeptic_runtime_path = skeptic_context["runtime_path"]
+            skeptic_next_commands = [
+                f"cd {shlex.quote(str(skeptic_worktree))}",
+                "git status --short",
+                f"./scripts/context-build.sh --task-id {task_id} --agent-role skeptic --agent-id {agent_id} --worktree {shlex.quote(str(skeptic_worktree))}",
+                f"./scripts/state-read.sh --task-id {task_id}",
+            ]
+        assignments.append({
+            "agent_id": agent_id,
+            "role": "skeptic",
+            "anchor_role": "quality_anchor" if agent_id in quality_anchors else "",
+            "status": skeptic_status,
+            "worktree_required": skeptic_independent,
+            "worktree_path": str(skeptic_worktree) if skeptic_independent else "",
+            "branch": skeptic_branch if skeptic_independent else "",
+            "handoff_path": skeptic_handoff,
+            "artifacts": {
+                "contract_path": state.get("contract_path", ""),
+                "state_path": state_path,
+                "context_path": skeptic_context_path,
+                "runtime_path": skeptic_runtime_path,
+            },
+            "next_commands": skeptic_next_commands,
+        })
+except MaterializationFailure as error:
+    print(json.dumps(dispatch_blocked_payload(error), ensure_ascii=False))
+    raise SystemExit(2)
 
 skeptic_lane = skeptic_lane_verdict(
     repo,
