@@ -648,7 +648,13 @@ run_entry() {
   [[ "$entry" == *"DD Hermes 体验入口"* ]]
   [[ "$entry" == *"最近一次真实 end-to-end 证明"* ]]
 
-  python3 - "$ROOT/指挥文档/06-一期PhaseDone审计.md" <<'PY'
+  local landing_doc="$ROOT/指挥文档/06-一期PhaseDone审计.md"
+  local landing_backup
+  landing_backup=$(mktemp)
+  cp "$landing_doc" "$landing_backup"
+  trap 'cp "$landing_backup" "$landing_doc"; rm -f "$landing_backup"; trap - RETURN' RETURN
+
+  python3 - "$landing_doc" <<'PY'
 from pathlib import Path
 import re
 import sys
@@ -662,6 +668,8 @@ lines = []
 for line in match.group(1).splitlines():
     if line.startswith("current_mainline_task_id:"):
         lines.append("current_mainline_task_id:")
+    elif line.startswith("current_mainline_doc:"):
+        lines.append("current_mainline_doc:")
     elif line.startswith("current_gap_1:"):
         lines.append("current_gap_1: 最近一个 phase-2 proof 已归档；当前还没有新的 active mainline。")
     elif line.startswith("current_gap_2:"):
@@ -676,6 +684,7 @@ PY
   vacant=$("$ROOT/scripts/demo-entry.sh")
   [[ "$vacant" == *"当前 active mainline：暂无"* ]]
   [[ "$vacant" == *"下一步决策文档：指挥文档/04-任务重校准与线程策略.md"* ]]
+  [[ "$vacant" == *"successor 审计："* ]]
 }
 
 run_schema() {
@@ -1061,6 +1070,59 @@ EOF
   local compact
   compact=$("$ROOT/scripts/coordination-endpoint.sh" --task-id smoke-sprint --endpoint journal.compact)
   assert_json_field "$compact" "'compacted' in data and 'kept' in data and 'dry_run' in data and data['dry_run'] is True"
+
+  local residue_dir="$ROOT/workspace/state/endpoint-residue-fixture"
+  mkdir -p "$residue_dir"
+  local landing_doc="$ROOT/指挥文档/06-一期PhaseDone审计.md"
+  local landing_backup
+  landing_backup=$(mktemp)
+  cp "$landing_doc" "$landing_backup"
+  trap 'cp "$landing_backup" "$landing_doc"; rm -f "$landing_backup"; rm -rf "$residue_dir"; trap - RETURN' RETURN
+  cat > "$residue_dir/state.json" <<'EOF'
+{
+  "task_id": "endpoint-residue-fixture",
+  "status": "initialized",
+  "mode": "planning",
+  "openspec": {
+    "stage": "proposal",
+    "proposal_path": "",
+    "design_path": "",
+    "task_path": "",
+    "archive_path": ""
+  }
+}
+EOF
+
+  local successor_audit
+  successor_audit=$("$ROOT/scripts/coordination-endpoint.sh" --task-id smoke-sprint --endpoint successor.audit)
+  assert_json_field "$successor_audit" "'verdict' in data and 'reasons' in data and 'live_committed_candidates' in data and 'local_residue' in data and 'archived_task_count' in data"
+  assert_json_field "$successor_audit" "any(item['task_id'] == 'endpoint-residue-fixture' for item in data['local_residue'])"
+
+  python3 - "$landing_doc" <<'PY'
+from pathlib import Path
+import re
+import sys
+
+path = Path(sys.argv[1])
+text = path.read_text(encoding="utf-8")
+match = re.match(r"---\n(.*?)\n---\n", text, re.S)
+if not match:
+    raise SystemExit("frontmatter missing")
+lines = []
+for line in match.group(1).splitlines():
+    if line.startswith("current_mainline_task_id:"):
+        lines.append("current_mainline_task_id: endpoint-residue-fixture")
+    elif line.startswith("current_mainline_doc:"):
+        lines.append("current_mainline_doc:")
+    else:
+        lines.append(line)
+updated = "---\n" + "\n".join(lines) + "\n---\n" + text[match.end():]
+path.write_text(updated, encoding="utf-8")
+PY
+
+  local residue_mainline
+  residue_mainline=$("$ROOT/scripts/coordination-endpoint.sh" --task-id smoke-sprint --endpoint successor.audit)
+  assert_json_field "$residue_mainline" "data['verdict'] == 'working-tree-mainline-only' and 'current_mainline_not_committed' in data['reasons']"
 }
 
 case "$SECTION" in

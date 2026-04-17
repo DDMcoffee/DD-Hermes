@@ -233,6 +233,18 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
 - Response required fields:
   - `compacted`, `kept`, `dry_run`
 
+### 13) `successor.audit`
+
+- Router entry: `scripts/coordination-endpoint.sh --endpoint successor.audit --task-id <any>`
+- Implementation: `scripts/successor-evidence-audit.sh`
+- Purpose: 审计当前 successor 证据，区分 committed live candidates、archived proof history 与 working-tree residue。
+- Response required fields:
+  - `verdict`, `reasons`
+  - `latest_proof_task_id`, `current_mainline_task_id`
+  - `live_committed_candidates`, `committed_candidate_count`
+  - `local_residue`, `local_residue_count`
+  - `archived_task_count`
+
 ## Closeout Flow
 
 1. `scripts/sprint-init.sh` 初始化 sprint 时，自动生成 `workspace/closeouts/<task_id>-<expert>.md`。

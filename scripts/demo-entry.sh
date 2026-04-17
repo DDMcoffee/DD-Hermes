@@ -106,6 +106,10 @@ mainline_state_json=""
 if [[ -n "$next_task" ]]; then
   mainline_state_json=$("$repo/scripts/state-read.sh" --task-id "$next_task" 2>/dev/null || true)
 fi
+successor_audit_json=""
+if [[ -z "$next_task" && -n "$proof_task" ]]; then
+  successor_audit_json=$("$repo/scripts/coordination-endpoint.sh" --task-id "$proof_task" --endpoint successor.audit 2>/dev/null || true)
+fi
 proof_latest_commit=$(read_state_field "$proof_state_path" "git.latest_commit")
 proof_status=$(read_state_field "$proof_state_path" "status")
 proof_mode=$(read_state_field "$proof_state_path" "mode")
@@ -140,6 +144,9 @@ fi
 entry_task_commit="未找到"
 if [[ -n "$task_doc_rel" ]]; then
   entry_task_commit=$(short_sha "$(latest_touch_commit "$task_doc_rel")")
+  if [[ "$entry_task_commit" == "未找到" && -f "$task_doc" ]]; then
+    entry_task_commit="当前工作树未提交"
+  fi
 fi
 mainline_summary=$(STATE_JSON="$mainline_state_json" python3 - <<'PY'
 import json
@@ -182,6 +189,39 @@ seat_reasons = summary.get("quality_seat_reasons", [])
 if seat_reasons:
     lines.append(f"- Quality Seat Reasons：{', '.join(seat_reasons)}")
 print("\n".join(lines))
+PY
+)
+successor_audit_summary=$(AUDIT_JSON="$successor_audit_json" python3 - <<'PY'
+import json
+import os
+
+payload = os.environ.get("AUDIT_JSON", "")
+if not payload:
+    print("")
+    raise SystemExit(0)
+try:
+    data = json.loads(payload)
+except json.JSONDecodeError:
+    print("")
+    raise SystemExit(0)
+
+labels = {
+    "active-mainline-present": "存在 active mainline",
+    "candidate-available": "存在 committed 候选",
+    "no-successor-yet": "暂无 committed successor",
+}
+verdict = labels.get(data.get("verdict", ""), data.get("verdict", "unknown"))
+line = (
+    f"successor 审计：{verdict}；"
+    f"{data.get('committed_candidate_count', 0)} 个 committed 候选；"
+    f"{data.get('local_residue_count', 0)} 个 local residue 已忽略"
+)
+residue = data.get("local_residue", [])
+if residue:
+    names = "、".join(item.get("task_id", "") for item in residue[:3] if item.get("task_id"))
+    if names:
+        line += f"\n- residue task_ids：{names}"
+print(line)
 PY
 )
 
@@ -241,4 +281,8 @@ EOF
 
 if [[ -n "$mainline_summary" ]]; then
   printf '\n%s\n' "$mainline_summary"
+fi
+
+if [[ -n "$successor_audit_summary" ]]; then
+  printf '\n%s\n' "$successor_audit_summary"
 fi

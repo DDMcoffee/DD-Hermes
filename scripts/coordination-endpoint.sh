@@ -28,7 +28,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ -z "$endpoint" ]]; then
-  json_out '{"error":"endpoint is required","supported":["state.read","state.update","context.build","dispatch.create","closeout.check","lease.check","thread.gate","git.integrate","session.analytics","memory.decay","journal.compact"]}'
+  json_out '{"error":"endpoint is required","supported":["state.read","state.update","context.build","dispatch.create","closeout.check","lease.check","thread.gate","git.integrate","session.analytics","memory.decay","journal.compact","successor.audit"]}'
   exit 3
 fi
 
@@ -95,8 +95,11 @@ case "$endpoint" in
   journal.compact)
     "$SCRIPT_DIR/journal-compact.sh" --dry-run
     ;;
+  successor.audit)
+    "$SCRIPT_DIR/successor-evidence-audit.sh"
+    ;;
   *)
-    json_out '{"error":"unknown endpoint","supported":["state.read","state.update","context.build","dispatch.create","closeout.check","lease.check","thread.gate","git.integrate","session.analytics","memory.decay","journal.compact"]}'
+    json_out '{"error":"unknown endpoint","supported":["state.read","state.update","context.build","dispatch.create","closeout.check","lease.check","thread.gate","git.integrate","session.analytics","memory.decay","journal.compact","successor.audit"]}'
     exit 3
     ;;
 esac

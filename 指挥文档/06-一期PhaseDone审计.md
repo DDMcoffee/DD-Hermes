@@ -2,10 +2,10 @@
 phase_status: 一期已经达到完整的 `phase done`；现在可以直接使用 DD Hermes harness 的只读入口与任务控制面。
 latest_proof_task_id: dd-hermes-independent-skeptic-dispatch-v1
 latest_proof_archive: openspec/archive/dd-hermes-independent-skeptic-dispatch-v1.md
-current_mainline_task_id:
-current_mainline_doc:
+current_mainline_task_id: dd-hermes-successor-evidence-audit-v1
+current_mainline_doc: openspec/tasks/dd-hermes-successor-evidence-audit-v1.md
 current_gap_1: 最近 proof 已更新为 `dd-hermes-independent-skeptic-dispatch-v1`；它已经把独立 skeptic 从命名真相推进成 review-backed、merge-backed 的运行面真相。
-current_gap_2: 当前没有 active mainline；下一步只剩 successor triage / 新 task package，而不是继续伪装这条 proof 还在执行。
+current_gap_2: 当前 active mainline 已切到 `dd-hermes-successor-evidence-audit-v1`；目标是把 successor 证据区分做成可调用 audit，而不是继续依赖手工 repo sweep。
 ---
 
 # DD Hermes 一期 Phase Done 审计
@@ -46,13 +46,13 @@ current_gap_2: 当前没有 active mainline；下一步只剩 successor triage /
    - `docs/git-management.md`
 3. phase-2 已经证明可以在不破坏一期入口的前提下继续推进、完成、归档
    - 最近归档 proof task：`dd-hermes-independent-skeptic-dispatch-v1`
-   - 当前 active mainline：暂无
+   - 当前 active mainline：`dd-hermes-successor-evidence-audit-v1`
 
 ## 当前 phase-2 处于什么位置
 
 - 最近归档 proof task：`dd-hermes-independent-skeptic-dispatch-v1`
 - 最近归档治理主线：`dd-hermes-successor-triage-v1`
-- 当前 active mainline：暂无
+- 当前 active mainline：`dd-hermes-successor-evidence-audit-v1`
 - 最新 proof 已完成的事实：
   - `expert-b` 质量位不再只是命名元数据，而是可物化的真实 skeptic lane
   - `dispatch-create` 在 `state_read / context_build / worktree_create` 上都能返回协议化 blocked JSON，而不是 traceback
@@ -81,9 +81,9 @@ current_gap_2: 当前没有 active mainline；下一步只剩 successor triage /
 ## 当前剩余 gap
 
 - 一期无剩余 blocker。
-- 当前剩余 gap 全部属于 phase-2 successor 选择：
-  - 需要重新做一次 successor triage，判断下一条 bounded task 是否已经有足够 repo evidence
-  - 在新 task package 出现之前，入口必须诚实地显示“暂无 active mainline”
+- 当前剩余 gap 已收口成一条新的 phase-2 治理主线：
+  - `dd-hermes-successor-evidence-audit-v1` 负责把 committed successor evidence 与 local residue 的区分做成可执行 endpoint / entry truth
+  - 在这条主线完成前，不应该再回到手工 repo sweep 或聊天记忆驱动的 successor 裁决
 
 ## 当前线程应该去哪里继续看
 

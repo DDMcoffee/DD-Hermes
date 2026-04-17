@@ -1,0 +1,882 @@
+{
+  "task_id": "dd-hermes-successor-evidence-audit-v1",
+  "agent_role": "executor",
+  "agent_id": "expert-a",
+  "generated_at": "2026-04-17T18:35:38Z",
+  "sources": {
+    "contract_path": "/Volumes/Coding/Hermes agent for mine/workspace/contracts/dd-hermes-successor-evidence-audit-v1.md",
+    "handoff_paths": [
+      "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-successor-evidence-audit-v1-lead-to-expert-a.md"
+    ],
+    "exploration_paths": [
+      "/Volumes/Coding/Hermes agent for mine/workspace/exploration/exploration-lead-dd-hermes-successor-evidence-audit-v1.md"
+    ],
+    "state_path": "/Volumes/Coding/Hermes agent for mine/workspace/state/dd-hermes-successor-evidence-audit-v1/state.json",
+    "runtime_path": "/Volumes/Coding/Hermes agent for mine/workspace/state/dd-hermes-successor-evidence-audit-v1/runtime-executor-expert-a.json",
+    "openspec": {
+      "proposal": "/Volumes/Coding/Hermes agent for mine/openspec/proposals/dd-hermes-successor-evidence-audit-v1.md",
+      "design": "/Volumes/Coding/Hermes agent for mine/openspec/designs/dd-hermes-successor-evidence-audit-v1.md",
+      "task": "/Volumes/Coding/Hermes agent for mine/openspec/tasks/dd-hermes-successor-evidence-audit-v1.md",
+      "archive": ""
+    }
+  },
+  "runtime": {
+    "timestamp": "2026-04-17T18:35:38Z",
+    "repo_root": "/Volumes/Coding/Hermes agent for mine",
+    "worktree": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-successor-evidence-audit-v1-expert-a",
+    "agent_role": "executor",
+    "shell": "/bin/zsh",
+    "git": {
+      "repo_root": "/Volumes/Coding/Hermes agent for mine",
+      "worktree": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-successor-evidence-audit-v1-expert-a",
+      "has_head": true,
+      "head": "b3e6a2dae1512345fc3483f5ae4fb3c8b29ae444",
+      "branch": "dd-hermes-successor-evidence-audit-v1-expert-a",
+      "upstream": "",
+      "ahead": 0,
+      "behind": 0,
+      "clean": true,
+      "dirty_files": [],
+      "remote_urls": {},
+      "known_worktrees": [
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine",
+          "head": "b3e6a2dae1512345fc3483f5ae4fb3c8b29ae444",
+          "branch": "main"
+        },
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-anchor-governance-v1-expert-a",
+          "head": "f9d89194b97c5cb630472c1a025d35576d3785af",
+          "branch": "dd-hermes-anchor-governance-v1-expert-a"
+        },
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-execution-bootstrap-expert-a",
+          "head": "4ea93ab8c265585b3de3555c8ecdd1e60311a70e",
+          "branch": "dd-hermes-execution-bootstrap-expert-a"
+        },
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-explicit-gate-verdicts-v1-expert-a",
+          "head": "1af20f9f046b4533b8ee65096142715016180bc3",
+          "branch": "dd-hermes-explicit-gate-verdicts-v1-expert-a"
+        },
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-independent-quality-seat-v1-expert-a",
+          "head": "bfe1739a7b49ced241cc98817423cde1606d1d3b",
+          "branch": "dd-hermes-independent-quality-seat-v1-expert-a"
+        },
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-independent-skeptic-dispatch-v1-expert-a",
+          "head": "2db66973abd117bcaf752271d7f9f02e56fa03bd",
+          "branch": "dd-hermes-independent-skeptic-dispatch-v1-expert-a"
+        },
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-independent-skeptic-dispatch-v1-expert-b",
+          "head": "73c782dc3eeec3c54e2a25f68a395ab3a365a63c",
+          "branch": "dd-hermes-independent-skeptic-dispatch-v1-expert-b"
+        },
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-legacy-archive-normalization-v1-expert-a",
+          "head": "c0237e5163a9cb8d5477765b586f8571bb7370d6",
+          "branch": "dd-hermes-legacy-archive-normalization-v1-expert-a"
+        },
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-quality-seat-escalation-rules-v1-expert-a",
+          "head": "7b39e070cfab9aac46e37afe3655d5fe3208ba43",
+          "branch": "dd-hermes-quality-seat-escalation-rules-v1-expert-a"
+        },
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-s5-2expert-20260416-expert-a",
+          "head": "f2282ca3d6fa13e94f18a13065b226a5dd8aea11",
+          "branch": "dd-hermes-s5-2expert-20260416-expert-a"
+        },
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-s5-2expert-20260416-expert-b",
+          "head": "f2282ca3d6fa13e94f18a13065b226a5dd8aea11",
+          "branch": "dd-hermes-s5-2expert-20260416-expert-b"
+        },
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-successor-evidence-audit-v1-expert-a",
+          "head": "b3e6a2dae1512345fc3483f5ae4fb3c8b29ae444",
+          "branch": "dd-hermes-successor-evidence-audit-v1-expert-a"
+        },
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-successor-evidence-audit-v1-expert-b",
+          "head": "b3e6a2dae1512345fc3483f5ae4fb3c8b29ae444",
+          "branch": "dd-hermes-successor-evidence-audit-v1-expert-b"
+        },
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-successor-triage-v1-expert-a",
+          "head": "dfd6652eae7d080173f445e4ebccfa66deda1fe7",
+          "branch": "dd-hermes-successor-triage-v1-expert-a"
+        }
+      ]
+    },
+    "hooks": {
+      "events": [
+        "PreToolUse",
+        "PostToolUse",
+        "Stop",
+        "SessionEnd"
+      ],
+      "available": [
+        "guard-dangerous-ops.sh",
+        "peon-ping.sh",
+        "post-edit-typecheck.sh",
+        "quality-gate.sh",
+        "session-end-log.sh",
+        "thread-switch-gate.sh"
+      ]
+    },
+    "skills": [
+      "auto-verify",
+      "coding-harness",
+      "deep-research",
+      "spec-first"
+    ],
+    "tests": [
+      "test-artifact-schemas.sh",
+      "test-coordination-endpoint.sh",
+      "test-hooks.sh",
+      "test-memory.sh",
+      "test-schema.sh",
+      "test-verify-loop.sh",
+      "test-workflow.sh",
+      "tests/smoke.sh"
+    ],
+    "task_surfaces": {
+      "contract_path": "/Volumes/Coding/Hermes agent for mine/workspace/contracts/dd-hermes-successor-evidence-audit-v1.md",
+      "state_path": "/Volumes/Coding/Hermes agent for mine/workspace/state/dd-hermes-successor-evidence-audit-v1/state.json"
+    }
+  },
+  "state": {
+    "state_version": 2,
+    "created_at": "2026-04-17T18:11:14Z",
+    "git": {
+      "baseline_commit": "",
+      "latest_commit": "",
+      "latest_branch": "",
+      "latest_upstream": "",
+      "latest_remote_urls": {}
+    },
+    "discussion": {
+      "policy": "3-explorer-then-execute",
+      "decision_id": "successor-evidence-audit-routing",
+      "explorer_queue": [],
+      "explorer_findings": [
+        "workspace/decisions/successor-evidence-audit-routing/architecture.md",
+        "workspace/decisions/successor-evidence-audit-routing/curriculum.md",
+        "workspace/decisions/successor-evidence-audit-routing/delivery.md"
+      ],
+      "synthesis_path": "workspace/decisions/successor-evidence-audit-routing/synthesis.md",
+      "current_executor": ""
+    },
+    "verification": {
+      "last_pass": true,
+      "last_run_at": "2026-04-17T18:25:23Z",
+      "verified_steps": [
+        "./scripts/test-workflow.sh --task-id dd-hermes-successor-evidence-audit-v1",
+        "./scripts/context-build.sh --task-id dd-hermes-successor-evidence-audit-v1 --agent-role commander",
+        "./scripts/spec-first.sh --changed-files scripts/successor-evidence-audit.sh,scripts/coordination-endpoint.sh,scripts/demo-entry.sh,tests/smoke.sh,docs/coordination-endpoints.md,openspec/proposals/dd-hermes-successor-evidence-audit-v1.md --spec-path openspec/proposals/dd-hermes-successor-evidence-audit-v1.md --task-id dd-hermes-successor-evidence-audit-v1",
+        "./scripts/coordination-endpoint.sh --task-id dd-hermes-successor-evidence-audit-v1 --endpoint successor.audit",
+        "bash tests/smoke.sh entry",
+        "bash tests/smoke.sh endpoint",
+        "bash tests/smoke.sh all",
+        "./scripts/demo-entry.sh"
+      ],
+      "verified_files": [
+        "scripts/successor-evidence-audit.sh",
+        "scripts/coordination-endpoint.sh",
+        "scripts/demo-entry.sh",
+        "tests/smoke.sh",
+        "docs/coordination-endpoints.md",
+        "workspace/contracts/dd-hermes-successor-evidence-audit-v1.md",
+        "openspec/proposals/dd-hermes-successor-evidence-audit-v1.md",
+        "openspec/designs/dd-hermes-successor-evidence-audit-v1.md",
+        "openspec/tasks/dd-hermes-successor-evidence-audit-v1.md",
+        "workspace/decisions/successor-evidence-audit-routing/synthesis.md",
+        "指挥文档/04-任务重校准与线程策略.md",
+        "指挥文档/06-一期PhaseDone审计.md"
+      ]
+    },
+    "runtime": {
+      "preferred_surface": "repo-first",
+      "worktree_strategy": "isolated",
+      "last_context_path": "/Volumes/Coding/Hermes agent for mine/workspace/state/dd-hermes-successor-evidence-audit-v1/context.json",
+      "last_runtime_report_path": "/Volumes/Coding/Hermes agent for mine/workspace/state/dd-hermes-successor-evidence-audit-v1/runtime.json",
+      "last_worktree_path": ""
+    },
+    "lease": {
+      "goal": "Expose successor evidence as an executable DD Hermes control-plane surface so maintainers can distinguish committed next-task candidates from working-tree residue without redoing manual repo sweeps.",
+      "status": "idle",
+      "duration_hours": 0,
+      "started_at": "",
+      "deadline_at": "",
+      "paused_at": "",
+      "pause_reason": "",
+      "resume_after": "",
+      "resume_checkpoint": "",
+      "dispatch_cursor": ""
+    },
+    "memory": {
+      "reads": [
+        "memory/world/no-destruction-without-confirmation.md"
+      ],
+      "writes": [
+        "memory/task/dd-hermes-successor-evidence-audit-v1.md"
+      ],
+      "last_selected_ids": [
+        "no-destruction-without-confirmation",
+        "user-pref-no-manual-generator-commands",
+        "dd-hermes-multi-agent-dispatch",
+        "dd-hermes-experience-demo-v1",
+        "dd-hermes-endpoint-router-v1",
+        "dd-hermes-demo-entry-v1",
+        "worktree-first",
+        "tool-selection-drift"
+      ]
+    },
+    "product": {
+      "anchor": "lead",
+      "goal": "Expose successor evidence as an executable DD Hermes control-plane surface so maintainers can distinguish committed next-task candidates from working-tree residue without redoing manual repo sweeps.",
+      "user_value": "Let a DD Hermes maintainer answer why there is or is not a next mainline from one audit result instead of chat memory or ad hoc shell inspection.",
+      "non_goals": [
+        "Do not expand into unrelated runtime, provider, or gateway work.",
+        "Do not promote working-tree residue into committed successor evidence.",
+        "Do not reopen archived proof tasks or mutate their archive boundaries.",
+        "Do not turn this slice into a generic repo linter unrelated to successor truth."
+      ],
+      "product_acceptance": [
+        "DD Hermes exposes one audit result that separates live committed candidates, archived proof history, and local residue.",
+        "demo-entry can reuse that audit when there is no active mainline, so no-mainline truth stops depending on manual repo sweeps.",
+        "The task package explains why executable successor evidence, not another feature slice, is the next bounded mainline."
+      ],
+      "drift_risk": "This task could drift into generic repository cleanup if it stops serving the maintainer-visible question of whether a next bounded mainline actually exists in committed repo truth.",
+      "goal_status": "defined",
+      "goal_drift_flags": [],
+      "last_product_review_at": "2026-04-17T18:11:14Z",
+      "task_class": "T3",
+      "quality_requirement": "requires-independent",
+      "task_class_rationale": "控制面与入口真相主线；需要把 successor 证据审计压成共享 endpoint/entry truth，而不是继续停留在手工裁决。"
+    },
+    "quality": {
+      "anchor": "expert-b",
+      "review_status": "pending",
+      "review_findings": [],
+      "review_examples": [],
+      "last_review_at": ""
+    },
+    "textbook": {
+      "last_entry_path": "",
+      "last_summary_path": "",
+      "last_summary_at": ""
+    },
+    "notes": [
+      {
+        "timestamp": "2026-04-17T18:11:14Z",
+        "text": "anchor governance initialized",
+        "product_gate_ready": true,
+        "quality_anchor_ready": true,
+        "quality_review_ready": false,
+        "degraded_ack_ready": false
+      },
+      {
+        "timestamp": "2026-04-17T18:19:22Z",
+        "text": "promoted successor evidence audit as the current phase-2 mainline",
+        "product_gate_ready": true,
+        "quality_anchor_ready": true,
+        "quality_review_ready": false,
+        "degraded_ack_ready": false
+      },
+      {
+        "timestamp": "2026-04-17T18:25:23Z",
+        "text": "verified successor evidence audit mainline package, endpoint, entry surface, and smoke coverage",
+        "product_gate_ready": true,
+        "quality_anchor_ready": true,
+        "quality_review_ready": false,
+        "degraded_ack_ready": false
+      },
+      {
+        "timestamp": "2026-04-17T18:35:11Z",
+        "text": "assigned expert-b as intended independent skeptic for successor evidence audit",
+        "product_gate_ready": true,
+        "quality_anchor_ready": true,
+        "quality_review_ready": false,
+        "degraded_ack_ready": true
+      }
+    ],
+    "task_id": "dd-hermes-successor-evidence-audit-v1",
+    "status": "active",
+    "mode": "planning",
+    "current_focus": "materialize expert-b skeptic lane so successor evidence audit can move from planning-valid to execution-ready",
+    "owner": "lead",
+    "experts": [
+      "expert-a"
+    ],
+    "active_expert": "",
+    "blocked_reason": "",
+    "contract_path": "/Volumes/Coding/Hermes agent for mine/workspace/contracts/dd-hermes-successor-evidence-audit-v1.md",
+    "handoff_paths": [
+      "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-successor-evidence-audit-v1-lead-to-expert-a.md"
+    ],
+    "exploration_paths": [
+      "/Volumes/Coding/Hermes agent for mine/workspace/exploration/exploration-lead-dd-hermes-successor-evidence-audit-v1.md"
+    ],
+    "openspec": {
+      "stage": "task",
+      "proposal_path": "/Volumes/Coding/Hermes agent for mine/openspec/proposals/dd-hermes-successor-evidence-audit-v1.md",
+      "design_path": "/Volumes/Coding/Hermes agent for mine/openspec/designs/dd-hermes-successor-evidence-audit-v1.md",
+      "task_path": "/Volumes/Coding/Hermes agent for mine/openspec/tasks/dd-hermes-successor-evidence-audit-v1.md",
+      "archive_path": ""
+    },
+    "team": {
+      "supervisor_min_count": 1,
+      "supervisors": [
+        "lead"
+      ],
+      "executors": [
+        "expert-a"
+      ],
+      "skeptics": [
+        "expert-b"
+      ],
+      "product_anchors": [
+        "lead"
+      ],
+      "quality_anchors": [
+        "expert-b"
+      ],
+      "anchor_policy": {
+        "product_anchor_role": "supervisor",
+        "quality_anchor_role": "skeptic",
+        "constant_anchor_seats": true
+      },
+      "high_risk_mode": false,
+      "integration_pressure": false,
+      "scale_out_recommended": false,
+      "scale_out_triggers": [],
+      "role_integrity": {
+        "independent_skeptic": true,
+        "degraded": false,
+        "role_conflicts": [],
+        "role_overlap": {
+          "supervisor_executor_overlap": [],
+          "supervisor_skeptic_overlap": [],
+          "executor_skeptic_overlap": []
+        },
+        "degraded_ack_by": "",
+        "degraded_ack_at": ""
+      }
+    },
+    "updated_at": "2026-04-17T18:35:38Z",
+    "verdicts": {
+      "updated_at": "2026-04-17T18:35:38Z",
+      "task_policy": {
+        "status": "ready",
+        "ready": true,
+        "reasons": [],
+        "updated_at": "2026-04-17T18:35:38Z",
+        "task_class": "T3",
+        "task_class_bucket": "strict-execution",
+        "quality_requirement": "requires-independent",
+        "quality_requirement_source": "task_class_default",
+        "manual_escalation_required": false,
+        "manual_escalation_reasons": []
+      },
+      "product_gate": {
+        "status": "ready",
+        "ready": true,
+        "reasons": [],
+        "updated_at": "2026-04-17T18:35:38Z",
+        "anchor": "lead",
+        "goal": "Expose successor evidence as an executable DD Hermes control-plane surface so maintainers can distinguish committed next-task candidates from working-tree residue without redoing manual repo sweeps.",
+        "goal_status": "defined"
+      },
+      "quality_anchor": {
+        "status": "ready",
+        "ready": true,
+        "reasons": [],
+        "updated_at": "2026-04-17T18:35:38Z",
+        "anchor": "expert-b"
+      },
+      "quality_review": {
+        "status": "blocked",
+        "ready": false,
+        "reasons": [
+          "quality_review_status_pending",
+          "quality_review_timestamp_missing"
+        ],
+        "updated_at": "2026-04-17T18:35:38Z",
+        "anchor": "expert-b",
+        "review_status": "pending",
+        "last_review_at": ""
+      },
+      "degraded_ack": {
+        "status": "not-required",
+        "ready": true,
+        "reasons": [],
+        "updated_at": "2026-04-17T18:35:38Z",
+        "required": false,
+        "ack_by": "",
+        "ack_at": ""
+      },
+      "quality_seat_execution": {
+        "status": "ready",
+        "ready": true,
+        "reasons": [],
+        "updated_at": "2026-04-17T18:35:38Z",
+        "mode": "independent"
+      },
+      "quality_seat_completion": {
+        "status": "blocked",
+        "ready": false,
+        "reasons": [
+          "quality_review_status_pending",
+          "quality_review_timestamp_missing"
+        ],
+        "updated_at": "2026-04-17T18:35:38Z",
+        "mode": "independent"
+      },
+      "execution_closeout": {
+        "status": "blocked",
+        "ready": false,
+        "reasons": [
+          "execution_commit_missing",
+          "quality_review_status_pending",
+          "quality_findings_summary_incomplete"
+        ],
+        "updated_at": "2026-04-17T18:35:38Z",
+        "closeout_path": "/Volumes/Coding/Hermes agent for mine/workspace/closeouts/dd-hermes-successor-evidence-audit-v1-expert-a.md",
+        "selected_by": "single_match",
+        "candidate_count": 1,
+        "semantic_valid": false,
+        "ready_for_execution_slice_done": false,
+        "execution_commit": "",
+        "quality_review_status": "pending",
+        "verified_step_count": 1,
+        "verified_file_count": 1,
+        "quality_findings_count": 1
+      },
+      "skeptic_lane": {
+        "status": "blocked",
+        "ready": false,
+        "reasons": [
+          "skeptic_handoff_missing:expert-b"
+        ],
+        "updated_at": "2026-04-17T18:35:38Z",
+        "required": true,
+        "independent_skeptic": true,
+        "lane_count": 1,
+        "ready_lane_count": 0,
+        "lanes": [
+          {
+            "agent_id": "expert-b",
+            "ready": false,
+            "reasons": [
+              "skeptic_handoff_missing:expert-b"
+            ],
+            "handoff_path": "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-successor-evidence-audit-v1-lead-to-expert-b.md",
+            "worktree_path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-successor-evidence-audit-v1-expert-b",
+            "context_path": "/Volumes/Coding/Hermes agent for mine/workspace/state/dd-hermes-successor-evidence-audit-v1/context-skeptic-expert-b.json",
+            "runtime_path": "/Volumes/Coding/Hermes agent for mine/workspace/state/dd-hermes-successor-evidence-audit-v1/runtime-skeptic-expert-b.json"
+          }
+        ]
+      }
+    }
+  },
+  "memory": {
+    "matches": [
+      {
+        "memory_id": "no-destruction-without-confirmation",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/world/no-destruction-without-confirmation.md",
+        "score": 126.0,
+        "token_score": 11,
+        "confidence": 1.0,
+        "recency_bonus": 5.0,
+        "type": "constraint",
+        "status": "active"
+      },
+      {
+        "memory_id": "user-pref-no-manual-generator-commands",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/user/user-pref-no-manual-generator-commands.md",
+        "score": 47.0,
+        "token_score": 32,
+        "confidence": 1.0,
+        "recency_bonus": 5.0,
+        "type": "preference",
+        "status": "active"
+      },
+      {
+        "memory_id": "dd-hermes-multi-agent-dispatch",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/dd-hermes-multi-agent-dispatch.md",
+        "score": 42.0,
+        "token_score": 28,
+        "confidence": 0.9,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "dd-hermes-experience-demo-v1",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/dd-hermes-experience-demo-v1.md",
+        "score": 41.5,
+        "token_score": 27,
+        "confidence": 0.95,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "dd-hermes-endpoint-router-v1",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/dd-hermes-endpoint-router-v1.md",
+        "score": 41.0,
+        "token_score": 27,
+        "confidence": 0.9,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "dd-hermes-demo-entry-v1",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/dd-hermes-demo-entry-v1.md",
+        "score": 37.5,
+        "token_score": 23,
+        "confidence": 0.95,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "worktree-first",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/worktree-first.md",
+        "score": 37.0,
+        "token_score": 22,
+        "confidence": 1.0,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "tool-selection-drift",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/self/tool-selection-drift.md",
+        "score": 31.5,
+        "token_score": 20,
+        "confidence": 0.65,
+        "recency_bonus": 5.0,
+        "type": "belief",
+        "status": "active"
+      }
+    ],
+    "scored_candidates": [
+      {
+        "memory_id": "no-destruction-without-confirmation",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/world/no-destruction-without-confirmation.md",
+        "score": 126.0,
+        "token_score": 11,
+        "confidence": 1.0,
+        "recency_bonus": 5.0,
+        "type": "constraint",
+        "status": "active"
+      },
+      {
+        "memory_id": "user-pref-no-manual-generator-commands",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/user/user-pref-no-manual-generator-commands.md",
+        "score": 47.0,
+        "token_score": 32,
+        "confidence": 1.0,
+        "recency_bonus": 5.0,
+        "type": "preference",
+        "status": "active"
+      },
+      {
+        "memory_id": "dd-hermes-multi-agent-dispatch",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/dd-hermes-multi-agent-dispatch.md",
+        "score": 42.0,
+        "token_score": 28,
+        "confidence": 0.9,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "dd-hermes-experience-demo-v1",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/dd-hermes-experience-demo-v1.md",
+        "score": 41.5,
+        "token_score": 27,
+        "confidence": 0.95,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "dd-hermes-endpoint-router-v1",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/dd-hermes-endpoint-router-v1.md",
+        "score": 41.0,
+        "token_score": 27,
+        "confidence": 0.9,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "dd-hermes-demo-entry-v1",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/dd-hermes-demo-entry-v1.md",
+        "score": 37.5,
+        "token_score": 23,
+        "confidence": 0.95,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "worktree-first",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/worktree-first.md",
+        "score": 37.0,
+        "token_score": 22,
+        "confidence": 1.0,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "tool-selection-drift",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/self/tool-selection-drift.md",
+        "score": 31.5,
+        "token_score": 20,
+        "confidence": 0.65,
+        "recency_bonus": 5.0,
+        "type": "belief",
+        "status": "active"
+      },
+      {
+        "memory_id": "plotly-preference",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/user/plotly-preference.md",
+        "score": 28.0,
+        "token_score": 15,
+        "confidence": 0.8,
+        "recency_bonus": 5.0,
+        "type": "belief",
+        "status": "active"
+      },
+      {
+        "memory_id": "user-pref-single-command-thread",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/user/user-pref-single-command-thread.md",
+        "score": 18.0,
+        "token_score": 3,
+        "confidence": 1.0,
+        "recency_bonus": 5.0,
+        "type": "preference",
+        "status": "active"
+      }
+    ],
+    "conflicts": [],
+    "expired": [],
+    "explanation": "constraint-first lexical match weighted by confidence and recency"
+  },
+  "discussion": {
+    "policy": "3-explorer-then-execute",
+    "decision_id": "successor-evidence-audit-routing",
+    "explorer_queue": [],
+    "explorer_findings": [
+      "workspace/decisions/successor-evidence-audit-routing/architecture.md",
+      "workspace/decisions/successor-evidence-audit-routing/curriculum.md",
+      "workspace/decisions/successor-evidence-audit-routing/delivery.md"
+    ],
+    "synthesis_path": "workspace/decisions/successor-evidence-audit-routing/synthesis.md",
+    "current_executor": ""
+  },
+  "product": {
+    "anchor": "lead",
+    "goal": "Expose successor evidence as an executable DD Hermes control-plane surface so maintainers can distinguish committed next-task candidates from working-tree residue without redoing manual repo sweeps.",
+    "user_value": "Let a DD Hermes maintainer answer why there is or is not a next mainline from one audit result instead of chat memory or ad hoc shell inspection.",
+    "non_goals": [
+      "Do not expand into unrelated runtime, provider, or gateway work.",
+      "Do not promote working-tree residue into committed successor evidence.",
+      "Do not reopen archived proof tasks or mutate their archive boundaries.",
+      "Do not turn this slice into a generic repo linter unrelated to successor truth."
+    ],
+    "product_acceptance": [
+      "DD Hermes exposes one audit result that separates live committed candidates, archived proof history, and local residue.",
+      "demo-entry can reuse that audit when there is no active mainline, so no-mainline truth stops depending on manual repo sweeps.",
+      "The task package explains why executable successor evidence, not another feature slice, is the next bounded mainline."
+    ],
+    "drift_risk": "This task could drift into generic repository cleanup if it stops serving the maintainer-visible question of whether a next bounded mainline actually exists in committed repo truth.",
+    "goal_status": "defined",
+    "goal_drift_flags": [],
+    "last_product_review_at": "2026-04-17T18:11:14Z",
+    "task_class": "T3",
+    "quality_requirement": "requires-independent",
+    "task_class_rationale": "控制面与入口真相主线；需要把 successor 证据审计压成共享 endpoint/entry truth，而不是继续停留在手工裁决。"
+  },
+  "quality": {
+    "anchor": "expert-b",
+    "review_status": "pending",
+    "review_findings": [],
+    "review_examples": [],
+    "last_review_at": ""
+  },
+  "continuation": {
+    "goal": "Expose successor evidence as an executable DD Hermes control-plane surface so maintainers can distinguish committed next-task candidates from working-tree residue without redoing manual repo sweeps.",
+    "lease": {
+      "goal": "Expose successor evidence as an executable DD Hermes control-plane surface so maintainers can distinguish committed next-task candidates from working-tree residue without redoing manual repo sweeps.",
+      "status": "idle",
+      "duration_hours": 0,
+      "started_at": "",
+      "deadline_at": "",
+      "paused_at": "",
+      "pause_reason": "",
+      "resume_after": "",
+      "resume_checkpoint": "",
+      "dispatch_cursor": ""
+    },
+    "current_focus": "materialize expert-b skeptic lane so successor evidence audit can move from planning-valid to execution-ready",
+    "active_expert": "",
+    "blocked_reason": "",
+    "current_executor": ""
+  },
+  "documents": {
+    "contract": {
+      "path": "/Volumes/Coding/Hermes agent for mine/workspace/contracts/dd-hermes-successor-evidence-audit-v1.md",
+      "text": "---\nschema_version: 2\ntask_id: dd-hermes-successor-evidence-audit-v1\nowner: lead\nexperts:\n  - expert-a\n  - expert-b\nproduct_goal: Expose successor evidence as an executable DD Hermes control-plane surface so maintainers can distinguish committed next-task candidates from working-tree residue without redoing manual repo sweeps.\nuser_value: Let a DD Hermes maintainer answer “为什么现在没有主线 / 下一个候选到底算不算证据” from one callable audit result instead of chat memory or ad hoc shell inspection.\ntask_class: T3\nquality_requirement: requires-independent\ntask_class_rationale: 控制面与入口真相主线；需要把 successor 证据审计压成共享 endpoint/entry truth，而不是继续停留在手工裁决。\nnon_goals:\n  - Do not expand into unrelated runtime, provider, or gateway work.\n  - Do not promote working-tree residue into committed successor evidence.\n  - Do not reopen archived proof tasks or mutate their archive boundaries.\n  - Do not turn this slice into a generic repo linter unrelated to successor truth.\nproduct_acceptance:\n  - DD Hermes exposes one audit result that separates live committed candidates, archived proof history, and local residue.\n  - `demo-entry` can reuse that audit when there is no active mainline, so “暂无主线” stops depending on manual repo sweeps.\n  - The task package explains why executable successor evidence, not another feature slice, is the next bounded mainline.\ndrift_risk: This task could drift into generic repository cleanup if it stops serving the maintainer-visible question of whether a next bounded mainline actually exists in committed repo truth.\nacceptance:\n  - Complete sprint artifacts and verification.\nblocked_if:\n  - Missing evidence that manual successor sweeps and residue rejection are still the current maintainer-visible gap.\n  - Scope expands into unrelated runtime/provider work or generic backlog gardening.\nmemory_reads:\n  - memory/world/no-destruction-without-confirmation.md\nmemory_writes:\n  - memory/task/dd-hermes-successor-evidence-audit-v1.md\n---\n\n# Sprint Contract\n\n## Context\n\n`dd-hermes-independent-skeptic-dispatch-v1` is archived and the repo again has no active mainline. The next real DD Hermes gap is no longer another archived proof boundary; it is that successor evidence still lives in manual shell sweeps and decision prose. Repeated committed docs and triage artifacts insist that committed repo evidence must be separated from working-tree residue such as `review-policy-demo`, but there is not yet one executable control-plane surface that performs that audit and feeds the entry layer.\n\n## Scope\n\n- In scope: successor-evidence audit script, coordination endpoint wiring, entry-surface reuse, docs, tests, and task-bound decision synthesis.\n- Out of scope: feature delivery beyond audit/reporting, runtime/provider changes, reopening archived proofs, or promoting residue into repo truth.\n\n## Required Fields\n\n- `task_id`\n- `owner`\n- `experts`\n- `product_goal`\n- `user_value`\n- `task_class`\n- `quality_requirement`\n- `task_class_rationale`\n- `non_goals`\n- `product_acceptance`\n- `drift_risk`\n- `acceptance`\n- `blocked_if`\n- `memory_reads`\n- `memory_writes`\n\n## Acceptance\n\n- The mainline package is internally consistent and tied to one clear control-plane gap.\n- One callable audit result distinguishes committed candidates from local residue and explains the current successor verdict.\n- The slice stays bounded to audit/reporting truth rather than generic repository cleanup.\n\n## Product Gate\n\n- The task must remain tied to one clear DD Hermes product outcome.\n- This bootstrap defaults to `T3` with `requires-independent` so later gates know the intended quality-seat bar.\n- If the work stops helping the system answer “what committed successor evidence actually exists right now?”, stop and recalibrate before implementation.\n\n## Verification\n\n- Commands: `scripts/test-workflow.sh --task-id dd-hermes-successor-evidence-audit-v1`\n- Commands: `scripts/context-build.sh --task-id dd-hermes-successor-evidence-audit-v1 --agent-role commander`\n- Commands: `./scripts/spec-first.sh --changed-files scripts/successor-evidence-audit.sh,scripts/coordination-endpoint.sh,scripts/demo-entry.sh,tests/smoke.sh,docs/coordination-endpoints.md,openspec/proposals/dd-hermes-successor-evidence-audit-v1.md --spec-path openspec/proposals/dd-hermes-successor-evidence-audit-v1.md --task-id dd-hermes-successor-evidence-audit-v1`\n- Commands: `./scripts/coordination-endpoint.sh --task-id dd-hermes-successor-evidence-audit-v1 --endpoint successor.audit`\n- Commands: `bash tests/smoke.sh endpoint`\n- Commands: `bash tests/smoke.sh all`\n- User-visible proof: DD Hermes points to this task as the active mainline, and the audit surface can explain why committed candidates do or do not justify a successor without reading chat history.\n\n## Open Questions\n\n- Should future candidate-pool cleanup work be absorbed into this audit surface, or remain separate bounded tasks that the audit only reports?\n"
+    },
+    "handoffs": [
+      {
+        "path": "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-successor-evidence-audit-v1-lead-to-expert-a.md",
+        "text": "---\nschema_version: 2\nfrom: lead\nto: expert-a\nscope: dd-hermes-successor-evidence-audit-v1 bootstrap artifact slice\nproduct_rationale: This slice should advance task dd-hermes-successor-evidence-audit-v1 in a way a DD Hermes maintainer can explain and verify.\ngoal_drift_risk: The slice could drift into generic control-plane churn if it stops serving the declared product goal.\nuser_visible_outcome: A maintainer can point to one concrete outcome instead of scattered partial work.\nfiles:\n  - workspace/contracts/dd-hermes-successor-evidence-audit-v1.md\n  - openspec/proposals/dd-hermes-successor-evidence-audit-v1.md\n  - workspace/state/dd-hermes-successor-evidence-audit-v1/state.json\ndecisions:\n  - Follow the sprint contract and spec-first rule.\n  - Prefer repo templates and existing scripts over ad-hoc scaffolding.\nrisks:\n  - Do not change policy through memory writes.\n  - Only write execution evidence back to commander-side state.\nnext_checks:\n  - Run verification before completion.\n  - Write back expert handoff and verification evidence.\n---\n\n# Lead Handoff\n\n## Context\n\nExpert expert-a owns the bootstrap execution slice for sprint dd-hermes-successor-evidence-audit-v1 inside an isolated worktree.\n\n## Required Fields\n\n- `from`\n- `to`\n- `scope`\n- `product_rationale`\n- `goal_drift_risk`\n- `user_visible_outcome`\n- `files`\n- `decisions`\n- `risks`\n- `next_checks`\n\n## Acceptance\n\n- Keep the sprint bootstrap artifacts task-bound, template-aligned, and ready for execution handoff.\n\n## Product Check\n\n- Confirm the slice still serves the stated product goal and does not expand into the declared non-goals.\n\n## Verification\n\n- State commands and evidence expected from expert before handoff return.\n- At minimum, include the workflow test result and the changed file list.\n\n## Open Questions\n\n- Final implementation files depend on the assigned execution slice and will be reported back by the expert.\n"
+      }
+    ],
+    "exploration": [
+      {
+        "path": "/Volumes/Coding/Hermes agent for mine/workspace/exploration/exploration-lead-dd-hermes-successor-evidence-audit-v1.md",
+        "text": "# Exploration Log\n\n## Context\n\n- Task: dd-hermes-successor-evidence-audit-v1\n- Role: lead\n- Status: SUCCESSOR_EVIDENCE_MAINLINE_SELECTION\n\n## Facts\n\n- `dd-hermes-independent-skeptic-dispatch-v1` is archived and the repo currently has no active mainline.\n- `2026-04-18` successor sweep had to manually enumerate `workspace/state/*/state.json`, `workspace/contracts/dd-hermes-*.md`, and `openspec/proposals/tasks` to confirm that all formal `dd-hermes-*` tasks are archived.\n- The same sweep had to explicitly reject `workspace/state/review-policy-demo/state.json` as non-evidence because it is working-tree residue with no committed task package.\n- Committed decision docs and textbook material repeatedly require separating committed repo evidence from local residue, but there is no callable audit endpoint for that distinction yet.\n\n## Hypotheses\n\n- The next maintainer-visible gap is no longer another feature proof; it is the lack of one executable successor-evidence audit surface.\n- A bounded audit/reporting slice can improve `demo-entry` and future triage without reopening archived proofs or inventing a new feature successor.\n\n## Evidence\n\n- `指挥文档/04-任务重校准与线程策略.md`\n- `指挥文档/06-一期PhaseDone审计.md`\n- `openspec/archive/dd-hermes-backlog-truth-hygiene-v1.md`\n- `openspec/archive/dd-hermes-successor-triage-v1.md`\n- `openspec/archive/dd-hermes-independent-skeptic-dispatch-v1.md`\n- `workspace/decisions/successor-triage-routing/architecture.md`\n- `docs/textbook/chapters/01-control-plane-honesty.md`\n\n## Acceptance\n\n- The task can explain why executable successor evidence audit is now the narrowest bounded gap.\n\n## Verification\n\n- Confirm `scripts/test-workflow.sh --task-id dd-hermes-successor-evidence-audit-v1` passes after package creation.\n- Confirm `scripts/context-build.sh --task-id dd-hermes-successor-evidence-audit-v1 --agent-role commander` passes once decision synthesis and paths are wired.\n\n## Open Questions\n\n- Should `demo-entry` surface only summary counts from the audit, or also surface ignored residue task ids when they exist?\n"
+      }
+    ],
+    "openspec": {
+      "proposal": {
+        "path": "/Volumes/Coding/Hermes agent for mine/openspec/proposals/dd-hermes-successor-evidence-audit-v1.md",
+        "text": "---\nstatus: proposed\nowner: lead\nscope: dd-hermes-successor-evidence-audit-v1\ndecision_log:\n  - Promote successor evidence audit as the new bounded mainline because repeated committed repo truth still depends on manual candidate/residue discrimination.\nchecks:\n  - scripts/test-workflow.sh --task-id dd-hermes-successor-evidence-audit-v1\n  - scripts/context-build.sh --task-id dd-hermes-successor-evidence-audit-v1 --agent-role commander\nlinks:\n  - workspace/contracts/dd-hermes-successor-evidence-audit-v1.md\n  - workspace/exploration/exploration-lead-dd-hermes-successor-evidence-audit-v1.md\n  - workspace/decisions/successor-evidence-audit-routing/synthesis.md\n---\n\n# Proposal\n\n## What\n\nStart `dd-hermes-successor-evidence-audit-v1` as the active phase-2 mainline and expose one executable audit of successor evidence through the DD Hermes control plane.\n\n## Why\n\nThe repo can honestly say “当前没有 active mainline”, but it still takes manual shell sweeps and decision prose to prove why. Committed artifacts repeatedly distinguish committed repo evidence from working-tree residue like `review-policy-demo`, yet there is no single callable audit result that surfaces that distinction for maintainers or for `demo-entry`.\n\n## Non-goals\n\n- Do not invent a feature successor that committed repo evidence does not support.\n- Do not promote untracked or working-tree-only residue into repo truth.\n- Do not reopen archived proof tasks or mutate their archive boundaries.\n- Do not turn this slice into a generic repo lint/audit framework unrelated to successor truth.\n\n## Acceptance\n\n- DD Hermes exposes one audit result that reports committed live candidates, archived proof coverage, local residue, verdict, and reasons.\n- `demo-entry` can reuse that audit when there is no active mainline, instead of relying only on static prose.\n- The task package explains why executable successor evidence is the next mainline, rather than another feature slice or another empty triage loop.\n\n## Verification\n\n- Run `scripts/test-workflow.sh --task-id dd-hermes-successor-evidence-audit-v1`.\n- Run `scripts/context-build.sh --task-id dd-hermes-successor-evidence-audit-v1 --agent-role commander`.\n- Run `./scripts/spec-first.sh --changed-files scripts/successor-evidence-audit.sh,scripts/coordination-endpoint.sh,scripts/demo-entry.sh,tests/smoke.sh,docs/coordination-endpoints.md,openspec/proposals/dd-hermes-successor-evidence-audit-v1.md --spec-path openspec/proposals/dd-hermes-successor-evidence-audit-v1.md --task-id dd-hermes-successor-evidence-audit-v1`.\n- Run `./scripts/coordination-endpoint.sh --task-id dd-hermes-successor-evidence-audit-v1 --endpoint successor.audit`.\n- Run `bash tests/smoke.sh endpoint`.\n- Run `bash tests/smoke.sh all`.\n"
+      },
+      "design": {
+        "path": "/Volumes/Coding/Hermes agent for mine/openspec/designs/dd-hermes-successor-evidence-audit-v1.md",
+        "text": "---\nstatus: design\nowner: lead\nscope: dd-hermes-successor-evidence-audit-v1\ndecision_log: []\nchecks:\n  - ./scripts/context-build.sh --task-id dd-hermes-successor-evidence-audit-v1 --agent-role commander\n  - ./scripts/demo-entry.sh\nlinks:\n  - workspace/contracts/dd-hermes-successor-evidence-audit-v1.md\n  - workspace/decisions/successor-evidence-audit-routing/synthesis.md\n---\n\n# Design\n\n## Summary\n\nDD Hermes already has the policy that only committed repo evidence may justify a successor mainline, and it already teaches that local residue must not be promoted into repo truth. This task adds the missing operational layer: one executable audit result that reports live committed candidates, archived proof coverage, local residue, and the current successor verdict, then lets `demo-entry` reuse that truth instead of relying only on manually curated prose.\n\n## Interfaces\n\n- `scripts/successor-evidence-audit.sh`\n- `scripts/coordination-endpoint.sh`\n- `scripts/demo-entry.sh`\n- `docs/coordination-endpoints.md`\n- `tests/smoke.sh`\n\n## Data Flow\n\n1. Read landing truth from `指挥文档/06-一期PhaseDone审计.md` to locate `latest_proof_task_id` and `current_mainline_task_id`.\n2. Enumerate task-package surfaces under `workspace/contracts/`, `workspace/state/`, and `openspec/{proposals,designs,tasks,archive}/`.\n3. For each discovered task id, distinguish tracked/committed surfaces from untracked working-tree-only residue.\n4. Classify task ids into archived proof history, live committed candidates, and local residue candidates.\n5. Emit one audit payload with `verdict`, `reasons`, candidate lists, residue lists, and summary counts.\n6. Let `demo-entry` consume the audit summary when there is no current active mainline.\n\n## Edge Cases\n\n- If `current_mainline_task_id` is set, the audit should report that active mainline instead of inventing a no-mainline verdict.\n- Archived tasks should not be reclassified as live candidates just because they still have proposal/task/state artifacts on disk.\n- Working-tree residue may include non-`dd-hermes-*` task ids; the audit must label them explicitly as local residue rather than silently dropping them.\n- The audit must stay informative even when there are zero live candidates and zero residue items.\n\n## Acceptance\n\n- The design explicitly separates committed candidate truth from local residue truth.\n- The slice stays inside audit/reporting/entry surfaces and does not reopen archived proof scope.\n- The design keeps “no active mainline” as a legal verdict, but makes the evidence behind it executable.\n\n## Verification\n\n- `./scripts/context-build.sh --task-id dd-hermes-successor-evidence-audit-v1 --agent-role commander`\n- `./scripts/demo-entry.sh`\n"
+      },
+      "task": {
+        "path": "/Volumes/Coding/Hermes agent for mine/openspec/tasks/dd-hermes-successor-evidence-audit-v1.md",
+        "text": "---\nstatus: active\nowner: lead\nscope: dd-hermes-successor-evidence-audit-v1\ndecision_log:\n  - Start a new bounded mainline that turns successor evidence discrimination into a callable control-plane capability.\nchecks:\n  - scripts/test-workflow.sh --task-id dd-hermes-successor-evidence-audit-v1\n  - scripts/context-build.sh --task-id dd-hermes-successor-evidence-audit-v1 --agent-role commander\n  - ./scripts/demo-entry.sh\nlinks:\n  - workspace/contracts/dd-hermes-successor-evidence-audit-v1.md\n  - workspace/decisions/successor-evidence-audit-routing/synthesis.md\n  - 指挥文档/04-任务重校准与线程策略.md\n  - 指挥文档/06-一期PhaseDone审计.md\n---\n\n# Task\n\n## Steps\n\n1. Materialize routing findings and synthesis for why successor evidence audit is now the bounded phase-2 mainline.\n2. Add one audit script that classifies live committed candidates, archived proof history, and working-tree residue.\n3. Wire the audit through `scripts/coordination-endpoint.sh` as `successor.audit`.\n4. Materialize an independent skeptic lane for this `T3` task so later execution/quality review is not stuck in degraded supervision.\n5. Reuse the audit summary from `scripts/demo-entry.sh` when there is no active mainline.\n6. Update commander docs and endpoint docs so the mainline and the new audit surface tell the same story.\n7. Prove the endpoint, entry behavior, and independent-execution-readiness path in verification.\n\n## Dependencies\n\n- `openspec/archive/dd-hermes-independent-skeptic-dispatch-v1.md`\n- `workspace/decisions/successor-triage-routing/architecture.md`\n- `workspace/contracts/dd-hermes-successor-evidence-audit-v1.md`\n\n## Done Definition\n\n- A maintainer can call one control-plane surface and see whether any committed successor candidate exists.\n- Working-tree residue is reported explicitly as residue instead of being silently treated as repo truth.\n- `demo-entry` no longer depends only on static prose to explain a no-mainline state.\n\n## Acceptance\n\n- The task remains about successor evidence audit, not feature planning or archive mutation.\n- The audit distinguishes committed repo evidence from local residue in a way future triage can reuse.\n- Entry and strategy pages point at this task while it is active.\n- The task does not claim execution-ready until an actual independent skeptic lane exists for this `T3` mainline.\n\n## Verification\n\n- `scripts/test-workflow.sh --task-id dd-hermes-successor-evidence-audit-v1`\n- `scripts/context-build.sh --task-id dd-hermes-successor-evidence-audit-v1 --agent-role commander`\n- `./scripts/coordination-endpoint.sh --task-id dd-hermes-successor-evidence-audit-v1 --endpoint successor.audit`\n- `bash tests/smoke.sh endpoint`\n- `bash tests/smoke.sh all`\n"
+      },
+      "archive": null
+    }
+  },
+  "context_summary": {
+    "memory_ids": [
+      "no-destruction-without-confirmation",
+      "user-pref-no-manual-generator-commands",
+      "dd-hermes-multi-agent-dispatch",
+      "dd-hermes-experience-demo-v1",
+      "dd-hermes-endpoint-router-v1",
+      "dd-hermes-demo-entry-v1",
+      "worktree-first",
+      "tool-selection-drift"
+    ],
+    "handoff_count": 1,
+    "exploration_count": 1,
+    "has_design": true,
+    "has_task": true,
+    "lease_status": "idle",
+    "resume_checkpoint": "",
+    "discussion_policy": "3-explorer-then-execute",
+    "decision_id": "successor-evidence-audit-routing",
+    "runtime_generated_at": "2026-04-17T18:35:38Z",
+    "runtime_stale_warning": "",
+    "supervisor_count": 1,
+    "product_anchor_count": 1,
+    "quality_anchor_count": 1,
+    "product_anchor_name": "lead",
+    "product_anchor_role": "supervisor",
+    "quality_anchor_name": "expert-b",
+    "quality_anchor_role": "skeptic",
+    "product_goal": "Expose successor evidence as an executable DD Hermes control-plane surface so maintainers can distinguish committed next-task candidates from working-tree residue without redoing manual repo sweeps.",
+    "product_goal_status": "defined",
+    "goal_drift_flags": [],
+    "quality_review_status": "pending",
+    "independent_skeptic": true,
+    "role_integrity_degraded": false,
+    "role_conflicts": [],
+    "scale_out_recommended": false,
+    "scale_out_triggers": [],
+    "degraded_ack_required": false,
+    "degraded_ack_ready": true,
+    "degraded_ack_status": "not-required",
+    "degraded_ack_by": "",
+    "degraded_ack_at": "",
+    "product_user_value": "Let a DD Hermes maintainer answer why there is or is not a next mainline from one audit result instead of chat memory or ad hoc shell inspection.",
+    "product_non_goals": [
+      "Do not expand into unrelated runtime, provider, or gateway work.",
+      "Do not promote working-tree residue into committed successor evidence.",
+      "Do not reopen archived proof tasks or mutate their archive boundaries.",
+      "Do not turn this slice into a generic repo linter unrelated to successor truth."
+    ],
+    "product_acceptance": [
+      "DD Hermes exposes one audit result that separates live committed candidates, archived proof history, and local residue.",
+      "demo-entry can reuse that audit when there is no active mainline, so no-mainline truth stops depending on manual repo sweeps.",
+      "The task package explains why executable successor evidence, not another feature slice, is the next bounded mainline."
+    ],
+    "product_drift_risk": "This task could drift into generic repository cleanup if it stops serving the maintainer-visible question of whether a next bounded mainline actually exists in committed repo truth.",
+    "task_class": "T3",
+    "task_class_bucket": "strict-execution",
+    "task_class_rationale": "控制面与入口真相主线；需要把 successor 证据审计压成共享 endpoint/entry truth，而不是继续停留在手工裁决。",
+    "quality_requirement": "requires-independent",
+    "quality_requirement_source": "task_class_default",
+    "quality_requirement_ready": true,
+    "quality_requirement_reasons": [],
+    "task_policy_status": "ready",
+    "manual_escalation_required": false,
+    "manual_escalation_reasons": [],
+    "product_gate_ready": true,
+    "product_gate_reasons": [],
+    "product_gate_status": "ready",
+    "quality_anchor_ready": true,
+    "quality_anchor_reasons": [],
+    "quality_anchor_status": "ready",
+    "quality_review_ready": false,
+    "quality_review_reasons": [
+      "quality_review_status_pending",
+      "quality_review_timestamp_missing"
+    ],
+    "quality_review_gate_status": "blocked",
+    "quality_seat_mode": "independent",
+    "quality_seat_ready": true,
+    "quality_seat_status": "ready",
+    "quality_seat_reasons": [],
+    "quality_seat_completion_ready": false,
+    "quality_seat_completion_status": "blocked",
+    "quality_seat_completion_reasons": [
+      "quality_review_status_pending",
+      "quality_review_timestamp_missing"
+    ],
+    "skeptic_lane_ready": false,
+    "skeptic_lane_status": "blocked",
+    "skeptic_lane_reasons": [
+      "skeptic_handoff_missing:expert-b"
+    ],
+    "execution_closeout_ready": false,
+    "execution_closeout_status": "blocked",
+    "execution_closeout_reasons": [
+      "execution_commit_missing",
+      "quality_review_status_pending",
+      "quality_findings_summary_incomplete"
+    ],
+    "execution_closeout_path": "/Volumes/Coding/Hermes agent for mine/workspace/closeouts/dd-hermes-successor-evidence-audit-v1-expert-a.md",
+    "execution_closeout_selected_by": "single_match",
+    "execution_closeout_candidate_count": 1,
+    "execution_closeout_semantic_valid": false,
+    "ready_for_execution_slice_done": false,
+    "verdicts_updated_at": "2026-04-17T18:35:38Z",
+    "quality_review_findings": [],
+    "quality_review_examples": [],
+    "anchor_policy": {
+      "product_anchor_role": "supervisor",
+      "quality_anchor_role": "skeptic",
+      "constant_anchor_seats": true
+    }
+  }
+}
