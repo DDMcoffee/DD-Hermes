@@ -30,10 +30,7 @@ if [[ ! -f "$repo/workspace/state/$task_id/state.json" ]]; then
   "$SCRIPT_DIR/state-init.sh" --task-id "$task_id" >/dev/null
 fi
 
-state_json=$("$SCRIPT_DIR/state-read.sh" --task-id "$task_id")
-context_json=$("$SCRIPT_DIR/context-build.sh" --task-id "$task_id" --agent-role commander)
-
-payload=$(STATE_JSON="$state_json" CONTEXT_JSON="$context_json" python3 - <<'PY' "$repo" "$task_id" "$SCRIPT_DIR"
+payload=$(python3 - <<'PY' "$repo" "$task_id" "$SCRIPT_DIR"
 import json
 import os
 import shlex
@@ -45,17 +42,28 @@ repo = Path(sys.argv[1]).resolve()
 task_id = sys.argv[2]
 script_dir = Path(sys.argv[3]).resolve()
 sys.path.insert(0, str(script_dir))
-state_wrapper = json.loads(os.environ["STATE_JSON"])
-context_wrapper = json.loads(os.environ["CONTEXT_JSON"])
-state = state_wrapper["state"]
-context_path = context_wrapper["context_path"]
-runtime_path = context_wrapper["runtime_path"]
-state_path = context_wrapper["state_path"]
 
 from team_governance import (
     governance_snapshot,
 )
 from artifact_semantics import lane_artifact_paths, skeptic_lane_verdict
+
+state = {}
+context_path = ""
+runtime_path = ""
+state_path = str(repo / "workspace" / "state" / task_id / "state.json")
+task_policy = {"task_class": "", "quality_requirement": ""}
+verdicts = {
+    "task_policy": {"status": ""},
+    "product_gate": {"status": ""},
+    "quality_anchor": {"status": ""},
+    "degraded_ack": {"status": ""},
+}
+quality_seat = {
+    "mode": "",
+    "execution_status": "",
+    "execution_reasons": [],
+}
 
 
 class MaterializationFailure(Exception):
@@ -130,8 +138,17 @@ def dispatch_blocked_payload(error):
             f"./scripts/dispatch-create.sh --task-id {task_id}"
         )
     elif error.stage == "context_build":
+        context_cmd = [
+            f"./scripts/context-build.sh --task-id {task_id} --agent-role {error.role}"
+        ]
+        if error.role != "commander" and error.agent_id and error.agent_id != error.role:
+            context_cmd[0] += f" --agent-id {error.agent_id}"
         suggested_next_commands.append(
-            f"./scripts/context-build.sh --task-id {task_id} --agent-role {error.role} --agent-id {error.agent_id}"
+            context_cmd[0]
+        )
+    elif error.stage == "state_read":
+        suggested_next_commands.append(
+            f"./scripts/state-read.sh --task-id {task_id}"
         )
     if not suggested_next_commands:
         suggested_next_commands.append(" ".join(shlex.quote(part) for part in error.cmd))
@@ -254,90 +271,108 @@ def build_context(agent_role, agent_id="", worktree_path=""):
     return run_json(cmd, stage="context_build", role=agent_role, agent_id=agent_id or agent_role)
 
 
-team = state.get("team", {}) if isinstance(state.get("team"), dict) else {}
-product = state.get("product", {}) if isinstance(state.get("product"), dict) else {}
-quality = state.get("quality", {}) if isinstance(state.get("quality"), dict) else {}
-governance = governance_snapshot(state)
-supervisors = governance["supervisors"]
-executors = governance["executors"]
-skeptics = governance["skeptics"]
-product_anchors = governance["product_anchors"]
-quality_anchors = governance["quality_anchors"]
-scale_out_triggers = governance["scale_out_triggers"]
-task_policy = governance["task_policy"]
-role_integrity = governance["role_integrity"]
-product_gate = governance["product_gate"]
-quality_anchor = governance["quality_anchor"]
-degraded_ack = governance["degraded_ack"]
-quality_seat = governance["quality_seat"]
-verdicts = governance["verdicts"]
-
-if not supervisors:
-    print(json.dumps({"error": "dispatch requires at least one supervisor", "blocked": True}, ensure_ascii=False))
-    raise SystemExit(2)
-if not executors:
-    print(json.dumps({"error": "dispatch requires at least one executor", "blocked": True}, ensure_ascii=False))
-    raise SystemExit(2)
-if not skeptics:
-    print(json.dumps({"error": "dispatch requires at least one skeptic", "blocked": True}, ensure_ascii=False))
-    raise SystemExit(2)
-if not product_gate["ready"]:
-    print(json.dumps({
-        "error": f"dispatch blocked by product gate: {', '.join(product_gate['reasons'])}",
-        "blocked": True,
-        "product_gate_reasons": product_gate["reasons"],
-    }, ensure_ascii=False))
-    raise SystemExit(2)
-if not task_policy["ready"]:
-    print(json.dumps({
-        "error": f"dispatch blocked by task classification: {', '.join(task_policy['reasons'])}",
-        "blocked": True,
-        "task_class": task_policy["task_class"],
-        "quality_requirement": task_policy["quality_requirement"],
-        "task_policy_reasons": task_policy["reasons"],
-    }, ensure_ascii=False))
-    raise SystemExit(2)
-if product.get("goal_status") in {"drifted", "blocked"}:
-    print(json.dumps({"error": f"dispatch blocked by product.goal_status={product.get('goal_status')}", "blocked": True}, ensure_ascii=False))
-    raise SystemExit(2)
-if not quality_anchor["ready"]:
-    print(json.dumps({
-        "error": f"dispatch blocked by quality anchor: {', '.join(quality_anchor['reasons'])}",
-        "blocked": True,
-        "quality_anchor_reasons": quality_anchor["reasons"],
-        "quality_seat_mode": quality_seat["mode"],
-        "quality_seat_status": quality_seat["execution_status"],
-        "quality_seat_reasons": quality_seat["execution_reasons"],
-    }, ensure_ascii=False))
-    raise SystemExit(2)
-if not degraded_ack["ready"]:
-    print(json.dumps({
-        "error": f"dispatch blocked by degraded supervision: {', '.join(degraded_ack['reasons'])}",
-        "blocked": True,
-        "degraded_ack_reasons": degraded_ack["reasons"],
-        "quality_seat_mode": quality_seat["mode"],
-        "quality_seat_status": quality_seat["execution_status"],
-        "quality_seat_reasons": quality_seat["execution_reasons"],
-    }, ensure_ascii=False))
-    raise SystemExit(2)
-if not quality_seat["execution_ready"]:
-    print(json.dumps({
-        "error": f"dispatch blocked by quality seat policy: {', '.join(quality_seat['execution_reasons'])}",
-        "blocked": True,
-        "task_class": task_policy["task_class"],
-        "quality_requirement": task_policy["quality_requirement"],
-        "task_policy_reasons": task_policy["reasons"],
-        "quality_seat_mode": quality_seat["mode"],
-        "quality_seat_status": quality_seat["execution_status"],
-        "quality_seat_reasons": quality_seat["execution_reasons"],
-    }, ensure_ascii=False))
-    raise SystemExit(2)
-
 assignments = []
 created_worktrees = []
 existing_worktrees = []
 
 try:
+    state_wrapper = run_json(
+        [str(script_dir / "state-read.sh"), "--task-id", task_id],
+        stage="state_read",
+        role="commander",
+        agent_id="lead",
+    )
+    state = state_wrapper["state"]
+
+    team = state.get("team", {}) if isinstance(state.get("team"), dict) else {}
+    product = state.get("product", {}) if isinstance(state.get("product"), dict) else {}
+    quality = state.get("quality", {}) if isinstance(state.get("quality"), dict) else {}
+    governance = governance_snapshot(state)
+    supervisors = governance["supervisors"]
+    executors = governance["executors"]
+    skeptics = governance["skeptics"]
+    product_anchors = governance["product_anchors"]
+    quality_anchors = governance["quality_anchors"]
+    scale_out_triggers = governance["scale_out_triggers"]
+    task_policy = governance["task_policy"]
+    role_integrity = governance["role_integrity"]
+    product_gate = governance["product_gate"]
+    quality_anchor = governance["quality_anchor"]
+    degraded_ack = governance["degraded_ack"]
+    quality_seat = governance["quality_seat"]
+    verdicts = governance["verdicts"]
+
+    commander_context = run_json(
+        [str(script_dir / "context-build.sh"), "--task-id", task_id, "--agent-role", "commander"],
+        stage="context_build",
+        role="commander",
+        agent_id="lead",
+    )
+    context_path = commander_context["context_path"]
+    runtime_path = commander_context["runtime_path"]
+    state_path = commander_context["state_path"]
+
+    if not supervisors:
+        print(json.dumps({"error": "dispatch requires at least one supervisor", "blocked": True}, ensure_ascii=False))
+        raise SystemExit(2)
+    if not executors:
+        print(json.dumps({"error": "dispatch requires at least one executor", "blocked": True}, ensure_ascii=False))
+        raise SystemExit(2)
+    if not skeptics:
+        print(json.dumps({"error": "dispatch requires at least one skeptic", "blocked": True}, ensure_ascii=False))
+        raise SystemExit(2)
+    if not product_gate["ready"]:
+        print(json.dumps({
+            "error": f"dispatch blocked by product gate: {', '.join(product_gate['reasons'])}",
+            "blocked": True,
+            "product_gate_reasons": product_gate["reasons"],
+        }, ensure_ascii=False))
+        raise SystemExit(2)
+    if not task_policy["ready"]:
+        print(json.dumps({
+            "error": f"dispatch blocked by task classification: {', '.join(task_policy['reasons'])}",
+            "blocked": True,
+            "task_class": task_policy["task_class"],
+            "quality_requirement": task_policy["quality_requirement"],
+            "task_policy_reasons": task_policy["reasons"],
+        }, ensure_ascii=False))
+        raise SystemExit(2)
+    if product.get("goal_status") in {"drifted", "blocked"}:
+        print(json.dumps({"error": f"dispatch blocked by product.goal_status={product.get('goal_status')}", "blocked": True}, ensure_ascii=False))
+        raise SystemExit(2)
+    if not quality_anchor["ready"]:
+        print(json.dumps({
+            "error": f"dispatch blocked by quality anchor: {', '.join(quality_anchor['reasons'])}",
+            "blocked": True,
+            "quality_anchor_reasons": quality_anchor["reasons"],
+            "quality_seat_mode": quality_seat["mode"],
+            "quality_seat_status": quality_seat["execution_status"],
+            "quality_seat_reasons": quality_seat["execution_reasons"],
+        }, ensure_ascii=False))
+        raise SystemExit(2)
+    if not degraded_ack["ready"]:
+        print(json.dumps({
+            "error": f"dispatch blocked by degraded supervision: {', '.join(degraded_ack['reasons'])}",
+            "blocked": True,
+            "degraded_ack_reasons": degraded_ack["reasons"],
+            "quality_seat_mode": quality_seat["mode"],
+            "quality_seat_status": quality_seat["execution_status"],
+            "quality_seat_reasons": quality_seat["execution_reasons"],
+        }, ensure_ascii=False))
+        raise SystemExit(2)
+    if not quality_seat["execution_ready"]:
+        print(json.dumps({
+            "error": f"dispatch blocked by quality seat policy: {', '.join(quality_seat['execution_reasons'])}",
+            "blocked": True,
+            "task_class": task_policy["task_class"],
+            "quality_requirement": task_policy["quality_requirement"],
+            "task_policy_reasons": task_policy["reasons"],
+            "quality_seat_mode": quality_seat["mode"],
+            "quality_seat_status": quality_seat["execution_status"],
+            "quality_seat_reasons": quality_seat["execution_reasons"],
+        }, ensure_ascii=False))
+        raise SystemExit(2)
+
     for agent_id in supervisors:
         assignments.append({
             "agent_id": agent_id,

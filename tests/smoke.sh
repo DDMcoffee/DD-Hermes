@@ -260,6 +260,39 @@ EOF
   assert_json_field "$materialization_blocked" "data['blocked'] is True and data['stage'] == 'worktree_create' and data['role'] == 'executor' and data['agent_id'] == 'expert-a'"
   assert_json_field "$materialization_blocked" "data['quality_seat_status'] == 'ready' and data['task_class'] == 'T2' and data['quality_requirement'] == 'degraded-allowed'"
   assert_json_field "$materialization_blocked" "data['child_exit_code'] != 0 and any('dispatch-failure-sprint' in item for item in data['suggested_next_commands'])"
+
+  "$ROOT/scripts/sprint-init.sh" --task-id dispatch-state-read-failure-sprint --owner lead --experts expert-a,expert-c >/dev/null
+  "$ROOT/scripts/state-update.sh" --task-id dispatch-state-read-failure-sprint <<'EOF' >/dev/null
+{"supervisors":["lead"],"executors":["expert-a"],"skeptics":["expert-c"],"quality_anchors":["expert-c"],"note":"dispatch preflight state-read failure fixture"}
+EOF
+  printf '{not-json\n' > "$ROOT/workspace/state/dispatch-state-read-failure-sprint/state.json"
+
+  local state_read_blocked
+  set +e
+  state_read_blocked=$("$ROOT/scripts/dispatch-create.sh" --task-id dispatch-state-read-failure-sprint)
+  status=$?
+  set -e
+  [[ $status -eq 2 ]]
+  assert_json_field "$state_read_blocked" "data['blocked'] is True and data['stage'] == 'state_read' and data['role'] == 'commander' and data['agent_id'] == 'lead'"
+  assert_json_field "$state_read_blocked" "data['task_class'] == '' and data['quality_requirement'] == '' and data['child_exit_code'] != 0"
+  assert_json_field "$state_read_blocked" "any(item == './scripts/state-read.sh --task-id dispatch-state-read-failure-sprint' for item in data['suggested_next_commands'])"
+
+  "$ROOT/scripts/sprint-init.sh" --task-id dispatch-context-build-failure-sprint --owner lead --experts expert-a,expert-c >/dev/null
+  "$ROOT/scripts/state-update.sh" --task-id dispatch-context-build-failure-sprint <<'EOF' >/dev/null
+{"supervisors":["lead"],"executors":["expert-a"],"skeptics":["expert-c"],"quality_anchors":["expert-c"],"note":"dispatch preflight context-build failure fixture"}
+EOF
+  mv "$ROOT/scripts/runtime-report.sh" "$ROOT/scripts/runtime-report.sh.off"
+
+  local context_build_blocked
+  set +e
+  context_build_blocked=$("$ROOT/scripts/dispatch-create.sh" --task-id dispatch-context-build-failure-sprint)
+  status=$?
+  set -e
+  mv "$ROOT/scripts/runtime-report.sh.off" "$ROOT/scripts/runtime-report.sh"
+  [[ $status -eq 2 ]]
+  assert_json_field "$context_build_blocked" "data['blocked'] is True and data['stage'] == 'context_build' and data['role'] == 'commander' and data['agent_id'] == 'lead'"
+  assert_json_field "$context_build_blocked" "data['quality_seat_status'] == 'ready' and data['task_class'] == 'T2' and data['quality_requirement'] == 'degraded-allowed'"
+  assert_json_field "$context_build_blocked" "data['child_exit_code'] != 0 and any(item == './scripts/context-build.sh --task-id dispatch-context-build-failure-sprint --agent-role commander' for item in data['suggested_next_commands'])"
 }
 
 run_git_management() {

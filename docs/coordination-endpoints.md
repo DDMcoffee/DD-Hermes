@@ -126,7 +126,7 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
   - `skeptic_lane_status`, `skeptic_lane_ready`, `skeptic_lane_reasons`
   - `summary.supervisor_count`, `summary.executor_count`, `summary.skeptic_count`
   - `assignments`
-- 若 lane 物化在 `worktree_create` 或 `context_build` 阶段失败，必须返回协议内 blocked JSON，而不是 traceback。
+- 若 preflight 或 lane 物化在 `state_read`、`context_build` 或 `worktree_create` 阶段失败，必须返回协议内 blocked JSON，而不是 traceback。
   - 失败响应至少应包含 `blocked`, `stage`, `role`, `agent_id`, `child_command`, `child_exit_code`, `suggested_next_commands`
 
 ### 5) `closeout.check`
