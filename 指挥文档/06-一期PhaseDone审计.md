@@ -5,7 +5,7 @@ latest_proof_archive: openspec/archive/dd-hermes-successor-evidence-audit-v1.md
 current_mainline_task_id:
 current_mainline_doc:
 current_gap_1: 最近 proof 已更新为 `dd-hermes-successor-evidence-audit-v1`；它已经把 successor evidence discrimination 收口成 review-backed、integration-backed 的 endpoint / entry truth。
-current_gap_2: 当前没有 active mainline；下一步只能重新做 successor triage，而不是从 residue 或聊天记忆里硬立新主线。
+current_gap_2: 最新治理 rerun `dd-hermes-successor-triage-v2` 已归档，并再次确认当前没有 active mainline；下一步必须等待新的 committed task package 或新的 maintainer-visible gap。
 ---
 
 # DD Hermes 一期 Phase Done 审计
@@ -51,7 +51,7 @@ current_gap_2: 当前没有 active mainline；下一步只能重新做 successor
 ## 当前 phase-2 处于什么位置
 
 - 最近归档 proof task：`dd-hermes-successor-evidence-audit-v1`
-- 最近归档治理主线：`dd-hermes-successor-triage-v1`
+- 最近归档治理主线：`dd-hermes-successor-triage-v2`
 - 当前 active mainline：暂无
 - 最新 proof 已完成的事实：
   - `successor.audit` 已经把 committed live candidates、archived proof history 和 working-tree residue 的区分做成共享 endpoint
@@ -82,9 +82,10 @@ current_gap_2: 当前没有 active mainline；下一步只能重新做 successor
 
 - 一期无剩余 blocker。
 - 当前没有 active phase-2 主线。
-- 下一步如果还要继续开发，必须先重新做 successor triage：
+- 最新治理 rerun `dd-hermes-successor-triage-v2` 已经再次确认：当前还没有新的 committed successor。
+- 下一步如果还要继续开发，必须先出现新的 bounded task package 或新的 maintainer-visible gap：
   - 只有 repo evidence 明确支持一个新 bounded task package 时，才能再次写入 `current_mainline_task_id`
-  - 在新主线出现前，不应该回到手工 repo sweep 或聊天记忆驱动的 successor 裁决
+  - 在新主线出现前，不应该回到手工 repo sweep、聊天记忆驱动的 successor 裁决，或把 residue 误记成 live candidate
 
 ## 当前线程应该去哪里继续看
 
