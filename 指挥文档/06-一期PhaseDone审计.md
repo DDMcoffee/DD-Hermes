@@ -1,11 +1,11 @@
 ---
 phase_status: 一期已经达到完整的 `phase done`；现在可以直接使用 DD Hermes harness 的只读入口与任务控制面。
-latest_proof_task_id: dd-hermes-independent-skeptic-dispatch-v1
-latest_proof_archive: openspec/archive/dd-hermes-independent-skeptic-dispatch-v1.md
-current_mainline_task_id: dd-hermes-successor-evidence-audit-v1
-current_mainline_doc: openspec/tasks/dd-hermes-successor-evidence-audit-v1.md
-current_gap_1: 最近 proof 已更新为 `dd-hermes-independent-skeptic-dispatch-v1`；它已经把独立 skeptic 从命名真相推进成 review-backed、merge-backed 的运行面真相。
-current_gap_2: 当前 active mainline 已切到 `dd-hermes-successor-evidence-audit-v1`；目标是把 successor 证据区分做成可调用 audit，而不是继续依赖手工 repo sweep。
+latest_proof_task_id: dd-hermes-successor-evidence-audit-v1
+latest_proof_archive: openspec/archive/dd-hermes-successor-evidence-audit-v1.md
+current_mainline_task_id:
+current_mainline_doc:
+current_gap_1: 最近 proof 已更新为 `dd-hermes-successor-evidence-audit-v1`；它已经把 successor evidence discrimination 收口成 review-backed、integration-backed 的 endpoint / entry truth。
+current_gap_2: 当前没有 active mainline；下一步只能重新做 successor triage，而不是从 residue 或聊天记忆里硬立新主线。
 ---
 
 # DD Hermes 一期 Phase Done 审计
@@ -45,18 +45,18 @@ current_gap_2: 当前 active mainline 已切到 `dd-hermes-successor-evidence-au
    - `docs/artifact-schemas.md`
    - `docs/git-management.md`
 3. phase-2 已经证明可以在不破坏一期入口的前提下继续推进、完成、归档
-   - 最近归档 proof task：`dd-hermes-independent-skeptic-dispatch-v1`
-   - 当前 active mainline：`dd-hermes-successor-evidence-audit-v1`
+   - 最近归档 proof task：`dd-hermes-successor-evidence-audit-v1`
+   - 当前 active mainline：暂无
 
 ## 当前 phase-2 处于什么位置
 
-- 最近归档 proof task：`dd-hermes-independent-skeptic-dispatch-v1`
+- 最近归档 proof task：`dd-hermes-successor-evidence-audit-v1`
 - 最近归档治理主线：`dd-hermes-successor-triage-v1`
-- 当前 active mainline：`dd-hermes-successor-evidence-audit-v1`
+- 当前 active mainline：暂无
 - 最新 proof 已完成的事实：
-  - `expert-b` 质量位不再只是命名元数据，而是可物化的真实 skeptic lane
-  - `dispatch-create` 在 `state_read / context_build / worktree_create` 上都能返回协议化 blocked JSON，而不是 traceback
-  - expert execution slice 已通过 review-backed closeout、合并进 `main`，并保持 execution anchor 与 merge commit 分离
+  - `successor.audit` 已经把 committed live candidates、archived proof history 和 working-tree residue 的区分做成共享 endpoint
+  - `demo-entry` 已能消费这份 audit truth，不再只靠手工 repo sweep 解释“为什么现在没有主线”
+  - expert execution slice 已通过 review-backed closeout、合并进 `main`，并保持 execution anchor `897a0d58f462ff7c4525e414682f037e023ac839` 与 integration commit `67d50f80fb8e4f8fa937e6eeaf772e4763c1b231` 分离
 
 ## 为什么现在仍然算 `phase done`
 
@@ -81,9 +81,10 @@ current_gap_2: 当前 active mainline 已切到 `dd-hermes-successor-evidence-au
 ## 当前剩余 gap
 
 - 一期无剩余 blocker。
-- 当前剩余 gap 已收口成一条新的 phase-2 治理主线：
-  - `dd-hermes-successor-evidence-audit-v1` 负责把 committed successor evidence 与 local residue 的区分做成可执行 endpoint / entry truth
-  - 在这条主线完成前，不应该再回到手工 repo sweep 或聊天记忆驱动的 successor 裁决
+- 当前没有 active phase-2 主线。
+- 下一步如果还要继续开发，必须先重新做 successor triage：
+  - 只有 repo evidence 明确支持一个新 bounded task package 时，才能再次写入 `current_mainline_task_id`
+  - 在新主线出现前，不应该回到手工 repo sweep 或聊天记忆驱动的 successor 裁决
 
 ## 当前线程应该去哪里继续看
 
