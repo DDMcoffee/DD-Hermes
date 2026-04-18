@@ -14,7 +14,7 @@
 - `02-三层终点定义.md`
   - execution slice、task、phase 三层完成定义。
 - `03-产品介绍与使用说明.md`
-  - 新人或回流开发者的稳定入口；回答“DD Hermes 是什么、为什么这样设计、最短怎么用”。
+  - 产品定位和操作手册；回答“DD Hermes 是什么、对外暴露什么表面、第一次或回流时最短怎么操作”。
 - `04-任务重校准与线程策略.md`
   - 当前主线或下一决策面、当前下一步、线程裁决和继续开发起点。
 - `06-一期PhaseDone审计.md`
@@ -26,22 +26,22 @@
 
 ## 建议阅读顺序
 
-### 先哲学
+### 第一次接手这个仓库
 
 1. 先读 `01-项目目标对齐.md`
 2. 再读 `03-产品介绍与使用说明.md`
 3. 再读 `09-今日输入整理.md`
-4. 再读 `08-恒定锚点策略.md`
-5. 需要看控制面边界时，再读 `docs/context-runtime-state-memory.md`
+4. 需要看控制面边界时，再读 `docs/context-runtime-state-memory.md`
+5. 最后再看 `08-恒定锚点策略.md`
 
-### 中规划
+### 判断当前运行态
 
 1. 运行 `./scripts/demo-entry.sh`
 2. 读 `06-一期PhaseDone审计.md`
 3. 读 `04-任务重校准与线程策略.md`
-4. 如果是架构、控制面或高风险任务，回到 `3-explorer-then-execute`，不要跳过 synthesis
+4. 如果是架构、控制面或高风险任务，再回到 `3-explorer-then-execute`
 
-### 后执行
+### 进入执行
 
 1. 读 `02-三层终点定义.md`
 2. 如果当前存在 active mainline，再读对应 `workspace/contracts/<task_id>.md`
