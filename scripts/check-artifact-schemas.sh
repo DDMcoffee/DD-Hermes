@@ -56,6 +56,10 @@ def schema_v2(frontmatter):
 
 
 contract_path = repo / "workspace" / "contracts" / f"{task_id}.md"
+if not contract_path.exists():
+    archived_contract_path = repo / "workspace" / "contracts" / "_archive" / f"{task_id}.md"
+    if archived_contract_path.exists():
+        contract_path = archived_contract_path
 contract_frontmatter = check_markdown(
     contract_path,
     required_frontmatter=("task_id", "owner", "experts", "acceptance", "blocked_if", "memory_reads", "memory_writes"),
