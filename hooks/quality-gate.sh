@@ -110,19 +110,36 @@ if changed_code and (quality_review_status not in ("approved", "degraded-approve
     missing.append("quality_review")
 if changed_code and not quality_seat["completion_ready"]:
     missing.append("quality_seat")
+# Evaluate closeout either from explicit --state path OR from stdin JSON
+# carrying task_id + state-shaped fields. The stdin fallback closes a gap
+# observed in xc-baoxiao-web-gate-green-v1 M5d evidence run where
+# `cat state.json | quality-gate.sh` returned execution_closeout_status=
+# not-evaluated despite a real closeout file existing on disk.
+# See memory/self/recalibration-2026-04-18-learnings.md Belief 3.
+closeout_state_data = state_data
+closeout_repo_root = None
+closeout_task_id = data.get("task_id", "")
 if state_path and state_path != "-":
     path = Path(state_path)
     if path.exists():
-        repo_root = path.parents[3]
-        task_id = data.get("task_id", "")
-        closeout = closeout_verdict(
-            repo_root,
-            task_id,
-            state=state_data,
-            updated_at=state_data.get("updated_at", ""),
-        )
-        if changed_code and not closeout.get("ready", False):
-            missing.append("closeout")
+        closeout_repo_root = path.parents[3]
+elif closeout_task_id and (
+    data.get("closeout_paths")
+    or isinstance(data.get("verification"), dict)
+    or isinstance(data.get("product"), dict)
+):
+    # Stdin mode carrying a populated state; infer repo_root from script location.
+    closeout_repo_root = script_dir.parent
+    closeout_state_data = data
+if closeout_repo_root is not None:
+    closeout = closeout_verdict(
+        closeout_repo_root,
+        closeout_task_id,
+        state=closeout_state_data,
+        updated_at=closeout_state_data.get("updated_at", ""),
+    )
+    if changed_code and not closeout.get("ready", False):
+        missing.append("closeout")
 
 passed = not missing
 result = {
