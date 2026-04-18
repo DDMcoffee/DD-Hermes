@@ -1,3 +1,5 @@
+> **Status: superseded-by-archive** (2026-04-18 DD Hermes M3b sweep). See `openspec/archive/dd-hermes-commander-doc-consolidation-v1.md`. This file is retained for historical reference only; do not treat as an active proposal.
+
 # DD Hermes 指挥文档收口提案
 
 ## What

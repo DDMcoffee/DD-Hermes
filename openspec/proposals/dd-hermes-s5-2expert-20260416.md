@@ -1,5 +1,5 @@
 ---
-status: proposed
+status: superseded-by-archive
 owner: lead
 scope: dd-hermes-s5-2expert-20260416
 decision_log:

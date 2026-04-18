@@ -1,5 +1,5 @@
 ---
-status: proposed
+status: superseded-by-archive
 owner: lead
 scope: dd-hermes-explicit-gate-verdicts-v1
 decision_log:

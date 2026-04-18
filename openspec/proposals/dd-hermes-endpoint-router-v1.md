@@ -1,5 +1,9 @@
 ---
-status: proposed
+status: deferred
+harness_self_reference: true
+provable_need: none
+deferral_reason: "Deferred under AGENTS.md Self-Reference Ops on 2026-04-18 (DD Hermes M3b sweep). No current real-slice observation requires a single endpoint router surface; all active mainline candidates sit in XC-BaoXiaoAuto web product line, not DD Hermes harness."
+deferral_date: "2026-04-18"
 owner: expert-a
 scope: dd-hermes-endpoint-router-v1
 decision_log:

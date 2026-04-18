@@ -17,6 +17,20 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# --- Repo-wide structural gate: 指挥文档/ markdown count must stay <= 8 ---
+# See 指挥文档/README.md line 7 ("Markdown 文件数长期不得超过 8") and AGENTS.md Self-Reference Ops.
+# Violation blocks any mainline from reaching implementation state, independent of per-task verification.
+_COMMANDER_DOC_DIR="$SCRIPT_DIR/../指挥文档"
+_COMMANDER_DOC_COUNT=0
+if [ -d "$_COMMANDER_DOC_DIR" ]; then
+  _COMMANDER_DOC_COUNT=$(find "$_COMMANDER_DOC_DIR" -maxdepth 1 -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
+fi
+if [ "${_COMMANDER_DOC_COUNT:-0}" -gt 8 ]; then
+  printf '{"event":"%s","pass":false,"missing_verification":["commander_doc_count_over_limit"],"commander_doc_count":%d,"commander_doc_limit":8,"blocked_reason":"指挥文档/ has %d markdown files (limit 8). See 指挥文档/README.md line 7.","required_next_step":"reduce 指挥文档/ to <= 8 markdown files before any mainline implementation gate can pass"}\n' "${event:-Stop}" "$_COMMANDER_DOC_COUNT" "$_COMMANDER_DOC_COUNT"
+  exit 2
+fi
+# --- end commander-doc structural gate ---
+
 input_json=$(read_stdin_json)
 payload=$(INPUT_JSON="$input_json" EVENT="$event" STATE_PATH="$state_path" python3 - <<'PY' "$SCRIPT_DIR/../scripts"
 import json

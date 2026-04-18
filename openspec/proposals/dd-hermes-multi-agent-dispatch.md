@@ -1,5 +1,5 @@
 ---
-status: proposed
+status: superseded-by-archive
 owner: lead
 scope: dd-hermes-multi-agent-dispatch
 decision_log:

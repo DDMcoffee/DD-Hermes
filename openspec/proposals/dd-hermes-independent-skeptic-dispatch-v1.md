@@ -1,5 +1,5 @@
 ---
-status: active
+status: superseded-by-archive
 owner: lead
 scope: dd-hermes-independent-skeptic-dispatch-v1
 decision_log:

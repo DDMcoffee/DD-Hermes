@@ -8,7 +8,7 @@ confidence: "0.9"
 created_at: "2026-04-16T10:54:44Z"
 last_validated_at: "2026-04-16T10:54:44Z"
 decay_policy: "manual"
-status: "active"
+status: "deferred"
 ---
 
 # Memory Card

@@ -35,15 +35,48 @@
 - 推送前必须先确认目标 remote。
 - `constraint` 记忆只允许引用和验证，不允许通过 memory 流程改写 policy。
 
+## Self-Reference Ops
+
+任何新 proposal / contract 若主题是 DD Hermes 自身 harness 能力（runtime / router / dispatch / memory runtime / 新脚本 / 新协议 / 新 schema 等），默认触发如下硬规则：
+
+- 必须附 `provable_need` 字段：引用当前真实 slice 的 file path 与观测到的具体瓶颈。
+- 缺 `provable_need` 或来源只是“为了控制面更整齐 / 为了 harness 更自洽” → 自动降级 `deferred`，不得进 mainline。
+- harness 自指 slice 不得占用 mainline，除非已立的真实 slice 里有直接依赖。
+- `deferred` 条目每季度回顾一次，仍无 `provable_need` → 归档为 `wont-fix`。
+- Product Anchor 在没有 active mainline 时主动写 PRD / RICE / Epic 视为漂移征兆，必须立即叫停并记入 `memory/journal/` 的漂移事件流。
+- 此段与 `Truth Sources` 里的 `AGENTS.md` 治理层级同级，`memory/task/*` 不得无规划地重启 harness 自指条目。
+
 ## Coordination Rules
 
-- 每个 Sprint 必须绑定一个 contract、至少一个 handoff 和至少一个 exploration log。
-- 每个活跃任务还必须有一个 `workspace/state/<task_id>/state.json`，由指挥线程推进。
-- 每个新任务默认都要声明 `product_goal / user_value / non_goals / drift_risk`，并把产品锚点与质量锚点写进 state。
+- 每个 S2/S3 Sprint 必须绑定一个 contract、至少一个 handoff 和至少一个 exploration log；S0/S1 按下方 `Task Size Gradation` 宽松规则。
+- 每个活跃任务必须有 `workspace/state/<task_id>/state.json`，由指挥线程推进；S0 可简化为只记录 `last_commit` 一行 log。
+- 每个 S2/S3 新任务默认都要声明 `product_goal / user_value / non_goals / drift_risk`，并把产品锚点与质量锚点写进 state；S0/S1 可省略（但任务若属于已立 mainline 的子切片，仍受父 mainline 的同套声明约束）。
 - `BLOCKED` 是有效探索结果，不视为失败。
-- handoff 必须写清 scope、已决策事项、风险和下一步检查。
+- handoff 必须写清 scope、已决策事项、风险和下一步检查；S0/S1 可省略 handoff。
 - workspace 产物只做运行时协作，不替代长期知识库。
-- 进入实现阶段前，必须至少有 `contract + state + context + handoff + worktree`。
+- S2/S3 进入实现阶段前，必须至少有 `contract + state + context + handoff + worktree`；S1 可省略 handoff 与 exploration；S0 只需 commit + state 一行 log。
+
+## Task Size Gradation
+
+所有新任务的 `contract`（或 S0 的 state.json）必须显式声明 `size`；默认禁止直接用 S2，需在 contract 写一句理由说明为何不是更低级别。
+
+- **S0 chore**：改一行注释、拼写、rename 类微改动。
+  - 必选：`git commit` + `state-update` 一行 log
+  - 可省：contract / handoff / closeout / exploration / archive
+- **S1 slice**：单点小功能、小 bug、文档更新。
+  - 必选：极简 contract（`id / size / intent / acceptance`）+ `state.json` + `git commit`
+  - 可省：handoff / closeout / exploration；archive 做 log append 即可
+- **S2 task**：标准任务、跨文件、有风险（原默认形态）。
+  - 必选：完整 `contract + state + handoff + verification + archive`
+  - 可省：3-explorer（除非涉及架构或控制面）
+- **S3 phase**：架构、控制面、跨 task、安全边界。
+  - 必选：S2 全套 + `3-explorer-then-execute` + 独立 Quality Anchor 视角
+  - 可省：无
+
+补充规则：
+
+- `contract` 的 `size` 是硬必填；缺则按 S2 对待并在 `quality-gate.sh` 标红。
+- `size` 升级不需额外 exploration；降级需在 state log 里解释“为什么原以为需要更多工件，现在看不需要”。
 
 ## Multi-Agent Strategy
 
