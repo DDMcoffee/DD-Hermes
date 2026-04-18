@@ -7,7 +7,7 @@ updated_at: 2026-04-19T01:17:00Z
 task_id: xc-baoxiao-web-m4-storage-driver-contract-v1
 target_repo: /Volumes/Coding/XC-BaoXiaoAuto
 target_repo_branch: codex/xc-baoxiao-web-m4-storage-driver-contract-v1
-target_repo_ref: de5ef1fd0d40f6ec25e65270178bd34c9d208b62
+target_repo_ref: de5ef1fe8b13d6111132a53867f52fcf922b445b
 cross_repo: true
 size: S2
 task_class: T2
