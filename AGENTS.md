@@ -90,12 +90,37 @@
 - 若 `state.team.role_integrity.independent_skeptic == false`，必须显式标记为 `degraded`，不得宣称“已完成独立监督”。
 - 若任务只是收口已有能力的 task-bound traceability，优先由当前线程单线程完成，不为文档回填额外开新聊天线程。
 
+## Cross-Repo Execution
+
+DD Hermes 仓负责指挥层工件（contract / state / verdicts / closeout / memory），真实业务代码在另一个仓（“target repo”）落地。跨仓 slice 必须显式说明手柄和证据边界。
+
+### Required Contract Fields
+
+每个 `target_repo != self` 的 S1/S2/S3 contract 都要显式声明：
+
+- `target_repo`：目标仓绝对路径或规范化名称，例 `/Volumes/Coding/XC-BaoXiaoAuto`；`self` 表示 DD Hermes 自身 harness 任务（触发 `Self-Reference Ops` 规则）。
+- `execution_host`：`target-repo` / `dd-hermes` / `both`，说明实际命令在哪里执行。
+- `cross_repo_boundary`：显式除名哪些证据允许回流 DD Hermes（如 test exit code、sample count、coverage 百分比），哪些不允许（任何含 PII 的原始业务数据；参见 `memory/world/xc-baoxiao-sample-data-location.md` 的样本处理约束）。
+- `target_repo_ref`：target_repo 若是 git repo，记录 commit SHA 或 tag；若不是则为 `not-applicable`。
+
+### Rules
+
+- DD Hermes 不直接对 `target_repo` 执行 `git push`；target_repo 的 commit / branch / push 生命周期在其自己仓内管理。
+- DD Hermes 的 `state.json` 可以记录 target_repo 的 `last_commit_sha`，但只用于追溯，不做为 DD Hermes 自己的 git ref。
+- 任何经 `cross_repo_boundary` 允许回流的 evidence 必须过 redaction：不携带姓名、金额、发票号、手机号、身份证号、完整日期（允许模糊到月份）。
+- 跨仓 slice 的 `hooks/quality-gate.sh` 跑在 DD Hermes 侧；校验 `verified_files` 时下游工具需将 `changed_code_files` 解析为相对于 `target_repo` 的路径。
+- `execution_host == dd-hermes` 的跨仓 slice 仅限合法场景：只读 target_repo / 构造 instruction / 不写 target_repo。
+- `execution_host == both` 需把两边的构造动作和读取动作分开写进 contract 的 `action_plan`，不允许模糊混写。
+
 ## Git Rules
 
 - 真实仓库在创建 Expert worktree 前必须先有一个 baseline commit。
 - Lead 负责 baseline commit、worktree 生命周期和最终集成边界。
 - Expert 只在自己的 worktree 上提交，不直接污染主工作区。
 - worktree 回收前必须确认 handoff 和 verification 已落盘。
+- 跨仓 slice（`target_repo != self`）的 baseline commit 在 target_repo 侧建立，不在 DD Hermes 侧；DD Hermes 侧只记录 `target_repo_ref`。
+- 跨仓 slice 的 Expert worktree 开在 target_repo 下（使用其自己的 `git worktree add`），不在 DD Hermes 下；DD Hermes 不作为 target_repo 的 mirror 或 submodule。
+- 跨仓 slice 的 verification evidence 进入 DD Hermes 前必须通过 `cross_repo_boundary` redaction 规则；含 PII 的原始 evidence 留在 target_repo 本地，不进 DD Hermes git history。
 
 ## Truth Sources
 
