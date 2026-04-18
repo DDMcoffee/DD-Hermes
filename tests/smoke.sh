@@ -6,6 +6,7 @@ SOURCE_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 SECTION="${1:-all}"
 TMP_ROOT=$(mktemp -d "${TMPDIR:-/tmp}/hermes-harness-smoke.XXXXXX")
 ROOT="$TMP_ROOT/repo"
+SUITE_START_TS=$(date +%s)
 
 cleanup() {
   rm -rf "$TMP_ROOT"
@@ -39,6 +40,44 @@ PY
 trap cleanup EXIT
 create_fixture
 
+should_emit_progress() {
+  [[ "$SECTION" == "all" || "${SMOKE_PROGRESS:-}" == "1" ]]
+}
+
+emit_progress() {
+  local status="$1"
+  local section_name="$2"
+  local section_start_ts="$3"
+  local exit_code="${4:-0}"
+  if ! should_emit_progress; then
+    return 0
+  fi
+  local now
+  now=$(date +%s)
+  local section_elapsed=$((now - section_start_ts))
+  local suite_elapsed=$((now - SUITE_START_TS))
+  local message="[smoke] $status section=$section_name section_elapsed_s=$section_elapsed suite_elapsed_s=$suite_elapsed"
+  if [[ "$status" == "fail" ]]; then
+    message="$message exit=$exit_code"
+  fi
+  printf '%s\n' "$message" >&2
+}
+
+run_with_progress() {
+  local section_name="$1"
+  local section_fn="$2"
+  local section_start_ts
+  section_start_ts=$(date +%s)
+  emit_progress start "$section_name" "$section_start_ts"
+  if "$section_fn"; then
+    emit_progress done "$section_name" "$section_start_ts"
+  else
+    local status=$?
+    emit_progress fail "$section_name" "$section_start_ts" "$status"
+    return "$status"
+  fi
+}
+
 assert_json_field() {
   local json="$1"
   local expr="$2"
@@ -51,6 +90,18 @@ expr = os.environ["EXPR"]
 value = eval(expr, {"__builtins__": {}}, {"data": data, "len": len, "any": any, "all": all})
 if not value:
     raise SystemExit(1)
+PY
+}
+
+entry_residue_count() {
+  local entry_text="$1"
+  ENTRY_TEXT="$entry_text" python3 - <<'PY'
+import os
+import re
+
+text = os.environ["ENTRY_TEXT"]
+match = re.search(r"(\d+) 个 local residue 已忽略", text)
+print(match.group(1) if match else "0")
 PY
 }
 
@@ -685,6 +736,8 @@ PY
   [[ "$vacant" == *"当前 active mainline：暂无"* ]]
   [[ "$vacant" == *"下一步决策文档：指挥文档/04-任务重校准与线程策略.md"* ]]
   [[ "$vacant" == *"successor 审计："* ]]
+  local vacant_residue_count
+  vacant_residue_count=$(entry_residue_count "$vacant")
 
   local residue_dir="$ROOT/workspace/state/entry-residue-fixture"
   mkdir -p "$residue_dir"
@@ -707,7 +760,20 @@ EOF
   local residue_entry
   residue_entry=$("$ROOT/scripts/demo-entry.sh")
   [[ "$residue_entry" == *"residue 建议："* ]]
-  [[ "$residue_entry" == *"entry-residue-fixture"* ]]
+  local residue_count
+  residue_count=$(entry_residue_count "$residue_entry")
+  [[ "$residue_count" -gt "$vacant_residue_count" ]]
+}
+
+run_progress() {
+  local stderr_file
+  stderr_file=$(mktemp "$TMP_ROOT/progress.XXXXXX")
+  local stdout
+  stdout=$(SMOKE_PROGRESS=1 "$ROOT/tests/smoke.sh" hooks 2>"$stderr_file")
+  assert_json_field "$stdout" "data['section'] == 'hooks' and data['passed'] is True"
+  rg -q '^\[smoke\] start section=hooks ' "$stderr_file"
+  rg -q '^\[smoke\] done section=hooks ' "$stderr_file"
+  ! rg -q '^\[smoke\] fail section=hooks ' "$stderr_file"
 }
 
 run_schema() {
@@ -1152,57 +1218,58 @@ PY
 
 case "$SECTION" in
   all)
-    run_hooks
-    run_memory
-    run_workflow
-    run_git_management
-    run_discussion_textbook
-    run_dispatch
-    run_context_state
-    run_verify
-    run_entry
-    run_endpoint
-    run_schema
+    run_with_progress hooks run_hooks
+    run_with_progress memory run_memory
+    run_with_progress workflow run_workflow
+    run_with_progress git run_git_management
+    run_with_progress discussion run_discussion_textbook
+    run_with_progress dispatch run_dispatch
+    run_with_progress context run_context_state
+    run_with_progress verify run_verify
+    run_with_progress entry run_entry
+    run_with_progress endpoint run_endpoint
+    run_with_progress schema run_schema
     ;;
-  hooks) run_hooks ;;
-  memory) run_memory ;;
-  workflow) run_workflow ;;
+  hooks) run_with_progress hooks run_hooks ;;
+  memory) run_with_progress memory run_memory ;;
+  workflow) run_with_progress workflow run_workflow ;;
   dispatch)
-    run_workflow
-    run_dispatch
+    run_with_progress workflow run_workflow
+    run_with_progress dispatch run_dispatch
     ;;
   git)
-    run_workflow
-    run_git_management
-    run_dispatch
+    run_with_progress workflow run_workflow
+    run_with_progress git run_git_management
+    run_with_progress dispatch run_dispatch
     ;;
   discussion)
-    run_workflow
-    run_discussion_textbook
+    run_with_progress workflow run_workflow
+    run_with_progress discussion run_discussion_textbook
     ;;
   context)
-    run_workflow
-    run_dispatch
-    run_context_state
+    run_with_progress workflow run_workflow
+    run_with_progress dispatch run_dispatch
+    run_with_progress context run_context_state
     ;;
   verify)
-    run_workflow
-    run_dispatch
-    run_context_state
-    run_verify
+    run_with_progress workflow run_workflow
+    run_with_progress dispatch run_dispatch
+    run_with_progress context run_context_state
+    run_with_progress verify run_verify
     ;;
-  entry) run_entry ;;
+  entry) run_with_progress entry run_entry ;;
+  progress) run_progress ;;
   endpoint)
-    run_workflow
-    run_dispatch
-    run_context_state
-    run_endpoint
+    run_with_progress workflow run_workflow
+    run_with_progress dispatch run_dispatch
+    run_with_progress context run_context_state
+    run_with_progress endpoint run_endpoint
     ;;
   schema)
-    run_workflow
-    run_dispatch
-    run_context_state
-    run_schema
+    run_with_progress workflow run_workflow
+    run_with_progress dispatch run_dispatch
+    run_with_progress context run_context_state
+    run_with_progress schema run_schema
     ;;
   *)
     echo "unknown smoke section: $SECTION" >&2
