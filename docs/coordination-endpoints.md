@@ -243,6 +243,10 @@ DD Hermes 当前用脚本表达 endpoint，等价于以下控制面接口。
   - `latest_proof_task_id`, `current_mainline_task_id`
   - `live_committed_candidates`, `committed_candidate_count`
   - `local_residue`, `local_residue_count`
+  - `local_residue[*].classification`
+  - `local_residue[*].recommended_action`
+  - `local_residue[*].hint`
+  - `local_residue[*].recommended_next_commands`
   - `archived_task_count`
 
 ## Closeout Flow

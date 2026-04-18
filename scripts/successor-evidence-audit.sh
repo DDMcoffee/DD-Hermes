@@ -58,6 +58,35 @@ def load_json(path: Path) -> dict:
         return {}
 
 
+def residue_hint(task_id: str, present_surfaces: list[str], current_mainline_task_id: str) -> dict[str, object]:
+    classification = "working-tree-only-task-package"
+    if task_id == current_mainline_task_id:
+        return {
+            "classification": classification,
+            "recommended_action": "commit_or_clear_current_mainline_reference",
+            "hint": (
+                f"`{task_id}` 目前只存在于 working tree。要么把完整 task package 提交进仓库，"
+                "要么先清空 `current_mainline_task_id`，不要把 residue 当成 active mainline。"
+            ),
+            "recommended_next_commands": [
+                f"find workspace/state/{task_id} -maxdepth 2 -type f",
+                "编辑 指挥文档/06-一期PhaseDone审计.md，清空 current_mainline_task_id，或补齐并提交完整 task package",
+            ],
+        }
+    return {
+        "classification": classification,
+        "recommended_action": "promote_or_remove_local_residue",
+        "hint": (
+            f"`{task_id}` 目前只是 working-tree residue。把它补齐为 committed task package，"
+            "或者确认它只是临时痕迹后删除本地残留。"
+        ),
+        "recommended_next_commands": [
+            f"find workspace/state/{task_id} -maxdepth 2 -type f",
+            f"git ls-files workspace/state/{task_id}/state.json",
+        ],
+    }
+
+
 frontmatter = read_frontmatter(landing_doc)
 latest_proof_task_id = frontmatter.get("latest_proof_task_id", "")
 current_mainline_task_id = frontmatter.get("current_mainline_task_id", "")
@@ -129,12 +158,21 @@ for task_id in sorted(all_state_ids):
     tracked_surfaces = [name for name, path in surface_paths.items() if path.exists() and git_tracked(path)]
     if tracked_surfaces:
         continue
+    hint = residue_hint(
+        task_id=task_id,
+        present_surfaces=[name for name, path in surface_paths.items() if path.exists()],
+        current_mainline_task_id=current_mainline_task_id,
+    )
     local_residue.append(
         {
             "task_id": task_id,
             "present_surfaces": [name for name, path in surface_paths.items() if path.exists()],
             "tracked_surfaces": [],
             "reason": "working_tree_only_task_package",
+            "classification": hint["classification"],
+            "recommended_action": hint["recommended_action"],
+            "hint": hint["hint"],
+            "recommended_next_commands": hint["recommended_next_commands"],
         }
     )
 

@@ -685,6 +685,29 @@ PY
   [[ "$vacant" == *"当前 active mainline：暂无"* ]]
   [[ "$vacant" == *"下一步决策文档：指挥文档/04-任务重校准与线程策略.md"* ]]
   [[ "$vacant" == *"successor 审计："* ]]
+
+  local residue_dir="$ROOT/workspace/state/entry-residue-fixture"
+  mkdir -p "$residue_dir"
+  cat > "$residue_dir/state.json" <<'EOF'
+{
+  "task_id": "entry-residue-fixture",
+  "status": "initialized",
+  "mode": "planning",
+  "openspec": {
+    "stage": "proposal",
+    "proposal_path": "",
+    "design_path": "",
+    "task_path": "",
+    "archive_path": ""
+  }
+}
+EOF
+  trap 'cp "$landing_backup" "$landing_doc"; rm -f "$landing_backup"; rm -rf "$residue_dir"; trap - RETURN' RETURN
+
+  local residue_entry
+  residue_entry=$("$ROOT/scripts/demo-entry.sh")
+  [[ "$residue_entry" == *"residue 建议："* ]]
+  [[ "$residue_entry" == *"entry-residue-fixture"* ]]
 }
 
 run_schema() {
@@ -1097,6 +1120,7 @@ EOF
   successor_audit=$("$ROOT/scripts/coordination-endpoint.sh" --task-id smoke-sprint --endpoint successor.audit)
   assert_json_field "$successor_audit" "'verdict' in data and 'reasons' in data and 'live_committed_candidates' in data and 'local_residue' in data and 'archived_task_count' in data"
   assert_json_field "$successor_audit" "any(item['task_id'] == 'endpoint-residue-fixture' for item in data['local_residue'])"
+  assert_json_field "$successor_audit" "any(item['task_id'] == 'endpoint-residue-fixture' and item['classification'] == 'working-tree-only-task-package' and item['recommended_action'] == 'promote_or_remove_local_residue' and 'committed task package' in item['hint'] for item in data['local_residue'])"
 
   python3 - "$landing_doc" <<'PY'
 from pathlib import Path
@@ -1123,6 +1147,7 @@ PY
   local residue_mainline
   residue_mainline=$("$ROOT/scripts/coordination-endpoint.sh" --task-id smoke-sprint --endpoint successor.audit)
   assert_json_field "$residue_mainline" "data['verdict'] == 'working-tree-mainline-only' and 'current_mainline_not_committed' in data['reasons']"
+  assert_json_field "$residue_mainline" "any(item['task_id'] == 'endpoint-residue-fixture' and item['recommended_action'] == 'commit_or_clear_current_mainline_reference' and 'current_mainline_task_id' in item['hint'] for item in data['local_residue'])"
 }
 
 case "$SECTION" in
