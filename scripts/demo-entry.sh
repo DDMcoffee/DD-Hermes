@@ -221,6 +221,9 @@ if residue:
     names = "、".join(item.get("task_id", "") for item in residue[:3] if item.get("task_id"))
     if names:
         line += f"\n- residue task_ids：{names}"
+    first_hint = residue[0].get("hint", "")
+    if first_hint:
+        line += f"\n- residue 建议：{first_hint}"
 print(line)
 PY
 )
