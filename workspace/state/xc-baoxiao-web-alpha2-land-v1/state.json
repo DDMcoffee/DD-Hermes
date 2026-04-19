@@ -1,0 +1,175 @@
+{
+  "state_version": 2,
+  "task_id": "xc-baoxiao-web-alpha2-land-v1",
+  "status": "done",
+  "mode": "archive",
+  "created_at": "2026-04-18T00:00:00Z",
+  "updated_at": "2026-04-18T13:31:34Z",
+  "owner": "lead",
+  "experts": [
+    "lead"
+  ],
+  "active_expert": "",
+  "blocked_reason": "",
+  "current_focus": "Alpha.2 landed onto local web-main, gate passed there, and the original WIP was restored.",
+  "cross_repo": {
+    "target_repo": "/Volumes/Coding/XC-BaoXiaoAuto",
+    "execution_host": "target-repo",
+    "target_repo_ref": "a6619de50df5474233cbe8a33b718817950fb196",
+    "target_repo_branch": "web-main",
+    "target_repo_workdir_relative": "products/web",
+    "boundary_doc": "docs/cross-repo-execution.md",
+    "last_target_commit_sha": "c73b987a7ae82b92f3a90a2e45e5cd9090f3e2e9"
+  },
+  "verification": {
+    "last_pass": false,
+    "last_run_at": "",
+    "verified_steps": [
+      "target-side: recorded six-path dirty web-main worktree before landing",
+      "target-side: git stash push -u saved the WIP as codex-alpha2-land-v1-temp",
+      "target-side: git merge --ff-only codex/xc-baoxiao-web-alpha2-prep-v1 advanced web-main from a6619de to c73b987",
+      "target-side: npm run test exit 0 on landed web-main",
+      "target-side: npm run typecheck exit 0 on landed web-main",
+      "target-side: npm run build exit 0 on landed web-main",
+      "target-side: git stash pop restored the original six-path WIP cleanly"
+    ],
+    "verified_files": [
+      "workspace/contracts/_archive/xc-baoxiao-web-alpha2-land-v1.md",
+      "workspace/handoffs/xc-baoxiao-web-alpha2-land-v1-lead-to-executor.md",
+      "memory/task/xc-baoxiao-web-alpha2-land-v1.md",
+      "workspace/closeouts/xc-baoxiao-web-alpha2-land-v1-lead.md"
+    ],
+    "target_execution": {
+      "status": "complete",
+      "pre_land_head": "a6619de50df5474233cbe8a33b718817950fb196",
+      "post_land_head": "c73b987a7ae82b92f3a90a2e45e5cd9090f3e2e9",
+      "stash_created": true,
+      "stash_restored": true,
+      "final_test_exit": 0,
+      "final_typecheck_exit": 0,
+      "final_build_exit": 0,
+      "restored_dirty_paths": [
+        "docs/web/README.md",
+        "products/web/apps/web/src/auth.ts",
+        "products/web/apps/web/src/middleware.ts",
+        "products/web/packages/db/src/index.ts",
+        "products/web/apps/web/.env.example",
+        "products/web/apps/web/src/auth.config.ts"
+      ]
+    }
+  },
+  "lease": {
+    "goal": "Advance local web-main to alpha.2 while preserving the user's unrelated WIP.",
+    "status": "done",
+    "duration_hours": 0.75,
+    "started_at": "2026-04-18T00:00:00Z",
+    "dispatch_cursor": "landed-and-restored"
+  },
+  "memory": {
+    "reads": [
+      "memory/self/recalibration-2026-04-18-learnings.md"
+    ],
+    "writes": [
+      "memory/task/xc-baoxiao-web-alpha2-land-v1.md"
+    ],
+    "last_selected_ids": [
+      "xc-baoxiao-web-alpha2-land-v1",
+      "recalibration-2026-04-18-learnings"
+    ]
+  },
+  "product": {
+    "anchor": "lead",
+    "goal": "Advance XC-BaoXiaoAuto web-main locally to the verified alpha.2 release-prep commit while preserving the user's unrelated uncommitted WIP.",
+    "user_value": "The Web small version becomes the actual local web-main baseline without losing current unfinished edits.",
+    "non_goals": [
+      "Do not push remote branches or tags.",
+      "Do not modify the substance of the user's six existing WIP edits.",
+      "Do not add new product work beyond landing alpha.2 on local web-main."
+    ],
+    "product_acceptance": [
+      "Local web-main advances to commit c73b987a7ae82b92f3a90a2e45e5cd9090f3e2e9.",
+      "The user's pre-existing WIP is restored after the fast-forward.",
+      "npm run test, npm run typecheck, and npm run build pass on local web-main after the branch move.",
+      "DD Hermes state records the landing evidence."
+    ],
+    "drift_risk": "This slice could drift into release publication or user-WIP cleanup.",
+    "goal_status": "met",
+    "goal_drift_flags": [],
+    "last_product_review_at": "2026-04-18T13:31:34Z",
+    "task_class": "T2",
+    "quality_requirement": "degraded-allowed"
+  },
+  "quality": {
+    "anchor": "lead",
+    "review_status": "degraded-approved",
+    "findings": [
+      "web-main is now the real local alpha.2 baseline instead of a side-branch-only state.",
+      "The user's six pre-existing WIP paths were restored after landing, so this slice did not consume or overwrite unfinished work.",
+      "Landing reused the already-verified alpha.2 payload; no extra product changes were introduced."
+    ],
+    "last_review_at": "2026-04-18T13:31:34Z",
+    "degraded_reason": "Single-thread execution for a bounded landing slice. No independent skeptic is claimed."
+  },
+  "contract_path": "/Volumes/Coding/Hermes agent for mine/workspace/contracts/_archive/xc-baoxiao-web-alpha2-land-v1.md",
+  "handoff_paths": [
+    "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/xc-baoxiao-web-alpha2-land-v1-lead-to-executor.md"
+  ],
+  "closeout_paths": [
+    "/Volumes/Coding/Hermes agent for mine/workspace/closeouts/xc-baoxiao-web-alpha2-land-v1-lead.md"
+  ],
+  "exploration_paths": [],
+  "openspec": {
+    "stage": "none",
+    "proposal_path": "",
+    "design_path": "",
+    "task_path": "",
+    "archive_path": "",
+    "note": "S2 cross-repo landing slice did not require standalone OpenSpec proposal; archived contract plus state and closeout are the authoritative task package."
+  },
+  "team": {
+    "supervisor_min_count": 1,
+    "supervisors": [
+      "lead"
+    ],
+    "executors": [
+      "lead"
+    ],
+    "skeptics": [],
+    "product_anchors": [
+      "lead"
+    ],
+    "quality_anchors": [
+      "lead"
+    ],
+    "anchor_policy": {
+      "product_anchor_role": "supervisor",
+      "quality_anchor_role": "skeptic",
+      "constant_anchor_seats": true
+    },
+    "role_integrity": {
+      "independent_skeptic": false,
+      "degraded": true,
+      "degraded_ack_by": "lead",
+      "degraded_ack_at": "2026-04-18T00:00:00Z",
+      "degraded_ack_reason": "Alpha.2 landing continues as a single-thread cross-repo slice by design."
+    }
+  },
+  "events": [
+    {
+      "timestamp": "2026-04-18T00:00:00Z",
+      "text": "Alpha.2 landing slice instantiated. Next step is stash / ff-only merge / gate / pop on target-side web-main.",
+      "product_gate_ready": true,
+      "quality_anchor_ready": true,
+      "quality_review_ready": false,
+      "degraded_ack_ready": true
+    },
+    {
+      "timestamp": "2026-04-18T13:31:34Z",
+      "text": "Target-side alpha.2 landing complete: web-main advanced to c73b987, standard web gate passed there, and the original six-path WIP was restored.",
+      "product_gate_ready": true,
+      "quality_anchor_ready": true,
+      "quality_review_ready": true,
+      "degraded_ack_ready": true
+    }
+  ]
+}
