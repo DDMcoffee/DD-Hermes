@@ -1,6 +1,6 @@
 # DD Hermes V2
 
-V2 是 DD Hermes 在"给 Codex APP 套马具 + 沉淀用户知识/经验"这个北极星下的下一代扩展空间。它**不是** V1 的补丁，也**不替代** V1 的任何协议；V2 以独立顶层目录并行存在，V1 的协议（`AGENTS.md` / `README.md` / `docs/` / `指挥文档/` / `workspace/`）保持稳定不动。
+V2 是 DD Hermes 在"给 Codex APP 套马具 + 沉淀用户知识/经验"这个北极星下的下一代扩展空间。它**不是** V1 的补丁，也**不替代** V1 的任何协议；V2 以独立顶层目录并行存在，V1 的所有文件（`AGENTS.md` / `README.md` / `CLAUDE.md` / `docs/` / `指挥文档/` / `hooks/` / `scripts/` / `tests/` / `workspace/` / `memory/` / `openspec/`）保持稳定不动。
 
 ## 北极星
 
