@@ -1,0 +1,308 @@
+{
+  "state_version": 2,
+  "created_at": "2026-04-17T08:55:55Z",
+  "git": {
+    "baseline_commit": "",
+    "latest_commit": "",
+    "latest_branch": "",
+    "latest_upstream": "",
+    "latest_remote_urls": {}
+  },
+  "discussion": {
+    "policy": "direct",
+    "decision_id": "",
+    "explorer_queue": [],
+    "explorer_findings": [],
+    "synthesis_path": "",
+    "current_executor": ""
+  },
+  "verification": {
+    "last_pass": true,
+    "last_run_at": "2026-04-17T09:04:27Z",
+    "verified_steps": [
+      "./scripts/test-workflow.sh --task-id dd-hermes-backlog-truth-hygiene-v1",
+      "./scripts/context-build.sh --task-id dd-hermes-backlog-truth-hygiene-v1 --agent-role commander",
+      "./scripts/demo-entry.sh",
+      "bash tests/smoke.sh all"
+    ],
+    "verified_files": [
+      "workspace/contracts/dd-hermes-backlog-truth-hygiene-v1.md",
+      "openspec/proposals/dd-hermes-backlog-truth-hygiene-v1.md",
+      "openspec/designs/dd-hermes-backlog-truth-hygiene-v1.md",
+      "openspec/tasks/dd-hermes-backlog-truth-hygiene-v1.md",
+      "openspec/archive/dd-hermes-backlog-truth-hygiene-v1.md",
+      "openspec/archive/dd-hermes-commander-doc-consolidation-v1.md",
+      "openspec/archive/dd-hermes-s5-2expert-20260416.md",
+      "workspace/handoffs/dd-hermes-backlog-truth-hygiene-v1-lead-to-lead-archive.md",
+      "workspace/handoffs/dd-hermes-s5-2expert-20260416-lead-to-lead-archive.md",
+      "指挥文档/04-任务重校准与线程策略.md"
+    ]
+  },
+  "runtime": {
+    "preferred_surface": "repo-first",
+    "worktree_strategy": "isolated",
+    "last_context_path": "/Volumes/Coding/Hermes agent for mine/workspace/state/dd-hermes-backlog-truth-hygiene-v1/context.json",
+    "last_runtime_report_path": "/Volumes/Coding/Hermes agent for mine/workspace/state/dd-hermes-backlog-truth-hygiene-v1/runtime.json",
+    "last_worktree_path": ""
+  },
+  "lease": {
+    "goal": "Clean stale DD Hermes candidate truth so maintainers can trust backlog and successor selection again.",
+    "status": "idle",
+    "duration_hours": 0,
+    "started_at": "",
+    "deadline_at": "",
+    "paused_at": "",
+    "pause_reason": "",
+    "resume_after": "",
+    "resume_checkpoint": "",
+    "dispatch_cursor": ""
+  },
+  "memory": {
+    "reads": [
+      "memory/world/no-destruction-without-confirmation.md"
+    ],
+    "writes": [
+      "memory/task/dd-hermes-backlog-truth-hygiene-v1.md"
+    ],
+    "last_selected_ids": [
+      "no-destruction-without-confirmation",
+      "user-pref-no-manual-generator-commands",
+      "dd-hermes-multi-agent-dispatch",
+      "dd-hermes-endpoint-router-v1",
+      "dd-hermes-experience-demo-v1",
+      "dd-hermes-demo-entry-v1",
+      "worktree-first",
+      "tool-selection-drift"
+    ]
+  },
+  "product": {
+    "anchor": "lead",
+    "goal": "Advance DD Hermes through task dd-hermes-backlog-truth-hygiene-v1 without drifting from the current product focus.",
+    "user_value": "Let a DD Hermes maintainer trust that proposal backlog, paused experiments, and commander docs all describe the same current reality instead of stale candidate noise.",
+    "non_goals": [
+      "Do not reopen runtime/provider/gateway work.",
+      "Do not promote a new phase-2 feature mainline unless repo evidence clearly favors one.",
+      "Do not resume the paused two-expert experiment as if it were already product work."
+    ],
+    "product_acceptance": [
+      "Proposal-only and paused experiment artifacts that no longer reflect repo truth are archived or explicitly marked as absorbed.",
+      "Commander truth sources can still say `no active mainline` after candidate-pool cleanup, without leaving stale backlog ambiguity behind.",
+      "The next maintainer can tell which candidate directions are real, which are archived, and which are still experiments."
+    ],
+    "drift_risk": "This task could drift into generic documentation cleanup if it stops tightening backlog truth around stale candidates and paused experiments.",
+    "goal_status": "defined",
+    "goal_drift_flags": [],
+    "last_product_review_at": "2026-04-17T09:04:27Z",
+    "task_class": "T0",
+    "quality_requirement": "degraded-allowed",
+    "task_class_rationale": "治理/裁决/归档/trace 收口任务，不进入 execution slice。"
+  },
+  "quality": {
+    "anchor": "expert-b",
+    "review_status": "approved",
+    "review_findings": [],
+    "review_examples": [
+      "Reviewed candidate-pool cleanup: commander-doc proposal archived as absorbed, S5 archived as paused experiment, and current mainline truth remains empty."
+    ],
+    "last_review_at": "2026-04-17T09:01:17Z"
+  },
+  "textbook": {
+    "last_entry_path": "",
+    "last_summary_path": "",
+    "last_summary_at": ""
+  },
+  "notes": [
+    {
+      "timestamp": "2026-04-17T08:55:55Z",
+      "text": "anchor governance initialized",
+      "product_gate_ready": true,
+      "quality_anchor_ready": true,
+      "quality_review_ready": false,
+      "degraded_ack_ready": false
+    },
+    {
+      "timestamp": "2026-04-17T09:02:24Z",
+      "text": "archived bounded backlog truth hygiene task without creating a new feature mainline",
+      "product_gate_ready": true,
+      "quality_anchor_ready": true,
+      "quality_review_ready": true,
+      "degraded_ack_ready": true
+    },
+    {
+      "timestamp": "2026-04-17T09:02:24Z",
+      "text": "anchor governance initialized",
+      "product_gate_ready": true,
+      "quality_anchor_ready": true,
+      "quality_review_ready": true,
+      "degraded_ack_ready": true
+    },
+    {
+      "timestamp": "2026-04-17T09:04:27Z",
+      "text": "recorded archive verification for backlog truth hygiene cleanup",
+      "product_gate_ready": true,
+      "quality_anchor_ready": true,
+      "quality_review_ready": true,
+      "degraded_ack_ready": true
+    },
+    {
+      "timestamp": "2026-04-17T09:04:27Z",
+      "text": "anchor governance initialized",
+      "product_gate_ready": true,
+      "quality_anchor_ready": true,
+      "quality_review_ready": true,
+      "degraded_ack_ready": true
+    },
+    {
+      "timestamp": "2026-04-17T09:21:14Z",
+      "text": "refreshed no-execution archive semantics after legacy normalization",
+      "product_gate_ready": true,
+      "quality_anchor_ready": true,
+      "quality_review_ready": true,
+      "degraded_ack_ready": true
+    }
+  ],
+  "task_id": "dd-hermes-backlog-truth-hygiene-v1",
+  "status": "done",
+  "mode": "archive",
+  "current_focus": "candidate-pool cleanup archived; backlog truth is cleaner and repo still has no active mainline",
+  "owner": "lead",
+  "experts": [
+    "expert-a"
+  ],
+  "active_expert": "",
+  "blocked_reason": "",
+  "contract_path": "/Volumes/Coding/Hermes agent for mine/workspace/contracts/dd-hermes-backlog-truth-hygiene-v1.md",
+  "handoff_paths": [
+    "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-backlog-truth-hygiene-v1-lead-to-expert-a.md",
+    "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-backlog-truth-hygiene-v1-lead-to-lead-archive.md"
+  ],
+  "exploration_paths": [
+    "/Volumes/Coding/Hermes agent for mine/workspace/exploration/exploration-lead-dd-hermes-backlog-truth-hygiene-v1.md"
+  ],
+  "openspec": {
+    "stage": "archive",
+    "proposal_path": "/Volumes/Coding/Hermes agent for mine/openspec/proposals/dd-hermes-backlog-truth-hygiene-v1.md",
+    "design_path": "/Volumes/Coding/Hermes agent for mine/openspec/designs/dd-hermes-backlog-truth-hygiene-v1.md",
+    "task_path": "/Volumes/Coding/Hermes agent for mine/openspec/tasks/dd-hermes-backlog-truth-hygiene-v1.md",
+    "archive_path": "/Volumes/Coding/Hermes agent for mine/openspec/archive/dd-hermes-backlog-truth-hygiene-v1.md"
+  },
+  "team": {
+    "supervisor_min_count": 1,
+    "supervisors": [
+      "lead"
+    ],
+    "executors": [
+      "expert-a"
+    ],
+    "skeptics": [
+      "expert-b"
+    ],
+    "product_anchors": [
+      "lead"
+    ],
+    "quality_anchors": [
+      "expert-b"
+    ],
+    "anchor_policy": {
+      "product_anchor_role": "supervisor",
+      "quality_anchor_role": "skeptic",
+      "constant_anchor_seats": true
+    },
+    "high_risk_mode": false,
+    "integration_pressure": false,
+    "scale_out_recommended": false,
+    "scale_out_triggers": [],
+    "role_integrity": {
+      "independent_skeptic": true,
+      "degraded": false,
+      "role_conflicts": [],
+      "role_overlap": {
+        "supervisor_executor_overlap": [],
+        "supervisor_skeptic_overlap": [],
+        "executor_skeptic_overlap": []
+      },
+      "degraded_ack_by": "",
+      "degraded_ack_at": ""
+    }
+  },
+  "updated_at": "2026-04-17T09:21:14Z",
+  "verdicts": {
+    "updated_at": "2026-04-17T09:21:14Z",
+    "task_policy": {
+      "status": "ready",
+      "ready": true,
+      "reasons": [],
+      "updated_at": "2026-04-17T09:21:14Z",
+      "task_class": "T0",
+      "task_class_bucket": "no-execution",
+      "quality_requirement": "degraded-allowed",
+      "quality_requirement_source": "task_class_default",
+      "manual_escalation_required": false,
+      "manual_escalation_reasons": []
+    },
+    "product_gate": {
+      "status": "ready",
+      "ready": true,
+      "reasons": [],
+      "updated_at": "2026-04-17T09:21:14Z",
+      "anchor": "lead",
+      "goal": "Advance DD Hermes through task dd-hermes-backlog-truth-hygiene-v1 without drifting from the current product focus.",
+      "goal_status": "defined"
+    },
+    "quality_anchor": {
+      "status": "ready",
+      "ready": true,
+      "reasons": [],
+      "updated_at": "2026-04-17T09:21:14Z",
+      "anchor": "expert-b"
+    },
+    "quality_review": {
+      "status": "ready",
+      "ready": true,
+      "reasons": [],
+      "updated_at": "2026-04-17T09:21:14Z",
+      "anchor": "expert-b",
+      "review_status": "approved",
+      "last_review_at": "2026-04-17T09:01:17Z"
+    },
+    "degraded_ack": {
+      "status": "not-required",
+      "ready": true,
+      "reasons": [],
+      "updated_at": "2026-04-17T09:21:14Z",
+      "required": false,
+      "ack_by": "",
+      "ack_at": ""
+    },
+    "quality_seat_execution": {
+      "status": "ready",
+      "ready": true,
+      "reasons": [],
+      "updated_at": "2026-04-17T09:21:14Z",
+      "mode": "independent"
+    },
+    "quality_seat_completion": {
+      "status": "ready",
+      "ready": true,
+      "reasons": [],
+      "updated_at": "2026-04-17T09:21:14Z",
+      "mode": "independent"
+    },
+    "execution_closeout": {
+      "status": "not-required",
+      "ready": true,
+      "reasons": [],
+      "updated_at": "2026-04-17T09:21:14Z",
+      "closeout_path": "",
+      "selected_by": "task_policy",
+      "candidate_count": 1,
+      "semantic_valid": true,
+      "ready_for_execution_slice_done": true,
+      "execution_commit": "",
+      "quality_review_status": "approved",
+      "verified_step_count": 0,
+      "verified_file_count": 0,
+      "quality_findings_count": 0
+    }
+  }
+}

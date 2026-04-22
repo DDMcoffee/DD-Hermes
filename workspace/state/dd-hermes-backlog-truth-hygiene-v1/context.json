@@ -1,0 +1,804 @@
+{
+  "task_id": "dd-hermes-backlog-truth-hygiene-v1",
+  "agent_role": "commander",
+  "generated_at": "2026-04-17T09:02:49Z",
+  "sources": {
+    "contract_path": "/Volumes/Coding/Hermes agent for mine/workspace/contracts/dd-hermes-backlog-truth-hygiene-v1.md",
+    "handoff_paths": [
+      "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-backlog-truth-hygiene-v1-lead-to-expert-a.md",
+      "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-backlog-truth-hygiene-v1-lead-to-lead-archive.md"
+    ],
+    "exploration_paths": [
+      "/Volumes/Coding/Hermes agent for mine/workspace/exploration/exploration-lead-dd-hermes-backlog-truth-hygiene-v1.md"
+    ],
+    "state_path": "/Volumes/Coding/Hermes agent for mine/workspace/state/dd-hermes-backlog-truth-hygiene-v1/state.json",
+    "runtime_path": "/Volumes/Coding/Hermes agent for mine/workspace/state/dd-hermes-backlog-truth-hygiene-v1/runtime.json",
+    "openspec": {
+      "proposal": "/Volumes/Coding/Hermes agent for mine/openspec/proposals/dd-hermes-backlog-truth-hygiene-v1.md",
+      "design": "/Volumes/Coding/Hermes agent for mine/openspec/designs/dd-hermes-backlog-truth-hygiene-v1.md",
+      "task": "/Volumes/Coding/Hermes agent for mine/openspec/tasks/dd-hermes-backlog-truth-hygiene-v1.md",
+      "archive": "/Volumes/Coding/Hermes agent for mine/openspec/archive/dd-hermes-backlog-truth-hygiene-v1.md"
+    }
+  },
+  "runtime": {
+    "timestamp": "2026-04-17T09:02:49Z",
+    "repo_root": "/Volumes/Coding/Hermes agent for mine",
+    "worktree": "/Volumes/Coding/Hermes agent for mine",
+    "agent_role": "commander",
+    "shell": "/bin/zsh",
+    "git": {
+      "repo_root": "/Volumes/Coding/Hermes agent for mine",
+      "worktree": "/Volumes/Coding/Hermes agent for mine",
+      "has_head": true,
+      "head": "dfd6652eae7d080173f445e4ebccfa66deda1fe7",
+      "branch": "main",
+      "upstream": "",
+      "ahead": 0,
+      "behind": 0,
+      "clean": false,
+      "dirty_files": [
+        "EADME.md",
+        "docs/textbook/daily/2026-04-17.md",
+        "openspec/designs/dd-hermes-quality-seat-escalation-rules-v1.md",
+        "openspec/tasks/dd-hermes-quality-seat-escalation-rules-v1.md",
+        "workspace/closeouts/dd-hermes-explicit-gate-verdicts-v1-expert-a.md",
+        "workspace/handoffs/dd-hermes-explicit-gate-verdicts-v1-expert-a-to-lead.md",
+        "workspace/state/dd-hermes-anchor-governance-v1/state.json",
+        "workspace/state/dd-hermes-independent-quality-seat-v1/state.json",
+        "workspace/state/dd-hermes-quality-seat-escalation-rules-v1/state.json",
+        "\"\\346\\214\\207\\346\\214\\245\\346\\226\\207\\346\\241\\243/04-\\344\\273\\273\\345\\212\\241\\351\\207\\215\\346\\240\\241\\345\\207\\206\\344\\270\\216\\347\\272\\277\\347\\250\\213\\347\\255\\226\\347\\225\\245.md\"",
+        "\"\\346\\214\\207\\346\\214\\245\\346\\226\\207\\346\\241\\243/06-\\344\\270\\200\\346\\234\\237PhaseDone\\345\\256\\241\\350\\256\\241.md\"",
+        "\"\\346\\214\\207\\346\\214\\245\\346\\226\\207\\346\\241\\243/09-\\344\\273\\212\\346\\227\\245\\350\\276\\223\\345\\205\\245\\346\\225\\264\\347\\220\\206.md\"",
+        "\"\\346\\214\\207\\346\\214\\245\\346\\226\\207\\346\\241\\243/README.md\"",
+        "openspec/archive/dd-hermes-backlog-truth-hygiene-v1.md",
+        "openspec/archive/dd-hermes-commander-doc-consolidation-v1.md",
+        "openspec/archive/dd-hermes-explicit-gate-verdicts-v1.md",
+        "openspec/archive/dd-hermes-quality-seat-escalation-rules-v1.md",
+        "openspec/archive/dd-hermes-s5-2expert-20260416.md",
+        "openspec/designs/dd-hermes-backlog-truth-hygiene-v1.md",
+        "openspec/proposals/dd-hermes-backlog-truth-hygiene-v1.md",
+        "openspec/tasks/dd-hermes-backlog-truth-hygiene-v1.md",
+        "workspace/closeouts/dd-hermes-backlog-truth-hygiene-v1-expert-a.md",
+        "workspace/contracts/dd-hermes-backlog-truth-hygiene-v1.md",
+        "workspace/exploration/exploration-lead-dd-hermes-backlog-truth-hygiene-v1.md",
+        "workspace/handoffs/dd-hermes-backlog-truth-hygiene-v1-lead-to-expert-a.md",
+        "workspace/handoffs/dd-hermes-backlog-truth-hygiene-v1-lead-to-lead-archive.md",
+        "workspace/handoffs/dd-hermes-explicit-gate-verdicts-v1-lead-to-lead-archive.md",
+        "workspace/handoffs/dd-hermes-quality-seat-escalation-rules-v1-lead-to-lead-archive.md",
+        "workspace/handoffs/dd-hermes-s5-2expert-20260416-lead-to-lead-archive.md"
+      ],
+      "remote_urls": {},
+      "known_worktrees": [
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine",
+          "head": "dfd6652eae7d080173f445e4ebccfa66deda1fe7",
+          "branch": "main"
+        },
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-anchor-governance-v1-expert-a",
+          "head": "f9d89194b97c5cb630472c1a025d35576d3785af",
+          "branch": "dd-hermes-anchor-governance-v1-expert-a"
+        },
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-execution-bootstrap-expert-a",
+          "head": "4ea93ab8c265585b3de3555c8ecdd1e60311a70e",
+          "branch": "dd-hermes-execution-bootstrap-expert-a"
+        },
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-explicit-gate-verdicts-v1-expert-a",
+          "head": "1af20f9f046b4533b8ee65096142715016180bc3",
+          "branch": "dd-hermes-explicit-gate-verdicts-v1-expert-a"
+        },
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-independent-quality-seat-v1-expert-a",
+          "head": "bfe1739a7b49ced241cc98817423cde1606d1d3b",
+          "branch": "dd-hermes-independent-quality-seat-v1-expert-a"
+        },
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-quality-seat-escalation-rules-v1-expert-a",
+          "head": "7b39e070cfab9aac46e37afe3655d5fe3208ba43",
+          "branch": "dd-hermes-quality-seat-escalation-rules-v1-expert-a"
+        },
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-s5-2expert-20260416-expert-a",
+          "head": "f2282ca3d6fa13e94f18a13065b226a5dd8aea11",
+          "branch": "dd-hermes-s5-2expert-20260416-expert-a"
+        },
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-s5-2expert-20260416-expert-b",
+          "head": "f2282ca3d6fa13e94f18a13065b226a5dd8aea11",
+          "branch": "dd-hermes-s5-2expert-20260416-expert-b"
+        }
+      ]
+    },
+    "hooks": {
+      "events": [
+        "PreToolUse",
+        "PostToolUse",
+        "Stop",
+        "SessionEnd"
+      ],
+      "available": [
+        "guard-dangerous-ops.sh",
+        "peon-ping.sh",
+        "post-edit-typecheck.sh",
+        "quality-gate.sh",
+        "session-end-log.sh",
+        "thread-switch-gate.sh"
+      ]
+    },
+    "skills": [
+      "auto-verify",
+      "coding-harness",
+      "deep-research",
+      "spec-first"
+    ],
+    "tests": [
+      "test-artifact-schemas.sh",
+      "test-coordination-endpoint.sh",
+      "test-hooks.sh",
+      "test-memory.sh",
+      "test-schema.sh",
+      "test-verify-loop.sh",
+      "test-workflow.sh",
+      "tests/smoke.sh"
+    ],
+    "task_surfaces": {
+      "contract_path": "/Volumes/Coding/Hermes agent for mine/workspace/contracts/dd-hermes-backlog-truth-hygiene-v1.md",
+      "state_path": "/Volumes/Coding/Hermes agent for mine/workspace/state/dd-hermes-backlog-truth-hygiene-v1/state.json"
+    }
+  },
+  "state": {
+    "state_version": 2,
+    "created_at": "2026-04-17T08:55:55Z",
+    "git": {
+      "baseline_commit": "",
+      "latest_commit": "",
+      "latest_branch": "",
+      "latest_upstream": "",
+      "latest_remote_urls": {}
+    },
+    "discussion": {
+      "policy": "direct",
+      "decision_id": "",
+      "explorer_queue": [],
+      "explorer_findings": [],
+      "synthesis_path": "",
+      "current_executor": ""
+    },
+    "verification": {
+      "last_pass": false,
+      "last_run_at": "",
+      "verified_steps": [],
+      "verified_files": []
+    },
+    "runtime": {
+      "preferred_surface": "repo-first",
+      "worktree_strategy": "isolated",
+      "last_context_path": "",
+      "last_runtime_report_path": "",
+      "last_worktree_path": ""
+    },
+    "lease": {
+      "goal": "Clean stale DD Hermes candidate truth so maintainers can trust backlog and successor selection again.",
+      "status": "idle",
+      "duration_hours": 0,
+      "started_at": "",
+      "deadline_at": "",
+      "paused_at": "",
+      "pause_reason": "",
+      "resume_after": "",
+      "resume_checkpoint": "",
+      "dispatch_cursor": ""
+    },
+    "memory": {
+      "reads": [
+        "memory/world/no-destruction-without-confirmation.md"
+      ],
+      "writes": [
+        "memory/task/dd-hermes-backlog-truth-hygiene-v1.md"
+      ],
+      "last_selected_ids": []
+    },
+    "product": {
+      "anchor": "lead",
+      "goal": "Advance DD Hermes through task dd-hermes-backlog-truth-hygiene-v1 without drifting from the current product focus.",
+      "user_value": "Let a DD Hermes maintainer trust that proposal backlog, paused experiments, and commander docs all describe the same current reality instead of stale candidate noise.",
+      "non_goals": [
+        "Do not reopen runtime/provider/gateway work.",
+        "Do not promote a new phase-2 feature mainline unless repo evidence clearly favors one.",
+        "Do not resume the paused two-expert experiment as if it were already product work."
+      ],
+      "product_acceptance": [
+        "Proposal-only and paused experiment artifacts that no longer reflect repo truth are archived or explicitly marked as absorbed.",
+        "Commander truth sources can still say `no active mainline` after candidate-pool cleanup, without leaving stale backlog ambiguity behind.",
+        "The next maintainer can tell which candidate directions are real, which are archived, and which are still experiments."
+      ],
+      "drift_risk": "This task could drift into generic documentation cleanup if it stops tightening backlog truth around stale candidates and paused experiments.",
+      "goal_status": "defined",
+      "goal_drift_flags": [],
+      "last_product_review_at": "2026-04-17T09:02:24Z",
+      "task_class": "T0",
+      "quality_requirement": "degraded-allowed",
+      "task_class_rationale": "治理/裁决/归档/trace 收口任务，不进入 execution slice。"
+    },
+    "quality": {
+      "anchor": "expert-b",
+      "review_status": "approved",
+      "review_findings": [],
+      "review_examples": [
+        "Reviewed candidate-pool cleanup: commander-doc proposal archived as absorbed, S5 archived as paused experiment, and current mainline truth remains empty."
+      ],
+      "last_review_at": "2026-04-17T09:01:17Z"
+    },
+    "textbook": {
+      "last_entry_path": "",
+      "last_summary_path": "",
+      "last_summary_at": ""
+    },
+    "notes": [
+      {
+        "timestamp": "2026-04-17T08:55:55Z",
+        "text": "anchor governance initialized",
+        "product_gate_ready": true,
+        "quality_anchor_ready": true,
+        "quality_review_ready": false,
+        "degraded_ack_ready": false
+      },
+      {
+        "timestamp": "2026-04-17T09:02:24Z",
+        "text": "archived bounded backlog truth hygiene task without creating a new feature mainline",
+        "product_gate_ready": true,
+        "quality_anchor_ready": true,
+        "quality_review_ready": true,
+        "degraded_ack_ready": true
+      },
+      {
+        "timestamp": "2026-04-17T09:02:24Z",
+        "text": "anchor governance initialized",
+        "product_gate_ready": true,
+        "quality_anchor_ready": true,
+        "quality_review_ready": true,
+        "degraded_ack_ready": true
+      }
+    ],
+    "task_id": "dd-hermes-backlog-truth-hygiene-v1",
+    "status": "done",
+    "mode": "archive",
+    "current_focus": "candidate-pool cleanup archived; backlog truth is cleaner and repo still has no active mainline",
+    "owner": "lead",
+    "experts": [
+      "expert-a"
+    ],
+    "active_expert": "",
+    "blocked_reason": "",
+    "contract_path": "/Volumes/Coding/Hermes agent for mine/workspace/contracts/dd-hermes-backlog-truth-hygiene-v1.md",
+    "handoff_paths": [
+      "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-backlog-truth-hygiene-v1-lead-to-expert-a.md",
+      "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-backlog-truth-hygiene-v1-lead-to-lead-archive.md"
+    ],
+    "exploration_paths": [
+      "/Volumes/Coding/Hermes agent for mine/workspace/exploration/exploration-lead-dd-hermes-backlog-truth-hygiene-v1.md"
+    ],
+    "openspec": {
+      "stage": "archive",
+      "proposal_path": "/Volumes/Coding/Hermes agent for mine/openspec/proposals/dd-hermes-backlog-truth-hygiene-v1.md",
+      "design_path": "/Volumes/Coding/Hermes agent for mine/openspec/designs/dd-hermes-backlog-truth-hygiene-v1.md",
+      "task_path": "/Volumes/Coding/Hermes agent for mine/openspec/tasks/dd-hermes-backlog-truth-hygiene-v1.md",
+      "archive_path": "/Volumes/Coding/Hermes agent for mine/openspec/archive/dd-hermes-backlog-truth-hygiene-v1.md"
+    },
+    "team": {
+      "supervisor_min_count": 1,
+      "supervisors": [
+        "lead"
+      ],
+      "executors": [
+        "expert-a"
+      ],
+      "skeptics": [
+        "expert-b"
+      ],
+      "product_anchors": [
+        "lead"
+      ],
+      "quality_anchors": [
+        "expert-b"
+      ],
+      "anchor_policy": {
+        "product_anchor_role": "supervisor",
+        "quality_anchor_role": "skeptic",
+        "constant_anchor_seats": true
+      },
+      "high_risk_mode": false,
+      "integration_pressure": false,
+      "scale_out_recommended": false,
+      "scale_out_triggers": [],
+      "role_integrity": {
+        "independent_skeptic": true,
+        "degraded": false,
+        "role_conflicts": [],
+        "role_overlap": {
+          "supervisor_executor_overlap": [],
+          "supervisor_skeptic_overlap": [],
+          "executor_skeptic_overlap": []
+        },
+        "degraded_ack_by": "",
+        "degraded_ack_at": ""
+      }
+    },
+    "updated_at": "2026-04-17T09:02:49Z",
+    "verdicts": {
+      "updated_at": "2026-04-17T09:02:49Z",
+      "task_policy": {
+        "status": "ready",
+        "ready": true,
+        "reasons": [],
+        "updated_at": "2026-04-17T09:02:49Z",
+        "task_class": "T0",
+        "task_class_bucket": "no-execution",
+        "quality_requirement": "degraded-allowed",
+        "quality_requirement_source": "task_class_default",
+        "manual_escalation_required": false,
+        "manual_escalation_reasons": []
+      },
+      "product_gate": {
+        "status": "ready",
+        "ready": true,
+        "reasons": [],
+        "updated_at": "2026-04-17T09:02:49Z",
+        "anchor": "lead",
+        "goal": "Advance DD Hermes through task dd-hermes-backlog-truth-hygiene-v1 without drifting from the current product focus.",
+        "goal_status": "defined"
+      },
+      "quality_anchor": {
+        "status": "ready",
+        "ready": true,
+        "reasons": [],
+        "updated_at": "2026-04-17T09:02:49Z",
+        "anchor": "expert-b"
+      },
+      "quality_review": {
+        "status": "ready",
+        "ready": true,
+        "reasons": [],
+        "updated_at": "2026-04-17T09:02:49Z",
+        "anchor": "expert-b",
+        "review_status": "approved",
+        "last_review_at": "2026-04-17T09:01:17Z"
+      },
+      "degraded_ack": {
+        "status": "not-required",
+        "ready": true,
+        "reasons": [],
+        "updated_at": "2026-04-17T09:02:49Z",
+        "required": false,
+        "ack_by": "",
+        "ack_at": ""
+      },
+      "quality_seat_execution": {
+        "status": "ready",
+        "ready": true,
+        "reasons": [],
+        "updated_at": "2026-04-17T09:02:49Z",
+        "mode": "independent"
+      },
+      "quality_seat_completion": {
+        "status": "ready",
+        "ready": true,
+        "reasons": [],
+        "updated_at": "2026-04-17T09:02:49Z",
+        "mode": "independent"
+      },
+      "execution_closeout": {
+        "status": "blocked",
+        "ready": false,
+        "reasons": [
+          "execution_commit_missing",
+          "quality_review_status_pending",
+          "quality_findings_summary_incomplete"
+        ],
+        "updated_at": "2026-04-17T09:02:49Z",
+        "closeout_path": "/Volumes/Coding/Hermes agent for mine/workspace/closeouts/dd-hermes-backlog-truth-hygiene-v1-expert-a.md",
+        "selected_by": "single_match",
+        "candidate_count": 1,
+        "semantic_valid": false,
+        "ready_for_execution_slice_done": false,
+        "execution_commit": "",
+        "quality_review_status": "pending",
+        "verified_step_count": 1,
+        "verified_file_count": 1,
+        "quality_findings_count": 1
+      }
+    }
+  },
+  "memory": {
+    "matches": [
+      {
+        "memory_id": "no-destruction-without-confirmation",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/world/no-destruction-without-confirmation.md",
+        "score": 122.0,
+        "token_score": 7,
+        "confidence": 1.0,
+        "recency_bonus": 5.0,
+        "type": "constraint",
+        "status": "active"
+      },
+      {
+        "memory_id": "user-pref-no-manual-generator-commands",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/user/user-pref-no-manual-generator-commands.md",
+        "score": 41.0,
+        "token_score": 26,
+        "confidence": 1.0,
+        "recency_bonus": 5.0,
+        "type": "preference",
+        "status": "active"
+      },
+      {
+        "memory_id": "dd-hermes-multi-agent-dispatch",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/dd-hermes-multi-agent-dispatch.md",
+        "score": 40.0,
+        "token_score": 26,
+        "confidence": 0.9,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "dd-hermes-endpoint-router-v1",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/dd-hermes-endpoint-router-v1.md",
+        "score": 38.0,
+        "token_score": 24,
+        "confidence": 0.9,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "dd-hermes-experience-demo-v1",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/dd-hermes-experience-demo-v1.md",
+        "score": 37.5,
+        "token_score": 23,
+        "confidence": 0.95,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "dd-hermes-demo-entry-v1",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/dd-hermes-demo-entry-v1.md",
+        "score": 35.5,
+        "token_score": 21,
+        "confidence": 0.95,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "worktree-first",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/worktree-first.md",
+        "score": 30.0,
+        "token_score": 15,
+        "confidence": 1.0,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "tool-selection-drift",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/self/tool-selection-drift.md",
+        "score": 28.5,
+        "token_score": 17,
+        "confidence": 0.65,
+        "recency_bonus": 5.0,
+        "type": "belief",
+        "status": "active"
+      }
+    ],
+    "scored_candidates": [
+      {
+        "memory_id": "no-destruction-without-confirmation",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/world/no-destruction-without-confirmation.md",
+        "score": 122.0,
+        "token_score": 7,
+        "confidence": 1.0,
+        "recency_bonus": 5.0,
+        "type": "constraint",
+        "status": "active"
+      },
+      {
+        "memory_id": "user-pref-no-manual-generator-commands",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/user/user-pref-no-manual-generator-commands.md",
+        "score": 41.0,
+        "token_score": 26,
+        "confidence": 1.0,
+        "recency_bonus": 5.0,
+        "type": "preference",
+        "status": "active"
+      },
+      {
+        "memory_id": "dd-hermes-multi-agent-dispatch",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/dd-hermes-multi-agent-dispatch.md",
+        "score": 40.0,
+        "token_score": 26,
+        "confidence": 0.9,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "dd-hermes-endpoint-router-v1",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/dd-hermes-endpoint-router-v1.md",
+        "score": 38.0,
+        "token_score": 24,
+        "confidence": 0.9,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "dd-hermes-experience-demo-v1",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/dd-hermes-experience-demo-v1.md",
+        "score": 37.5,
+        "token_score": 23,
+        "confidence": 0.95,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "dd-hermes-demo-entry-v1",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/dd-hermes-demo-entry-v1.md",
+        "score": 35.5,
+        "token_score": 21,
+        "confidence": 0.95,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "worktree-first",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/worktree-first.md",
+        "score": 30.0,
+        "token_score": 15,
+        "confidence": 1.0,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "tool-selection-drift",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/self/tool-selection-drift.md",
+        "score": 28.5,
+        "token_score": 17,
+        "confidence": 0.65,
+        "recency_bonus": 5.0,
+        "type": "belief",
+        "status": "active"
+      },
+      {
+        "memory_id": "plotly-preference",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/user/plotly-preference.md",
+        "score": 26.0,
+        "token_score": 13,
+        "confidence": 0.8,
+        "recency_bonus": 5.0,
+        "type": "belief",
+        "status": "active"
+      },
+      {
+        "memory_id": "user-pref-single-command-thread",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/user/user-pref-single-command-thread.md",
+        "score": 18.0,
+        "token_score": 3,
+        "confidence": 1.0,
+        "recency_bonus": 5.0,
+        "type": "preference",
+        "status": "active"
+      }
+    ],
+    "conflicts": [],
+    "expired": [],
+    "explanation": "constraint-first lexical match weighted by confidence and recency"
+  },
+  "discussion": {
+    "policy": "direct",
+    "decision_id": "",
+    "explorer_queue": [],
+    "explorer_findings": [],
+    "synthesis_path": "",
+    "current_executor": ""
+  },
+  "product": {
+    "anchor": "lead",
+    "goal": "Advance DD Hermes through task dd-hermes-backlog-truth-hygiene-v1 without drifting from the current product focus.",
+    "user_value": "Let a DD Hermes maintainer trust that proposal backlog, paused experiments, and commander docs all describe the same current reality instead of stale candidate noise.",
+    "non_goals": [
+      "Do not reopen runtime/provider/gateway work.",
+      "Do not promote a new phase-2 feature mainline unless repo evidence clearly favors one.",
+      "Do not resume the paused two-expert experiment as if it were already product work."
+    ],
+    "product_acceptance": [
+      "Proposal-only and paused experiment artifacts that no longer reflect repo truth are archived or explicitly marked as absorbed.",
+      "Commander truth sources can still say `no active mainline` after candidate-pool cleanup, without leaving stale backlog ambiguity behind.",
+      "The next maintainer can tell which candidate directions are real, which are archived, and which are still experiments."
+    ],
+    "drift_risk": "This task could drift into generic documentation cleanup if it stops tightening backlog truth around stale candidates and paused experiments.",
+    "goal_status": "defined",
+    "goal_drift_flags": [],
+    "last_product_review_at": "2026-04-17T09:02:24Z",
+    "task_class": "T0",
+    "quality_requirement": "degraded-allowed",
+    "task_class_rationale": "治理/裁决/归档/trace 收口任务，不进入 execution slice。"
+  },
+  "quality": {
+    "anchor": "expert-b",
+    "review_status": "approved",
+    "review_findings": [],
+    "review_examples": [
+      "Reviewed candidate-pool cleanup: commander-doc proposal archived as absorbed, S5 archived as paused experiment, and current mainline truth remains empty."
+    ],
+    "last_review_at": "2026-04-17T09:01:17Z"
+  },
+  "continuation": {
+    "goal": "Advance DD Hermes through task dd-hermes-backlog-truth-hygiene-v1 without drifting from the current product focus.",
+    "lease": {
+      "goal": "Clean stale DD Hermes candidate truth so maintainers can trust backlog and successor selection again.",
+      "status": "idle",
+      "duration_hours": 0,
+      "started_at": "",
+      "deadline_at": "",
+      "paused_at": "",
+      "pause_reason": "",
+      "resume_after": "",
+      "resume_checkpoint": "",
+      "dispatch_cursor": ""
+    },
+    "current_focus": "candidate-pool cleanup archived; backlog truth is cleaner and repo still has no active mainline",
+    "active_expert": "",
+    "blocked_reason": "",
+    "current_executor": ""
+  },
+  "documents": {
+    "contract": {
+      "path": "/Volumes/Coding/Hermes agent for mine/workspace/contracts/dd-hermes-backlog-truth-hygiene-v1.md",
+      "text": "---\nschema_version: 2\ntask_id: dd-hermes-backlog-truth-hygiene-v1\nowner: lead\nexperts:\n  - expert-a\nproduct_goal: Advance DD Hermes through task dd-hermes-backlog-truth-hygiene-v1 without drifting from the current product focus.\nuser_value: Let a DD Hermes maintainer trust that proposal backlog, paused experiments, and commander docs all describe the same current reality instead of stale candidate noise.\ntask_class: T0\nquality_requirement: degraded-allowed\ntask_class_rationale: 治理/裁决/归档/trace 收口任务，不进入 execution slice。\nnon_goals:\n  - Do not reopen runtime/provider/gateway work.\n  - Do not promote a new phase-2 feature mainline unless repo evidence clearly favors one.\n  - Do not resume the paused two-expert experiment as if it were already product work.\nproduct_acceptance:\n  - Proposal-only and paused experiment artifacts that no longer reflect repo truth are archived or explicitly marked as absorbed.\n  - Commander truth sources can still say `no active mainline` after candidate-pool cleanup, without leaving stale backlog ambiguity behind.\n  - The next maintainer can tell which candidate directions are real, which are archived, and which are still experiments.\ndrift_risk: This task could drift into generic documentation cleanup if it stops tightening backlog truth around stale candidates and paused experiments.\nacceptance:\n  - Complete the bounded backlog-truth cleanup with runnable verification.\nblocked_if:\n  - Missing repo facts or missing verification.\nmemory_reads:\n  - memory/world/no-destruction-without-confirmation.md\nmemory_writes:\n  - memory/task/dd-hermes-backlog-truth-hygiene-v1.md\n---\n\n# Sprint Contract\n\n## Context\n\n`dd-hermes-explicit-gate-verdicts-v1` is archived, and the repo truth now says there is no active phase-2 mainline. Two stale artifacts still blur that truth: `dd-hermes-commander-doc-consolidation-v1` already appears completed in the docs surface but remains proposal-only, and `dd-hermes-s5-2expert-20260416` is a paused experiment whose state still reads like an unfinished execution task.\n\n## Scope\n\n- In scope:\n  - Archive `dd-hermes-commander-doc-consolidation-v1` as absorbed docs work.\n  - Archive `dd-hermes-s5-2expert-20260416` as a paused experiment that produced bootstrap evidence but no execution slice.\n  - Update task-triage truth so maintainers can see that candidate-pool hygiene was completed without fabricating a new feature mainline.\n- Out of scope:\n  - Any new runtime, provider, endpoint, or routing feature.\n  - Resuming the two-expert experiment.\n  - Creating a new phase-2 feature mainline before repo evidence clearly favors one.\n\n## Required Fields\n\n- `task_id`\n- `owner`\n- `experts`\n- `product_goal`\n- `user_value`\n- `task_class`\n- `quality_requirement`\n- `task_class_rationale`\n- `non_goals`\n- `product_acceptance`\n- `drift_risk`\n- `acceptance`\n- `blocked_if`\n- `memory_reads`\n- `memory_writes`\n\n## Acceptance\n\n- `openspec/archive/dd-hermes-commander-doc-consolidation-v1.md` truthfully records that the docs-consolidation proposal was absorbed by the current command-doc layout.\n- `dd-hermes-s5-2expert-20260416` no longer presents itself as an active execution task; its archive trail and state describe a paused experiment with no claimed execution slice.\n- `指挥文档/04-任务重校准与线程策略.md` records that candidate-pool hygiene is complete while `current_mainline_task_id` still remains empty.\n\n## Product Gate\n\n- The only user-visible outcome is cleaner repo truth: a maintainer should stop mistaking absorbed proposals and paused experiments for live successor candidates.\n- This task is `T0` governance work; it must not mutate into a hidden feature sprint.\n- If the slice starts inventing a new mainline instead of cleaning stale candidate truth, stop and recalibrate.\n\n## Verification\n\n- Commands:\n  - `./scripts/test-workflow.sh --task-id dd-hermes-backlog-truth-hygiene-v1`\n  - `./scripts/test-workflow.sh --task-id dd-hermes-s5-2expert-20260416`\n  - `./scripts/state-read.sh --task-id dd-hermes-s5-2expert-20260416`\n  - `./scripts/demo-entry.sh`\n- User-visible proof: archived/absorbed candidates are explicitly marked as such, and the commander docs still truthfully show no active mainline.\n\n## Open Questions\n\n- After stale candidate cleanup, which next bounded DD Hermes task actually has enough repo evidence to become the real successor mainline?\n"
+    },
+    "handoffs": [
+      {
+        "path": "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-backlog-truth-hygiene-v1-lead-to-expert-a.md",
+        "text": "---\nschema_version: 2\nfrom: lead\nto: expert-a\nscope: dd-hermes-backlog-truth-hygiene-v1 backlog truth cleanup slice\nproduct_rationale: This slice removes stale candidate ambiguity so maintainers stop treating absorbed docs work and paused experiments as live successor tasks.\ngoal_drift_risk: The slice could drift into generic cleanup if it stops tightening candidate-pool truth around specific stale artifacts.\nuser_visible_outcome: A maintainer can see which backlog items are absorbed, which are archived experiments, and that there is still no active mainline.\nfiles:\n  - workspace/contracts/dd-hermes-backlog-truth-hygiene-v1.md\n  - openspec/proposals/dd-hermes-backlog-truth-hygiene-v1.md\n  - workspace/state/dd-hermes-backlog-truth-hygiene-v1/state.json\n  - openspec/proposals/dd-hermes-commander-doc-consolidation-v1.md\n  - openspec/proposals/dd-hermes-s5-2expert-20260416.md\ndecisions:\n  - Archive absorbed docs work instead of pretending proposal-only means still pending.\n  - Archive the paused two-expert experiment as an experiment, not as a failed or unfinished mainline.\nrisks:\n  - Do not fabricate a new successor mainline just because the candidate pool is being cleaned.\n  - Do not resume or integrate the paused experiment while doing archive cleanup.\nnext_checks:\n  - Verify that commander docs still say `no active mainline` after the stale candidates are archived.\n  - Re-run the experiment workflow/state checks so the archive claim points to real evidence.\n---\n\n# Lead Handoff\n\n## Context\n\nThis handoff scopes a bounded governance slice: clean stale candidate truth around absorbed docs work and a paused two-expert experiment, without promoting any new feature mainline.\n\n## Required Fields\n\n- `from`\n- `to`\n- `scope`\n- `product_rationale`\n- `goal_drift_risk`\n- `user_visible_outcome`\n- `files`\n- `decisions`\n- `risks`\n- `next_checks`\n\n## Acceptance\n\n- Keep the cleanup task-bound and evidence-backed; do not let it drift into a hidden feature sprint.\n\n## Product Check\n\n- Confirm the slice improves maintainer-visible backlog truth and still leaves `current_mainline_task_id` empty.\n\n## Verification\n\n- `./scripts/test-workflow.sh --task-id dd-hermes-backlog-truth-hygiene-v1`\n- `./scripts/test-workflow.sh --task-id dd-hermes-s5-2expert-20260416`\n- `./scripts/state-read.sh --task-id dd-hermes-s5-2expert-20260416`\n- `./scripts/demo-entry.sh`\n\n## Open Questions\n\n- Once stale candidates are cleaned, does any real successor mainline remain clearly favored by repo evidence?\n"
+      },
+      {
+        "path": "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-backlog-truth-hygiene-v1-lead-to-lead-archive.md",
+        "text": "---\nschema_version: 2\nfrom: lead\nto: lead\nscope: archive checkpoint for dd-hermes-backlog-truth-hygiene-v1 candidate-pool cleanup\nproduct_rationale: Keep the repo backlog honest so maintainers do not mistake absorbed proposals or paused experiments for real successor mainlines.\ngoal_drift_risk: The repo would drift if backlog cleanup silently turned into a fake feature mainline or left stale candidates looking live.\nuser_visible_outcome: The candidate pool is cleaner, but DD Hermes still truthfully reports that there is no active mainline.\nfiles:\n  - workspace/contracts/dd-hermes-backlog-truth-hygiene-v1.md\n  - openspec/proposals/dd-hermes-backlog-truth-hygiene-v1.md\n  - openspec/designs/dd-hermes-backlog-truth-hygiene-v1.md\n  - openspec/tasks/dd-hermes-backlog-truth-hygiene-v1.md\n  - openspec/archive/dd-hermes-backlog-truth-hygiene-v1.md\n  - openspec/archive/dd-hermes-commander-doc-consolidation-v1.md\n  - openspec/archive/dd-hermes-s5-2expert-20260416.md\n  - workspace/handoffs/dd-hermes-s5-2expert-20260416-lead-to-lead-archive.md\n  - workspace/state/dd-hermes-backlog-truth-hygiene-v1/state.json\n  - 指挥文档/04-任务重校准与线程策略.md\ndecisions:\n  - Clean stale candidate truth before promoting any new successor mainline.\n  - Keep `current_mainline_task_id` empty after cleanup because no new feature slice is clearly favored yet.\nrisks:\n  - This checkpoint does not reduce the remaining successor-selection ambiguity to one winning task.\n  - Future maintainers may still need a fresh triage task if multiple new candidates emerge.\nnext_checks:\n  - Use the cleaned candidate pool as the baseline for the next real successor decision.\n  - Do not relabel this governance cleanup as the latest feature proof.\n---\n\n# Lead Handoff\n\n## Context\n\nThis handoff records the archive checkpoint for candidate-pool cleanup. The task is done once stale candidate truth is removed and the repo remains honest about having no active mainline.\n\n## Required Fields\n\n- `from`\n- `to`\n- `scope`\n- `product_rationale`\n- `goal_drift_risk`\n- `user_visible_outcome`\n- `files`\n- `decisions`\n- `risks`\n- `next_checks`\n\n## Acceptance\n\n- Candidate-pool truth is cleaner.\n- The repo still says `no active mainline`.\n\n## Product Check\n\n- Confirm the cleanup improved maintainer trust without inventing a successor.\n\n## Verification\n\n- `./scripts/test-workflow.sh --task-id dd-hermes-backlog-truth-hygiene-v1` -> pass\n- `./scripts/demo-entry.sh` -> still reports no active mainline\n\n## Open Questions\n\n- Which next bounded DD Hermes task now has enough repo evidence to become the true successor mainline?\n"
+      }
+    ],
+    "exploration": [
+      {
+        "path": "/Volumes/Coding/Hermes agent for mine/workspace/exploration/exploration-lead-dd-hermes-backlog-truth-hygiene-v1.md",
+        "text": "# Exploration Log\n\n## Context\n\n- Task: dd-hermes-backlog-truth-hygiene-v1\n- Role: lead\n- Goal: decide whether stale candidate artifacts should be archived or kept as live successor candidates.\n\n## Facts\n\n- `指挥文档/04-任务重校准与线程策略.md` and `./scripts/demo-entry.sh` both say there is currently no active mainline.\n- `openspec/proposals/dd-hermes-commander-doc-consolidation-v1.md` is proposal-only, but its acceptance is already reflected by the current `指挥文档/` layout: the directory has `7` Markdown files and `README.md` gives a single reading order.\n- `workspace/state/dd-hermes-s5-2expert-20260416/state.json` still says `status=in_progress` and `mode=execution`, while the same state also shows `lease.status=paused`.\n- `./scripts/test-workflow.sh --task-id dd-hermes-s5-2expert-20260416` passes, but `./scripts/dispatch-create.sh --task-id dd-hermes-s5-2expert-20260416` is now blocked by missing product/anchor truth, so the experiment is not a resumable mainline slice in its current form.\n- `openspec/proposals/dd-hermes-explicit-gate-verdicts-v1.md` and its archive explicitly rejected promoting the paused two-expert experiment into the mainline.\n\n## Hypotheses\n\n- The strongest current maintainer-visible gap is not a new feature slice, but stale candidate truth.\n- `dd-hermes-commander-doc-consolidation-v1` should be archived as absorbed work.\n- `dd-hermes-s5-2expert-20260416` should be archived as a paused experiment with bootstrap evidence but no execution slice claim.\n\n## Evidence\n\n- `openspec/proposals/dd-hermes-commander-doc-consolidation-v1.md`\n- `openspec/proposals/dd-hermes-s5-2expert-20260416.md`\n- `workspace/state/dd-hermes-s5-2expert-20260416/state.json`\n- `workspace/handoffs/dd-hermes-s5-2expert-20260416-lead-to-lead-separation.md`\n- `workspace/closeouts/dd-hermes-s5-2expert-20260416-expert-a.md`\n- `workspace/closeouts/dd-hermes-s5-2expert-20260416-expert-b.md`\n- `指挥文档/04-任务重校准与线程策略.md`\n- `指挥文档/06-一期PhaseDone审计.md`\n- `./scripts/demo-entry.sh`\n- `./scripts/test-workflow.sh --task-id dd-hermes-s5-2expert-20260416`\n- `./scripts/dispatch-create.sh --task-id dd-hermes-s5-2expert-20260416`\n\n## Acceptance\n\n- There is no lingering artifact that makes maintainers misread absorbed docs work or paused experiments as live successor candidates.\n\n## Verification\n\n- `./scripts/test-workflow.sh --task-id dd-hermes-backlog-truth-hygiene-v1`\n- `./scripts/test-workflow.sh --task-id dd-hermes-s5-2expert-20260416`\n- `./scripts/state-read.sh --task-id dd-hermes-s5-2expert-20260416`\n- `./scripts/demo-entry.sh`\n\n## Open Questions\n\n- Which real maintainer-visible gap remains once stale candidate truth is cleaned?\n"
+      }
+    ],
+    "openspec": {
+      "proposal": {
+        "path": "/Volumes/Coding/Hermes agent for mine/openspec/proposals/dd-hermes-backlog-truth-hygiene-v1.md",
+        "text": "---\nstatus: proposed\nowner: lead\nscope: dd-hermes-backlog-truth-hygiene-v1\ndecision_log:\n  - Treat stale candidate truth as the next bounded governance task instead of forcing a feature successor.\nchecks:\n  - scripts/test-workflow.sh --task-id dd-hermes-backlog-truth-hygiene-v1\nlinks:\n  - workspace/contracts/dd-hermes-backlog-truth-hygiene-v1.md\n  - workspace/exploration/exploration-lead-dd-hermes-backlog-truth-hygiene-v1.md\n  - openspec/proposals/dd-hermes-commander-doc-consolidation-v1.md\n  - openspec/proposals/dd-hermes-s5-2expert-20260416.md\n---\n\n# Proposal\n\n## What\n\nArchive absorbed or paused candidate artifacts so the DD Hermes backlog tells the truth about what is still live.\n\n## Why\n\nThe repo now truthfully says there is no active mainline, but two stale artifacts still muddy that claim: one docs-consolidation proposal is effectively finished yet unarchived, and one two-expert experiment still looks like an unfinished execution task even though it was deliberately paused.\n\n## Non-goals\n\n- Runtime/provider/gateway work.\n- Resuming the paused two-expert experiment.\n- Promoting a new successor mainline before evidence clearly favors one.\n\n## Acceptance\n\n- `dd-hermes-commander-doc-consolidation-v1` is archived as absorbed docs work.\n- `dd-hermes-s5-2expert-20260416` is archived as a paused experiment, not left in a misleading execution state.\n- Commander triage docs remain honest that there is still no active mainline.\n\n## Verification\n\n- Run `./scripts/test-workflow.sh --task-id dd-hermes-backlog-truth-hygiene-v1`.\n- Run `./scripts/test-workflow.sh --task-id dd-hermes-s5-2expert-20260416`.\n- Run `./scripts/state-read.sh --task-id dd-hermes-s5-2expert-20260416`.\n- Run `./scripts/demo-entry.sh`.\n"
+      },
+      "design": {
+        "path": "/Volumes/Coding/Hermes agent for mine/openspec/designs/dd-hermes-backlog-truth-hygiene-v1.md",
+        "text": "---\nstatus: design\nowner: lead\nscope: dd-hermes-backlog-truth-hygiene-v1\ndecision_log:\n  - Treat stale candidate truth as a bounded governance slice instead of promoting a new feature mainline.\n  - Prefer archive notes and state corrections over deleting historical evidence.\nchecks:\n  - ./scripts/test-workflow.sh --task-id dd-hermes-backlog-truth-hygiene-v1\n  - ./scripts/state-read.sh --task-id dd-hermes-s5-2expert-20260416\n  - ./scripts/demo-entry.sh\nlinks:\n  - workspace/contracts/dd-hermes-backlog-truth-hygiene-v1.md\n  - openspec/proposals/dd-hermes-commander-doc-consolidation-v1.md\n  - openspec/proposals/dd-hermes-s5-2expert-20260416.md\n  - 指挥文档/04-任务重校准与线程策略.md\n---\n\n# Design\n\n## Summary\n\nClose stale candidate ambiguity by archiving one absorbed docs proposal and one paused experiment, then refresh the commander truth source so maintainers can trust the candidate pool without inventing a successor mainline.\n\n## Interfaces\n\n- `openspec/archive/dd-hermes-commander-doc-consolidation-v1.md`\n  - New archive note marking the docs proposal as absorbed by the current `指挥文档/` surface.\n- `openspec/archive/dd-hermes-s5-2expert-20260416.md`\n  - New archive note marking S5 as a paused experiment with bootstrap evidence only.\n- `workspace/handoffs/dd-hermes-s5-2expert-20260416-lead-to-lead-archive.md`\n  - Archive checkpoint linking experiment evidence to its final frozen state.\n- `workspace/state/dd-hermes-s5-2expert-20260416/state.json`\n  - Update status/mode/archive fields so the experiment no longer presents itself as a live execution task.\n- `指挥文档/04-任务重校准与线程策略.md`\n  - Refresh the candidate-pool narrative: stale candidates were cleaned, but no new mainline was chosen.\n\n## Data Flow\n\n1. Read current candidate evidence from proposals, archived proof tasks, and paused experiment state.\n2. Separate absorbed work from true still-open candidates.\n3. Write archive notes for the absorbed docs proposal and paused experiment.\n4. Refresh the paused experiment state so its runtime truth matches the archive.\n5. Update task-triage docs to reflect the cleaned candidate pool while keeping `no active mainline` truth.\n\n## Edge Cases\n\n- `dd-hermes-s5-2expert-20260416` should not suddenly claim an execution slice; its closeouts remain placeholders and the archive must say so explicitly.\n- `dd-hermes-commander-doc-consolidation-v1` has no task state; its archive must therefore describe absorption into current docs rather than a full task lifecycle.\n- Cleaning the candidate pool must not change `latest_proof_task_id`; the latest phase-2 proof remains `dd-hermes-explicit-gate-verdicts-v1`.\n\n## Acceptance\n\n- Stale absorbed/proposal-only artifacts are no longer indistinguishable from live successor candidates.\n- The paused S5 experiment no longer reads like an unfinished mainline execution task.\n- Commander docs still honestly report that there is no active mainline after cleanup.\n\n## Verification\n\n- `./scripts/test-workflow.sh --task-id dd-hermes-backlog-truth-hygiene-v1`\n- `./scripts/test-workflow.sh --task-id dd-hermes-s5-2expert-20260416`\n- `./scripts/state-read.sh --task-id dd-hermes-s5-2expert-20260416`\n- `./scripts/demo-entry.sh`\n"
+      },
+      "task": {
+        "path": "/Volumes/Coding/Hermes agent for mine/openspec/tasks/dd-hermes-backlog-truth-hygiene-v1.md",
+        "text": "---\nstatus: active\nowner: lead\nscope: dd-hermes-backlog-truth-hygiene-v1\ndecision_log:\n  - Clean stale candidate truth before attempting another successor selection.\nchecks:\n  - ./scripts/test-workflow.sh --task-id dd-hermes-backlog-truth-hygiene-v1\n  - ./scripts/test-workflow.sh --task-id dd-hermes-s5-2expert-20260416\n  - ./scripts/state-read.sh --task-id dd-hermes-s5-2expert-20260416\n  - ./scripts/demo-entry.sh\nlinks:\n  - openspec/designs/dd-hermes-backlog-truth-hygiene-v1.md\n  - openspec/archive/dd-hermes-explicit-gate-verdicts-v1.md\n  - openspec/proposals/dd-hermes-commander-doc-consolidation-v1.md\n  - openspec/proposals/dd-hermes-s5-2expert-20260416.md\n---\n\n# Task\n\n## Steps\n\n1. Archive `dd-hermes-commander-doc-consolidation-v1` as absorbed docs work.\n2. Archive `dd-hermes-s5-2expert-20260416` as a paused experiment and refresh its state accordingly.\n3. Update candidate-pool truth in `指挥文档/04-任务重校准与线程策略.md`.\n4. Verify the cleanup without changing `latest_proof_task_id` or inventing a successor mainline.\n\n## Dependencies\n\n- `workspace/contracts/dd-hermes-backlog-truth-hygiene-v1.md`\n- `openspec/archive/dd-hermes-explicit-gate-verdicts-v1.md`\n- `workspace/state/dd-hermes-s5-2expert-20260416/state.json`\n\n## Done Definition\n\n- A maintainer can distinguish archived absorbed work, archived experiments, and real future candidates without reading chat history.\n- The repo still truthfully says there is no active mainline.\n\n## Acceptance\n\n- The task stays bounded to backlog/candidate truth cleanup.\n- No new feature mainline is fabricated during cleanup.\n- Archived evidence remains readable and linked.\n\n## Verification\n\n- `./scripts/test-workflow.sh --task-id dd-hermes-backlog-truth-hygiene-v1`\n- `./scripts/test-workflow.sh --task-id dd-hermes-s5-2expert-20260416`\n- `./scripts/state-read.sh --task-id dd-hermes-s5-2expert-20260416`\n- `./scripts/demo-entry.sh`\n"
+      },
+      "archive": {
+        "path": "/Volumes/Coding/Hermes agent for mine/openspec/archive/dd-hermes-backlog-truth-hygiene-v1.md",
+        "text": "---\nstatus: archived\nowner: lead\nscope: dd-hermes-backlog-truth-hygiene-v1\ndecision_log:\n  - Treat stale candidate truth as a bounded governance task instead of promoting a new feature mainline.\n  - Archive absorbed docs work and the paused two-expert experiment, then return the repo to an honest `no active mainline` state.\nchecks:\n  - ./scripts/test-workflow.sh --task-id dd-hermes-backlog-truth-hygiene-v1\n  - ./scripts/test-workflow.sh --task-id dd-hermes-s5-2expert-20260416\n  - ./scripts/state-read.sh --task-id dd-hermes-s5-2expert-20260416\n  - ./scripts/demo-entry.sh\nlinks:\n  - workspace/contracts/dd-hermes-backlog-truth-hygiene-v1.md\n  - workspace/handoffs/dd-hermes-backlog-truth-hygiene-v1-lead-to-expert-a.md\n  - workspace/handoffs/dd-hermes-backlog-truth-hygiene-v1-lead-to-lead-archive.md\n  - workspace/exploration/exploration-lead-dd-hermes-backlog-truth-hygiene-v1.md\n  - workspace/state/dd-hermes-backlog-truth-hygiene-v1/state.json\n  - openspec/archive/dd-hermes-commander-doc-consolidation-v1.md\n  - openspec/archive/dd-hermes-s5-2expert-20260416.md\n  - workspace/handoffs/dd-hermes-s5-2expert-20260416-lead-to-lead-archive.md\n  - 指挥文档/04-任务重校准与线程策略.md\n---\n\n# Archive\n\n## Result\n\n`dd-hermes-backlog-truth-hygiene-v1` closes a bounded governance slice: the repo candidate pool no longer confuses maintainers with an absorbed docs proposal or a paused experiment that still looks like live execution.\n\n## Deviations\n\n- This task does not choose a new phase-2 feature mainline.\n- The latest phase-2 proof task remains `dd-hermes-explicit-gate-verdicts-v1`; this archive only cleans backlog truth around candidate selection.\n\n## Risks\n\n- Cleaning stale candidate truth does not itself answer what the next real successor mainline should be.\n- Future candidate drift should happen under a new task id, not by reopening this governance cleanup.\n\n## Acceptance\n\n- Absorbed docs work is archived as absorbed, not left as a live proposal.\n- The paused two-expert experiment is archived as bootstrap/dispatch evidence, not left as a fake active execution task.\n- Commander triage still honestly says there is no active mainline.\n\n## Verification\n\n- `./scripts/test-workflow.sh --task-id dd-hermes-backlog-truth-hygiene-v1`\n- `./scripts/test-workflow.sh --task-id dd-hermes-s5-2expert-20260416`\n- `./scripts/state-read.sh --task-id dd-hermes-s5-2expert-20260416`\n- `./scripts/demo-entry.sh`\n"
+      }
+    }
+  },
+  "context_summary": {
+    "memory_ids": [
+      "no-destruction-without-confirmation",
+      "user-pref-no-manual-generator-commands",
+      "dd-hermes-multi-agent-dispatch",
+      "dd-hermes-endpoint-router-v1",
+      "dd-hermes-experience-demo-v1",
+      "dd-hermes-demo-entry-v1",
+      "worktree-first",
+      "tool-selection-drift"
+    ],
+    "handoff_count": 2,
+    "exploration_count": 1,
+    "has_design": true,
+    "has_task": true,
+    "lease_status": "idle",
+    "resume_checkpoint": "",
+    "discussion_policy": "direct",
+    "decision_id": "",
+    "runtime_generated_at": "2026-04-17T09:02:49Z",
+    "runtime_stale_warning": "",
+    "supervisor_count": 1,
+    "product_anchor_count": 1,
+    "quality_anchor_count": 1,
+    "product_anchor_name": "lead",
+    "product_anchor_role": "supervisor",
+    "quality_anchor_name": "expert-b",
+    "quality_anchor_role": "skeptic",
+    "product_goal": "Advance DD Hermes through task dd-hermes-backlog-truth-hygiene-v1 without drifting from the current product focus.",
+    "product_goal_status": "defined",
+    "goal_drift_flags": [],
+    "quality_review_status": "approved",
+    "independent_skeptic": true,
+    "role_integrity_degraded": false,
+    "role_conflicts": [],
+    "scale_out_recommended": false,
+    "scale_out_triggers": [],
+    "degraded_ack_required": false,
+    "degraded_ack_ready": true,
+    "degraded_ack_status": "not-required",
+    "degraded_ack_by": "",
+    "degraded_ack_at": "",
+    "product_user_value": "Let a DD Hermes maintainer trust that proposal backlog, paused experiments, and commander docs all describe the same current reality instead of stale candidate noise.",
+    "product_non_goals": [
+      "Do not reopen runtime/provider/gateway work.",
+      "Do not promote a new phase-2 feature mainline unless repo evidence clearly favors one.",
+      "Do not resume the paused two-expert experiment as if it were already product work."
+    ],
+    "product_acceptance": [
+      "Proposal-only and paused experiment artifacts that no longer reflect repo truth are archived or explicitly marked as absorbed.",
+      "Commander truth sources can still say `no active mainline` after candidate-pool cleanup, without leaving stale backlog ambiguity behind.",
+      "The next maintainer can tell which candidate directions are real, which are archived, and which are still experiments."
+    ],
+    "product_drift_risk": "This task could drift into generic documentation cleanup if it stops tightening backlog truth around stale candidates and paused experiments.",
+    "task_class": "T0",
+    "task_class_bucket": "no-execution",
+    "task_class_rationale": "治理/裁决/归档/trace 收口任务，不进入 execution slice。",
+    "quality_requirement": "degraded-allowed",
+    "quality_requirement_source": "task_class_default",
+    "quality_requirement_ready": true,
+    "quality_requirement_reasons": [],
+    "task_policy_status": "ready",
+    "manual_escalation_required": false,
+    "manual_escalation_reasons": [],
+    "product_gate_ready": true,
+    "product_gate_reasons": [],
+    "product_gate_status": "ready",
+    "quality_anchor_ready": true,
+    "quality_anchor_reasons": [],
+    "quality_anchor_status": "ready",
+    "quality_review_ready": true,
+    "quality_review_reasons": [],
+    "quality_review_gate_status": "ready",
+    "quality_seat_mode": "independent",
+    "quality_seat_ready": true,
+    "quality_seat_status": "ready",
+    "quality_seat_reasons": [],
+    "quality_seat_completion_ready": true,
+    "quality_seat_completion_status": "ready",
+    "quality_seat_completion_reasons": [],
+    "execution_closeout_ready": false,
+    "execution_closeout_status": "blocked",
+    "execution_closeout_reasons": [
+      "execution_commit_missing",
+      "quality_review_status_pending",
+      "quality_findings_summary_incomplete"
+    ],
+    "execution_closeout_path": "/Volumes/Coding/Hermes agent for mine/workspace/closeouts/dd-hermes-backlog-truth-hygiene-v1-expert-a.md",
+    "execution_closeout_selected_by": "single_match",
+    "execution_closeout_candidate_count": 1,
+    "execution_closeout_semantic_valid": false,
+    "ready_for_execution_slice_done": false,
+    "verdicts_updated_at": "2026-04-17T09:02:49Z",
+    "quality_review_findings": [],
+    "quality_review_examples": [
+      "Reviewed candidate-pool cleanup: commander-doc proposal archived as absorbed, S5 archived as paused experiment, and current mainline truth remains empty."
+    ],
+    "anchor_policy": {
+      "product_anchor_role": "supervisor",
+      "quality_anchor_role": "skeptic",
+      "constant_anchor_seats": true
+    }
+  }
+}

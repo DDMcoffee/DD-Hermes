@@ -1,0 +1,66 @@
+{
+  "task_id": "dd-hermes-github-v1-release",
+  "status": "done",
+  "mode": "closeout",
+  "updated_at": "2026-04-22T09:15:00-07:00",
+  "contract_path": "workspace/contracts/dd-hermes-github-v1-release.md",
+  "product": {
+    "goal": "Package DD Hermes as a GitHub-publishable V1 repository with public-facing docs, MIT licensing, and release assets.",
+    "user_value": "A first-time GitHub reader can understand what DD Hermes is, how to start, and how to validate it without relying on chat history.",
+    "non_goals": [
+      "Do not publish V2 drafts as part of the V1 promise.",
+      "Do not include unrelated worktree changes.",
+      "Do not hardcode live runtime truth into the landing page."
+    ]
+  },
+  "quality": {
+    "review_status": "approved",
+    "review_findings": [
+      "The public landing surface is now English-first while preserving deeper Chinese operational materials where needed.",
+      "MIT licensing, contributor guidance, quickstart documentation, and both long and short release assets are present as a coherent public package.",
+      "The V1 publish scope remains bounded and excludes unrelated mixed-worktree changes while restoring the missing no-execution state fixtures required by schema smoke."
+    ]
+  },
+  "verification": {
+    "planned_steps": [
+      "bash tests/smoke.sh schema",
+      "./scripts/demo-entry.sh",
+      "rg -n '/Volumes|file://' README.md CONTRIBUTING.md docs/github-release-v1.md docs/quickstart.md docs/releases/*.md",
+      "test -f LICENSE"
+    ],
+    "last_pass": true,
+    "last_run_at": "2026-04-22T09:24:00-07:00",
+    "verified_steps": [
+      "bash tests/smoke.sh schema",
+      "./scripts/demo-entry.sh",
+      "rg -n '/Volumes|file://' README.md CONTRIBUTING.md docs/github-release-v1.md docs/quickstart.md docs/releases/*.md",
+      "test -f LICENSE"
+    ],
+    "verified_files": [
+      "README.md",
+      "CONTRIBUTING.md",
+      "LICENSE",
+      "docs/github-release-v1.md",
+      "docs/quickstart.md",
+      "docs/releases/github-v1.0.0.md",
+      "docs/releases/github-v1.0.0-short.md",
+      "workspace/contracts/dd-hermes-github-v1-release.md",
+      "workspace/handoffs/dd-hermes-github-v1-release-lead-to-lead.md",
+      "workspace/closeouts/dd-hermes-github-v1-release-lead.md",
+      "workspace/state/dd-hermes-github-v1-release/state.json",
+      "workspace/state/dd-hermes-github-v1-release/events.jsonl",
+      "workspace/state/dd-hermes-backlog-truth-hygiene-v1/state.json",
+      "workspace/state/dd-hermes-s5-2expert-20260416/state.json"
+    ]
+  },
+  "notes": [
+    {
+      "timestamp": "2026-04-22T09:15:00-07:00",
+      "text": "english-first public docs, short release copy, and release state trace were added for GitHub publish packaging"
+    },
+    {
+      "timestamp": "2026-04-22T09:24:00-07:00",
+      "text": "restored missing no-execution state fixtures so schema smoke passes in this publish branch"
+    }
+  ]
+}

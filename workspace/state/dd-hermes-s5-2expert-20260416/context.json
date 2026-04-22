@@ -1,0 +1,758 @@
+{
+  "task_id": "dd-hermes-s5-2expert-20260416",
+  "agent_role": "commander",
+  "generated_at": "2026-04-17T08:55:03Z",
+  "sources": {
+    "contract_path": "/Volumes/Coding/Hermes agent for mine/workspace/contracts/dd-hermes-s5-2expert-20260416.md",
+    "handoff_paths": [
+      "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-s5-2expert-20260416-lead-to-expert-a.md",
+      "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-s5-2expert-20260416-lead-to-expert-b.md",
+      "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-s5-2expert-20260416-lead-to-lead-separation.md"
+    ],
+    "exploration_paths": [
+      "/Volumes/Coding/Hermes agent for mine/workspace/exploration/exploration-lead-dd-hermes-s5-2expert-20260416.md"
+    ],
+    "state_path": "/Volumes/Coding/Hermes agent for mine/workspace/state/dd-hermes-s5-2expert-20260416/state.json",
+    "runtime_path": "/Volumes/Coding/Hermes agent for mine/workspace/state/dd-hermes-s5-2expert-20260416/runtime.json",
+    "openspec": {
+      "proposal": "/Volumes/Coding/Hermes agent for mine/openspec/proposals/dd-hermes-s5-2expert-20260416.md",
+      "design": "",
+      "task": "",
+      "archive": ""
+    }
+  },
+  "runtime": {
+    "timestamp": "2026-04-17T08:55:03Z",
+    "repo_root": "/Volumes/Coding/Hermes agent for mine",
+    "worktree": "/Volumes/Coding/Hermes agent for mine",
+    "agent_role": "commander",
+    "shell": "/bin/zsh",
+    "git": {
+      "repo_root": "/Volumes/Coding/Hermes agent for mine",
+      "worktree": "/Volumes/Coding/Hermes agent for mine",
+      "has_head": true,
+      "head": "dfd6652eae7d080173f445e4ebccfa66deda1fe7",
+      "branch": "main",
+      "upstream": "",
+      "ahead": 0,
+      "behind": 0,
+      "clean": false,
+      "dirty_files": [
+        "EADME.md",
+        "openspec/designs/dd-hermes-quality-seat-escalation-rules-v1.md",
+        "openspec/tasks/dd-hermes-quality-seat-escalation-rules-v1.md",
+        "workspace/closeouts/dd-hermes-explicit-gate-verdicts-v1-expert-a.md",
+        "workspace/handoffs/dd-hermes-explicit-gate-verdicts-v1-expert-a-to-lead.md",
+        "workspace/state/dd-hermes-anchor-governance-v1/state.json",
+        "workspace/state/dd-hermes-independent-quality-seat-v1/state.json",
+        "workspace/state/dd-hermes-quality-seat-escalation-rules-v1/state.json",
+        "\"\\346\\214\\207\\346\\214\\245\\346\\226\\207\\346\\241\\243/04-\\344\\273\\273\\345\\212\\241\\351\\207\\215\\346\\240\\241\\345\\207\\206\\344\\270\\216\\347\\272\\277\\347\\250\\213\\347\\255\\226\\347\\225\\245.md\"",
+        "\"\\346\\214\\207\\346\\214\\245\\346\\226\\207\\346\\241\\243/06-\\344\\270\\200\\346\\234\\237PhaseDone\\345\\256\\241\\350\\256\\241.md\"",
+        "\"\\346\\214\\207\\346\\214\\245\\346\\226\\207\\346\\241\\243/09-\\344\\273\\212\\346\\227\\245\\350\\276\\223\\345\\205\\245\\346\\225\\264\\347\\220\\206.md\"",
+        "\"\\346\\214\\207\\346\\214\\245\\346\\226\\207\\346\\241\\243/README.md\"",
+        "openspec/archive/dd-hermes-explicit-gate-verdicts-v1.md",
+        "openspec/archive/dd-hermes-quality-seat-escalation-rules-v1.md",
+        "workspace/handoffs/dd-hermes-explicit-gate-verdicts-v1-lead-to-lead-archive.md",
+        "workspace/handoffs/dd-hermes-quality-seat-escalation-rules-v1-lead-to-lead-archive.md"
+      ],
+      "remote_urls": {},
+      "known_worktrees": [
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine",
+          "head": "dfd6652eae7d080173f445e4ebccfa66deda1fe7",
+          "branch": "main"
+        },
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-anchor-governance-v1-expert-a",
+          "head": "f9d89194b97c5cb630472c1a025d35576d3785af",
+          "branch": "dd-hermes-anchor-governance-v1-expert-a"
+        },
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-execution-bootstrap-expert-a",
+          "head": "4ea93ab8c265585b3de3555c8ecdd1e60311a70e",
+          "branch": "dd-hermes-execution-bootstrap-expert-a"
+        },
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-explicit-gate-verdicts-v1-expert-a",
+          "head": "1af20f9f046b4533b8ee65096142715016180bc3",
+          "branch": "dd-hermes-explicit-gate-verdicts-v1-expert-a"
+        },
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-independent-quality-seat-v1-expert-a",
+          "head": "bfe1739a7b49ced241cc98817423cde1606d1d3b",
+          "branch": "dd-hermes-independent-quality-seat-v1-expert-a"
+        },
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-quality-seat-escalation-rules-v1-expert-a",
+          "head": "7b39e070cfab9aac46e37afe3655d5fe3208ba43",
+          "branch": "dd-hermes-quality-seat-escalation-rules-v1-expert-a"
+        },
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-s5-2expert-20260416-expert-a",
+          "head": "f2282ca3d6fa13e94f18a13065b226a5dd8aea11",
+          "branch": "dd-hermes-s5-2expert-20260416-expert-a"
+        },
+        {
+          "path": "/Volumes/Coding/Hermes agent for mine/.worktrees/dd-hermes-s5-2expert-20260416-expert-b",
+          "head": "f2282ca3d6fa13e94f18a13065b226a5dd8aea11",
+          "branch": "dd-hermes-s5-2expert-20260416-expert-b"
+        }
+      ]
+    },
+    "hooks": {
+      "events": [
+        "PreToolUse",
+        "PostToolUse",
+        "Stop",
+        "SessionEnd"
+      ],
+      "available": [
+        "guard-dangerous-ops.sh",
+        "peon-ping.sh",
+        "post-edit-typecheck.sh",
+        "quality-gate.sh",
+        "session-end-log.sh",
+        "thread-switch-gate.sh"
+      ]
+    },
+    "skills": [
+      "auto-verify",
+      "coding-harness",
+      "deep-research",
+      "spec-first"
+    ],
+    "tests": [
+      "test-artifact-schemas.sh",
+      "test-coordination-endpoint.sh",
+      "test-hooks.sh",
+      "test-memory.sh",
+      "test-schema.sh",
+      "test-verify-loop.sh",
+      "test-workflow.sh",
+      "tests/smoke.sh"
+    ],
+    "task_surfaces": {
+      "contract_path": "/Volumes/Coding/Hermes agent for mine/workspace/contracts/dd-hermes-s5-2expert-20260416.md",
+      "state_path": "/Volumes/Coding/Hermes agent for mine/workspace/state/dd-hermes-s5-2expert-20260416/state.json"
+    }
+  },
+  "state": {
+    "state_version": 1,
+    "created_at": "2026-04-16T09:18:23Z",
+    "git": {
+      "baseline_commit": "",
+      "latest_commit": "",
+      "latest_branch": "",
+      "latest_upstream": "",
+      "latest_remote_urls": {}
+    },
+    "discussion": {
+      "policy": "direct",
+      "decision_id": "",
+      "explorer_queue": [],
+      "explorer_findings": [],
+      "synthesis_path": "",
+      "current_executor": ""
+    },
+    "verification": {
+      "last_pass": false,
+      "last_run_at": "",
+      "verified_steps": [],
+      "verified_files": []
+    },
+    "runtime": {
+      "preferred_surface": "repo-first",
+      "worktree_strategy": "isolated",
+      "last_context_path": "/Volumes/Coding/Hermes agent for mine/workspace/state/dd-hermes-s5-2expert-20260416/context.json",
+      "last_runtime_report_path": "/Volumes/Coding/Hermes agent for mine/workspace/state/dd-hermes-s5-2expert-20260416/runtime.json",
+      "last_worktree_path": ""
+    },
+    "lease": {
+      "goal": "validate two-expert parallel execution",
+      "status": "paused",
+      "duration_hours": 2,
+      "started_at": "",
+      "deadline_at": "",
+      "paused_at": "",
+      "pause_reason": "separated as independent experiment task; do not count toward endpoint/schema main-task finish line",
+      "resume_after": "",
+      "resume_checkpoint": "resume only under dedicated experiment approval",
+      "dispatch_cursor": ""
+    },
+    "memory": {
+      "reads": [
+        "memory/world/no-destruction-without-confirmation.md"
+      ],
+      "writes": [
+        "memory/task/dd-hermes-s5-2expert-20260416.md"
+      ],
+      "last_selected_ids": [
+        "no-destruction-without-confirmation",
+        "user-pref-no-manual-generator-commands",
+        "worktree-first",
+        "tool-selection-drift",
+        "plotly-preference"
+      ]
+    },
+    "textbook": {
+      "last_entry_path": "",
+      "last_summary_path": "",
+      "last_summary_at": ""
+    },
+    "notes": [
+      {
+        "timestamp": "2026-04-16T10:04:09Z",
+        "text": "S5 kept as independent experiment task; no integration into current main task"
+      }
+    ],
+    "task_id": "dd-hermes-s5-2expert-20260416",
+    "status": "in_progress",
+    "mode": "execution",
+    "current_focus": "experiment separated from main task",
+    "owner": "lead",
+    "experts": [
+      "expert-a",
+      "expert-b"
+    ],
+    "active_expert": "",
+    "blocked_reason": "",
+    "contract_path": "/Volumes/Coding/Hermes agent for mine/workspace/contracts/dd-hermes-s5-2expert-20260416.md",
+    "handoff_paths": [
+      "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-s5-2expert-20260416-lead-to-expert-a.md",
+      "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-s5-2expert-20260416-lead-to-expert-b.md"
+    ],
+    "exploration_paths": [
+      "/Volumes/Coding/Hermes agent for mine/workspace/exploration/exploration-lead-dd-hermes-s5-2expert-20260416.md"
+    ],
+    "openspec": {
+      "stage": "proposal",
+      "proposal_path": "/Volumes/Coding/Hermes agent for mine/openspec/proposals/dd-hermes-s5-2expert-20260416.md",
+      "design_path": "",
+      "task_path": "",
+      "archive_path": ""
+    },
+    "team": {
+      "supervisor_min_count": 1,
+      "supervisors": [
+        "lead"
+      ],
+      "executors": [
+        "expert-a",
+        "expert-b"
+      ],
+      "skeptics": [
+        "skeptic-1"
+      ],
+      "high_risk_mode": false,
+      "integration_pressure": false,
+      "scale_out_recommended": true,
+      "scale_out_triggers": [
+        "parallel_execution_slices"
+      ],
+      "role_integrity": {
+        "independent_skeptic": true,
+        "degraded": false,
+        "role_conflicts": [],
+        "role_overlap": {
+          "supervisor_executor_overlap": [],
+          "supervisor_skeptic_overlap": [],
+          "executor_skeptic_overlap": []
+        }
+      }
+    },
+    "updated_at": "2026-04-17T08:55:03Z",
+    "verdicts": {
+      "updated_at": "2026-04-17T08:55:03Z",
+      "task_policy": {
+        "status": "blocked",
+        "ready": false,
+        "reasons": [
+          "task_class_missing"
+        ],
+        "updated_at": "2026-04-17T08:55:03Z",
+        "task_class": "",
+        "task_class_bucket": "",
+        "quality_requirement": "",
+        "quality_requirement_source": "",
+        "manual_escalation_required": false,
+        "manual_escalation_reasons": []
+      },
+      "product_gate": {
+        "status": "blocked",
+        "ready": false,
+        "reasons": [
+          "product_anchor_unassigned",
+          "product_anchor_missing",
+          "product_goal_missing",
+          "product_user_value_missing",
+          "product_non_goals_missing",
+          "product_acceptance_missing",
+          "product_drift_risk_missing",
+          "product_goal_status_missing",
+          "product_review_missing",
+          "constant_anchor_seats_disabled"
+        ],
+        "updated_at": "2026-04-17T08:55:03Z",
+        "anchor": "",
+        "goal": "",
+        "goal_status": ""
+      },
+      "quality_anchor": {
+        "status": "blocked",
+        "ready": false,
+        "reasons": [
+          "quality_anchor_unassigned",
+          "quality_anchor_missing",
+          "constant_anchor_seats_disabled"
+        ],
+        "updated_at": "2026-04-17T08:55:03Z",
+        "anchor": ""
+      },
+      "quality_review": {
+        "status": "blocked",
+        "ready": false,
+        "reasons": [
+          "quality_anchor_unassigned",
+          "quality_anchor_missing",
+          "constant_anchor_seats_disabled",
+          "quality_review_status_missing",
+          "quality_review_timestamp_missing"
+        ],
+        "updated_at": "2026-04-17T08:55:03Z",
+        "anchor": "",
+        "review_status": "",
+        "last_review_at": ""
+      },
+      "degraded_ack": {
+        "status": "not-required",
+        "ready": true,
+        "reasons": [],
+        "updated_at": "2026-04-17T08:55:03Z",
+        "required": false,
+        "ack_by": "",
+        "ack_at": ""
+      },
+      "quality_seat_execution": {
+        "status": "blocked",
+        "ready": false,
+        "reasons": [
+          "quality_anchor_unassigned",
+          "quality_anchor_missing",
+          "constant_anchor_seats_disabled",
+          "task_class_missing"
+        ],
+        "updated_at": "2026-04-17T08:55:03Z",
+        "mode": "independent"
+      },
+      "quality_seat_completion": {
+        "status": "blocked",
+        "ready": false,
+        "reasons": [
+          "quality_anchor_unassigned",
+          "quality_anchor_missing",
+          "constant_anchor_seats_disabled",
+          "task_class_missing",
+          "quality_review_status_missing",
+          "quality_review_timestamp_missing"
+        ],
+        "updated_at": "2026-04-17T08:55:03Z",
+        "mode": "independent"
+      },
+      "execution_closeout": {
+        "status": "blocked",
+        "ready": false,
+        "reasons": [
+          "closeout_selection_ambiguous"
+        ],
+        "updated_at": "2026-04-17T08:55:03Z",
+        "closeout_path": "",
+        "selected_by": "",
+        "candidate_count": 2,
+        "semantic_valid": false,
+        "ready_for_execution_slice_done": false,
+        "execution_commit": "",
+        "quality_review_status": "",
+        "verified_step_count": 0,
+        "verified_file_count": 0,
+        "quality_findings_count": 0
+      }
+    }
+  },
+  "memory": {
+    "matches": [
+      {
+        "memory_id": "no-destruction-without-confirmation",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/world/no-destruction-without-confirmation.md",
+        "score": 125.0,
+        "token_score": 10,
+        "confidence": 1.0,
+        "recency_bonus": 5.0,
+        "type": "constraint",
+        "status": "active"
+      },
+      {
+        "memory_id": "user-pref-no-manual-generator-commands",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/user/user-pref-no-manual-generator-commands.md",
+        "score": 44.0,
+        "token_score": 29,
+        "confidence": 1.0,
+        "recency_bonus": 5.0,
+        "type": "preference",
+        "status": "active"
+      },
+      {
+        "memory_id": "dd-hermes-endpoint-router-v1",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/dd-hermes-endpoint-router-v1.md",
+        "score": 38.0,
+        "token_score": 24,
+        "confidence": 0.9,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "dd-hermes-multi-agent-dispatch",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/dd-hermes-multi-agent-dispatch.md",
+        "score": 38.0,
+        "token_score": 24,
+        "confidence": 0.9,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "dd-hermes-experience-demo-v1",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/dd-hermes-experience-demo-v1.md",
+        "score": 35.5,
+        "token_score": 21,
+        "confidence": 0.95,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "worktree-first",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/worktree-first.md",
+        "score": 35.0,
+        "token_score": 20,
+        "confidence": 1.0,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "dd-hermes-demo-entry-v1",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/dd-hermes-demo-entry-v1.md",
+        "score": 29.5,
+        "token_score": 15,
+        "confidence": 0.95,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "tool-selection-drift",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/self/tool-selection-drift.md",
+        "score": 28.5,
+        "token_score": 17,
+        "confidence": 0.65,
+        "recency_bonus": 5.0,
+        "type": "belief",
+        "status": "active"
+      }
+    ],
+    "scored_candidates": [
+      {
+        "memory_id": "no-destruction-without-confirmation",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/world/no-destruction-without-confirmation.md",
+        "score": 125.0,
+        "token_score": 10,
+        "confidence": 1.0,
+        "recency_bonus": 5.0,
+        "type": "constraint",
+        "status": "active"
+      },
+      {
+        "memory_id": "user-pref-no-manual-generator-commands",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/user/user-pref-no-manual-generator-commands.md",
+        "score": 44.0,
+        "token_score": 29,
+        "confidence": 1.0,
+        "recency_bonus": 5.0,
+        "type": "preference",
+        "status": "active"
+      },
+      {
+        "memory_id": "dd-hermes-endpoint-router-v1",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/dd-hermes-endpoint-router-v1.md",
+        "score": 38.0,
+        "token_score": 24,
+        "confidence": 0.9,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "dd-hermes-multi-agent-dispatch",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/dd-hermes-multi-agent-dispatch.md",
+        "score": 38.0,
+        "token_score": 24,
+        "confidence": 0.9,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "dd-hermes-experience-demo-v1",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/dd-hermes-experience-demo-v1.md",
+        "score": 35.5,
+        "token_score": 21,
+        "confidence": 0.95,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "worktree-first",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/worktree-first.md",
+        "score": 35.0,
+        "token_score": 20,
+        "confidence": 1.0,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "dd-hermes-demo-entry-v1",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/task/dd-hermes-demo-entry-v1.md",
+        "score": 29.5,
+        "token_score": 15,
+        "confidence": 0.95,
+        "recency_bonus": 5.0,
+        "type": "commitment",
+        "status": "active"
+      },
+      {
+        "memory_id": "tool-selection-drift",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/self/tool-selection-drift.md",
+        "score": 28.5,
+        "token_score": 17,
+        "confidence": 0.65,
+        "recency_bonus": 5.0,
+        "type": "belief",
+        "status": "active"
+      },
+      {
+        "memory_id": "plotly-preference",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/user/plotly-preference.md",
+        "score": 26.0,
+        "token_score": 13,
+        "confidence": 0.8,
+        "recency_bonus": 5.0,
+        "type": "belief",
+        "status": "active"
+      },
+      {
+        "memory_id": "user-pref-single-command-thread",
+        "path": "/Volumes/Coding/Hermes agent for mine/memory/user/user-pref-single-command-thread.md",
+        "score": 17.0,
+        "token_score": 2,
+        "confidence": 1.0,
+        "recency_bonus": 5.0,
+        "type": "preference",
+        "status": "active"
+      }
+    ],
+    "conflicts": [],
+    "expired": [],
+    "explanation": "constraint-first lexical match weighted by confidence and recency"
+  },
+  "discussion": {
+    "policy": "direct",
+    "decision_id": "",
+    "explorer_queue": [],
+    "explorer_findings": [],
+    "synthesis_path": "",
+    "current_executor": ""
+  },
+  "product": {},
+  "quality": {},
+  "continuation": {
+    "goal": "validate two-expert parallel execution",
+    "lease": {
+      "goal": "validate two-expert parallel execution",
+      "status": "paused",
+      "duration_hours": 2,
+      "started_at": "",
+      "deadline_at": "",
+      "paused_at": "",
+      "pause_reason": "separated as independent experiment task; do not count toward endpoint/schema main-task finish line",
+      "resume_after": "",
+      "resume_checkpoint": "resume only under dedicated experiment approval",
+      "dispatch_cursor": ""
+    },
+    "current_focus": "experiment separated from main task",
+    "active_expert": "",
+    "blocked_reason": "",
+    "current_executor": ""
+  },
+  "documents": {
+    "contract": {
+      "path": "/Volumes/Coding/Hermes agent for mine/workspace/contracts/dd-hermes-s5-2expert-20260416.md",
+      "text": "---\ntask_id: dd-hermes-s5-2expert-20260416\nowner: lead\nexperts:\n  - expert-a\n  - expert-b\nacceptance:\n  - Validate that a two-expert parallel sprint can be initialized and dispatched with isolated worktrees.\n  - Keep all experiment evidence separated from the current main task finish line.\nblocked_if:\n  - Missing repo facts or missing verification.\n  - The experiment starts to change the current main task scope or acceptance.\nmemory_reads:\n  - memory/world/no-destruction-without-confirmation.md\nmemory_writes:\n  - memory/task/dd-hermes-s5-2expert-20260416.md\n---\n\n# Sprint Contract\n\n## Context\n\nThis sprint is an independent experiment task used to validate the DD Hermes two-expert parallel workflow. It is not part of the current endpoint/schema main-task finish line and must not be used to claim task completion for that main task.\n\n## Scope\n\n- In scope: sprint bootstrap, dispatch, isolated worktree creation, role integrity validation, and experiment documentation.\n- Out of scope: mainline feature delivery, project-level policy changes, and any integration into the endpoint/schema task unless separately approved.\n\n## Required Fields\n\n- `task_id`\n- `owner`\n- `experts`\n- `acceptance`\n- `blocked_if`\n- `memory_reads`\n- `memory_writes`\n\n## Acceptance\n\n- Contract, handoffs, exploration log, proposal, and state all exist and point to the same experiment task id.\n- Two executor worktrees can be materialized without contaminating the primary worktree.\n- Experiment outputs clearly state that they are not part of the current main task deliverable.\n\n## Verification\n\n- Commands: `scripts/test-workflow.sh --task-id dd-hermes-s5-2expert-20260416`\n- Commands: `scripts/dispatch-create.sh --task-id dd-hermes-s5-2expert-20260416`\n- User-visible proof: workflow test passes, two isolated executor worktrees exist, and role integrity is reported explicitly.\n\n## Open Questions\n\n- Should this experiment later be resumed as a dedicated phase-validation task, or archived after documentation only?\n"
+    },
+    "handoffs": [
+      {
+        "path": "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-s5-2expert-20260416-lead-to-expert-a.md",
+        "text": "---\nfrom: lead\nto: expert-a\nscope: dd-hermes-s5-2expert-20260416 separate experiment slice\nfiles:\n  - workspace/contracts/dd-hermes-s5-2expert-20260416.md\n  - openspec/proposals/dd-hermes-s5-2expert-20260416.md\n  - workspace/state/dd-hermes-s5-2expert-20260416/state.json\ndecisions:\n  - Follow the sprint contract and spec-first rule.\n  - Treat this task as an experiment separate from the endpoint/schema main task.\nrisks:\n  - Do not change policy through memory writes.\n  - Do not let experiment outputs be mistaken for the current main-task deliverable.\nnext_checks:\n  - Run verification before completion.\n  - If execution resumes later, write back expert handoff and verification evidence under this experiment task only.\n---\n\n# Lead Handoff\n\n## Context\n\nExpert expert-a owns a reserved execution slot for the separate experiment task dd-hermes-s5-2expert-20260416 inside an isolated worktree. This does not count toward the current endpoint/schema main-task finish line.\n\n## Required Fields\n\n- `from`\n- `to`\n- `scope`\n- `files`\n- `decisions`\n- `risks`\n- `next_checks`\n\n## Acceptance\n\n- Keep the experiment artifacts task-bound, template-aligned, and clearly separated from the main task.\n\n## Verification\n\n- State commands and evidence expected from expert before handoff return if the experiment is resumed.\n- At minimum, include the workflow test result and the changed file list.\n\n## Open Questions\n\n- The experiment is currently paused after bootstrap and dispatch; a later lead decision is required before any execution slice is claimed as done.\n"
+      },
+      {
+        "path": "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-s5-2expert-20260416-lead-to-expert-b.md",
+        "text": "---\nfrom: lead\nto: expert-b\nscope: dd-hermes-s5-2expert-20260416 separate experiment slice\nfiles:\n  - workspace/contracts/dd-hermes-s5-2expert-20260416.md\n  - openspec/proposals/dd-hermes-s5-2expert-20260416.md\n  - workspace/state/dd-hermes-s5-2expert-20260416/state.json\ndecisions:\n  - Follow the sprint contract and spec-first rule.\n  - Treat this task as an experiment separate from the endpoint/schema main task.\nrisks:\n  - Do not change policy through memory writes.\n  - Do not let experiment outputs be mistaken for the current main-task deliverable.\nnext_checks:\n  - Run verification before completion.\n  - If execution resumes later, write back expert handoff and verification evidence under this experiment task only.\n---\n\n# Lead Handoff\n\n## Context\n\nExpert expert-b owns a reserved execution slot for the separate experiment task dd-hermes-s5-2expert-20260416 inside an isolated worktree. This does not count toward the current endpoint/schema main-task finish line.\n\n## Required Fields\n\n- `from`\n- `to`\n- `scope`\n- `files`\n- `decisions`\n- `risks`\n- `next_checks`\n\n## Acceptance\n\n- Keep the experiment artifacts task-bound, template-aligned, and clearly separated from the main task.\n\n## Verification\n\n- State commands and evidence expected from expert before handoff return if the experiment is resumed.\n- At minimum, include the workflow test result and the changed file list.\n\n## Open Questions\n\n- The experiment is currently paused after bootstrap and dispatch; a later lead decision is required before any execution slice is claimed as done.\n"
+      },
+      {
+        "path": "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-s5-2expert-20260416-lead-to-lead-separation.md",
+        "text": "---\nfrom: lead\nto: lead\nscope: separate dd-hermes-s5-2expert-20260416 as an independent experiment task\nfiles:\n  - workspace/contracts/dd-hermes-s5-2expert-20260416.md\n  - openspec/proposals/dd-hermes-s5-2expert-20260416.md\n  - workspace/exploration/exploration-lead-dd-hermes-s5-2expert-20260416.md\n  - workspace/handoffs/dd-hermes-s5-2expert-20260416-lead-to-expert-a.md\n  - workspace/handoffs/dd-hermes-s5-2expert-20260416-lead-to-expert-b.md\n  - workspace/closeouts/dd-hermes-s5-2expert-20260416-expert-a.md\n  - workspace/closeouts/dd-hermes-s5-2expert-20260416-expert-b.md\ndecisions:\n  - Treat S5 as a dedicated experiment task rather than continuing it inside the endpoint/schema main task.\n  - Preserve generated worktrees and artifacts, but do not use them to claim current main-task progress.\nrisks:\n  - Future readers may still misread the experiment as a mainline task unless the separation note is consulted.\n  - Runtime state for the experiment is local and not versioned in git.\n  - The preserved expert worktrees still contain local uncommitted artifacts and must not be mistaken for completed execution slices.\nnext_checks:\n  - Resume only under explicit lead approval.\n  - If resumed, produce expert-to-lead handoffs and true execution commits under the experiment task id.\n---\n\n# Lead Handoff\n\n## Context\n\nThis handoff records a deliberate separation decision: `dd-hermes-s5-2expert-20260416` is preserved as an independent experiment task for validating two-expert parallel dispatch, not as part of the current endpoint/schema delivery thread.\n\n## Required Fields\n\n- `from`\n- `to`\n- `scope`\n- `files`\n- `decisions`\n- `risks`\n- `next_checks`\n\n## Acceptance\n\n- S5 is clearly documented as experiment-only.\n- Main-task finish line remains unchanged.\n- Existing worktrees are preserved for later resumption, but no integration is attempted now.\n\n## Verification\n\n- `./scripts/test-workflow.sh --task-id dd-hermes-s5-2expert-20260416` passed.\n- `./scripts/dispatch-create.sh --task-id dd-hermes-s5-2expert-20260416` produced two executor worktrees.\n\n## Open Questions\n\n- Should the experiment eventually be archived after documentation, or resumed as a dedicated phase-validation track?\n"
+      }
+    ],
+    "exploration": [
+      {
+        "path": "/Volumes/Coding/Hermes agent for mine/workspace/exploration/exploration-lead-dd-hermes-s5-2expert-20260416.md",
+        "text": "# Exploration Log\n\n## Context\n\n- Task: dd-hermes-s5-2expert-20260416\n- Role: lead\n- Status: SEPARATED_EXPERIMENT\n\n## Facts\n\n- Sprint bootstrap initialized.\n- Two executor worktrees were successfully materialized for `expert-a` and `expert-b`.\n- The experiment was explicitly separated from the endpoint/schema main task to avoid scope drift.\n\n## Hypotheses\n\n- DD Hermes can support a two-expert parallel workflow as an experiment without turning that experiment into the current main-task deliverable.\n\n## Evidence\n\n- Generated by `scripts/sprint-init.sh --task-id dd-hermes-s5-2expert-20260416`.\n- Dispatch verified by `scripts/dispatch-create.sh --task-id dd-hermes-s5-2expert-20260416`.\n- Contract path: workspace/contracts/dd-hermes-s5-2expert-20260416.md\n- Proposal path: openspec/proposals/dd-hermes-s5-2expert-20260416.md\n\n## Acceptance\n\n- Establish a traceable starting point for a separate experiment task.\n- Keep experiment evidence auditable without claiming progress on the current main task.\n\n## Verification\n\n- Confirm `scripts/test-workflow.sh --task-id dd-hermes-s5-2expert-20260416` passes after initialization.\n- Confirm `scripts/dispatch-create.sh --task-id dd-hermes-s5-2expert-20260416` reports two executor worktrees.\n\n## Open Questions\n\n- Should this experiment be resumed later as a dedicated phase-validation track, or archived after documentation only?\n"
+      }
+    ],
+    "openspec": {
+      "proposal": {
+        "path": "/Volumes/Coding/Hermes agent for mine/openspec/proposals/dd-hermes-s5-2expert-20260416.md",
+        "text": "---\nstatus: proposed\nowner: lead\nscope: dd-hermes-s5-2expert-20260416\ndecision_log:\n  - Bootstrap a dedicated experiment task instead of extending the current endpoint/schema main task.\n  - Keep the experiment auditable, but separate from the current main-task finish line.\nchecks:\n  - scripts/test-workflow.sh --task-id dd-hermes-s5-2expert-20260416\nlinks:\n  - workspace/contracts/dd-hermes-s5-2expert-20260416.md\n  - workspace/exploration/exploration-lead-dd-hermes-s5-2expert-20260416.md\n---\n\n# Proposal\n\n## What\n\nCreate an independent experiment task to validate whether DD Hermes can safely bootstrap and dispatch a two-expert parallel sprint with isolated worktrees.\n\n## Why\n\nPreserve the experiment as a separate truth-tracked task instead of letting it drift into the current endpoint/schema delivery thread.\n\n## Non-goals\n\n- Claiming completion for the endpoint/schema main task.\n- Merging experiment artifacts as if they were part of the current mainline deliverable.\n- Project-level policy changes.\n- Runtime implementation details outside the sprint bootstrap.\n\n## Acceptance\n\n- Contract, handoffs, exploration log, proposal, and state all exist and point to the same experiment task id.\n- Dispatch can materialize two executor worktrees and report role integrity truthfully.\n- Experiment documents explicitly state that they are not part of the current main task finish line.\n\n## Verification\n\n- Run `scripts/test-workflow.sh --task-id dd-hermes-s5-2expert-20260416`.\n- Run `scripts/dispatch-create.sh --task-id dd-hermes-s5-2expert-20260416`.\n"
+      },
+      "design": null,
+      "task": null,
+      "archive": null
+    }
+  },
+  "context_summary": {
+    "memory_ids": [
+      "no-destruction-without-confirmation",
+      "user-pref-no-manual-generator-commands",
+      "dd-hermes-endpoint-router-v1",
+      "dd-hermes-multi-agent-dispatch",
+      "dd-hermes-experience-demo-v1",
+      "worktree-first",
+      "dd-hermes-demo-entry-v1",
+      "tool-selection-drift"
+    ],
+    "handoff_count": 3,
+    "exploration_count": 1,
+    "has_design": false,
+    "has_task": false,
+    "lease_status": "paused",
+    "resume_checkpoint": "resume only under dedicated experiment approval",
+    "discussion_policy": "direct",
+    "decision_id": "",
+    "runtime_generated_at": "2026-04-17T08:55:03Z",
+    "runtime_stale_warning": "",
+    "supervisor_count": 1,
+    "product_anchor_count": 0,
+    "quality_anchor_count": 0,
+    "product_anchor_name": "",
+    "product_anchor_role": "",
+    "quality_anchor_name": "",
+    "quality_anchor_role": "",
+    "product_goal": "",
+    "product_goal_status": "",
+    "goal_drift_flags": [],
+    "quality_review_status": "",
+    "independent_skeptic": true,
+    "role_integrity_degraded": false,
+    "role_conflicts": [],
+    "scale_out_recommended": true,
+    "scale_out_triggers": [
+      "parallel_execution_slices"
+    ],
+    "degraded_ack_required": false,
+    "degraded_ack_ready": true,
+    "degraded_ack_status": "not-required",
+    "degraded_ack_by": "",
+    "degraded_ack_at": "",
+    "product_user_value": "",
+    "product_non_goals": [],
+    "product_acceptance": [],
+    "product_drift_risk": "",
+    "task_class": "",
+    "task_class_bucket": "",
+    "task_class_rationale": "",
+    "quality_requirement": "",
+    "quality_requirement_source": "",
+    "quality_requirement_ready": false,
+    "quality_requirement_reasons": [
+      "task_class_missing"
+    ],
+    "task_policy_status": "blocked",
+    "manual_escalation_required": false,
+    "manual_escalation_reasons": [],
+    "product_gate_ready": false,
+    "product_gate_reasons": [
+      "product_anchor_unassigned",
+      "product_anchor_missing",
+      "product_goal_missing",
+      "product_user_value_missing",
+      "product_non_goals_missing",
+      "product_acceptance_missing",
+      "product_drift_risk_missing",
+      "product_goal_status_missing",
+      "product_review_missing",
+      "constant_anchor_seats_disabled"
+    ],
+    "product_gate_status": "blocked",
+    "quality_anchor_ready": false,
+    "quality_anchor_reasons": [
+      "quality_anchor_unassigned",
+      "quality_anchor_missing",
+      "constant_anchor_seats_disabled"
+    ],
+    "quality_anchor_status": "blocked",
+    "quality_review_ready": false,
+    "quality_review_reasons": [
+      "quality_anchor_unassigned",
+      "quality_anchor_missing",
+      "constant_anchor_seats_disabled",
+      "quality_review_status_missing",
+      "quality_review_timestamp_missing"
+    ],
+    "quality_review_gate_status": "blocked",
+    "quality_seat_mode": "independent",
+    "quality_seat_ready": false,
+    "quality_seat_status": "blocked",
+    "quality_seat_reasons": [
+      "quality_anchor_unassigned",
+      "quality_anchor_missing",
+      "constant_anchor_seats_disabled",
+      "task_class_missing"
+    ],
+    "quality_seat_completion_ready": false,
+    "quality_seat_completion_status": "blocked",
+    "quality_seat_completion_reasons": [
+      "quality_anchor_unassigned",
+      "quality_anchor_missing",
+      "constant_anchor_seats_disabled",
+      "task_class_missing",
+      "quality_review_status_missing",
+      "quality_review_timestamp_missing"
+    ],
+    "execution_closeout_ready": false,
+    "execution_closeout_status": "blocked",
+    "execution_closeout_reasons": [
+      "closeout_selection_ambiguous"
+    ],
+    "execution_closeout_path": "",
+    "execution_closeout_selected_by": "",
+    "execution_closeout_candidate_count": 2,
+    "execution_closeout_semantic_valid": false,
+    "ready_for_execution_slice_done": false,
+    "verdicts_updated_at": "2026-04-17T08:55:03Z",
+    "quality_review_findings": [],
+    "quality_review_examples": [],
+    "anchor_policy": {}
+  }
+}

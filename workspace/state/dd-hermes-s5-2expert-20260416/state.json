@@ -1,0 +1,314 @@
+{
+  "state_version": 2,
+  "created_at": "2026-04-16T09:18:23Z",
+  "git": {
+    "baseline_commit": "",
+    "latest_commit": "",
+    "latest_branch": "",
+    "latest_upstream": "",
+    "latest_remote_urls": {}
+  },
+  "discussion": {
+    "policy": "direct",
+    "decision_id": "",
+    "explorer_queue": [],
+    "explorer_findings": [],
+    "synthesis_path": "",
+    "current_executor": ""
+  },
+  "verification": {
+    "last_pass": true,
+    "last_run_at": "2026-04-17T09:04:27Z",
+    "verified_steps": [
+      "./scripts/test-workflow.sh --task-id dd-hermes-s5-2expert-20260416",
+      "./scripts/state-read.sh --task-id dd-hermes-s5-2expert-20260416"
+    ],
+    "verified_files": [
+      "openspec/archive/dd-hermes-s5-2expert-20260416.md",
+      "workspace/handoffs/dd-hermes-s5-2expert-20260416-lead-to-lead-archive.md",
+      "workspace/state/dd-hermes-s5-2expert-20260416/state.json"
+    ]
+  },
+  "runtime": {
+    "preferred_surface": "repo-first",
+    "worktree_strategy": "isolated",
+    "last_context_path": "/Volumes/Coding/Hermes agent for mine/workspace/state/dd-hermes-s5-2expert-20260416/context.json",
+    "last_runtime_report_path": "/Volumes/Coding/Hermes agent for mine/workspace/state/dd-hermes-s5-2expert-20260416/runtime.json",
+    "last_worktree_path": ""
+  },
+  "lease": {
+    "goal": "validate two-expert parallel execution",
+    "status": "idle",
+    "duration_hours": 2,
+    "started_at": "",
+    "deadline_at": "",
+    "paused_at": "",
+    "pause_reason": "",
+    "resume_after": "",
+    "resume_checkpoint": "",
+    "dispatch_cursor": ""
+  },
+  "memory": {
+    "reads": [
+      "memory/world/no-destruction-without-confirmation.md"
+    ],
+    "writes": [
+      "memory/task/dd-hermes-s5-2expert-20260416.md"
+    ],
+    "last_selected_ids": [
+      "no-destruction-without-confirmation",
+      "user-pref-no-manual-generator-commands",
+      "dd-hermes-endpoint-router-v1",
+      "dd-hermes-multi-agent-dispatch",
+      "dd-hermes-experience-demo-v1",
+      "worktree-first",
+      "dd-hermes-demo-entry-v1",
+      "tool-selection-drift"
+    ]
+  },
+  "textbook": {
+    "last_entry_path": "",
+    "last_summary_path": "",
+    "last_summary_at": ""
+  },
+  "notes": [
+    {
+      "timestamp": "2026-04-16T10:04:09Z",
+      "text": "S5 kept as independent experiment task; no integration into current main task"
+    },
+    {
+      "timestamp": "2026-04-17T09:01:36Z",
+      "text": "archived paused two-expert experiment as bootstrap-and-dispatch evidence only",
+      "product_gate_ready": true,
+      "quality_anchor_ready": true,
+      "quality_review_ready": true,
+      "degraded_ack_ready": false
+    },
+    {
+      "timestamp": "2026-04-17T09:01:49Z",
+      "text": "recorded explicit degraded acknowledgement for archived two-expert experiment",
+      "product_gate_ready": true,
+      "quality_anchor_ready": true,
+      "quality_review_ready": true,
+      "degraded_ack_ready": true
+    },
+    {
+      "timestamp": "2026-04-17T09:04:27Z",
+      "text": "recorded archive verification for paused S5 experiment",
+      "product_gate_ready": true,
+      "quality_anchor_ready": true,
+      "quality_review_ready": true,
+      "degraded_ack_ready": true
+    },
+    {
+      "timestamp": "2026-04-17T09:04:27Z",
+      "text": "anchor governance initialized",
+      "product_gate_ready": false,
+      "quality_anchor_ready": true,
+      "quality_review_ready": true,
+      "degraded_ack_ready": true
+    },
+    {
+      "timestamp": "2026-04-17T09:20:25Z",
+      "text": "anchor governance initialized",
+      "product_gate_ready": true,
+      "quality_anchor_ready": true,
+      "quality_review_ready": true,
+      "degraded_ack_ready": true
+    },
+    {
+      "timestamp": "2026-04-17T09:21:14Z",
+      "text": "refreshed no-execution experiment archive semantics after legacy normalization",
+      "product_gate_ready": true,
+      "quality_anchor_ready": true,
+      "quality_review_ready": true,
+      "degraded_ack_ready": true
+    }
+  ],
+  "task_id": "dd-hermes-s5-2expert-20260416",
+  "status": "done",
+  "mode": "archive",
+  "current_focus": "archived paused experiment; bootstrap and dispatch evidence preserved without claiming an execution slice",
+  "owner": "lead",
+  "experts": [
+    "expert-a",
+    "expert-b"
+  ],
+  "active_expert": "",
+  "blocked_reason": "",
+  "contract_path": "/Volumes/Coding/Hermes agent for mine/workspace/contracts/dd-hermes-s5-2expert-20260416.md",
+  "handoff_paths": [
+    "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-s5-2expert-20260416-lead-to-expert-a.md",
+    "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-s5-2expert-20260416-lead-to-expert-b.md",
+    "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-s5-2expert-20260416-lead-to-lead-archive.md",
+    "/Volumes/Coding/Hermes agent for mine/workspace/handoffs/dd-hermes-s5-2expert-20260416-lead-to-lead-separation.md"
+  ],
+  "exploration_paths": [
+    "/Volumes/Coding/Hermes agent for mine/workspace/exploration/exploration-lead-dd-hermes-s5-2expert-20260416.md"
+  ],
+  "openspec": {
+    "stage": "archive",
+    "proposal_path": "/Volumes/Coding/Hermes agent for mine/openspec/proposals/dd-hermes-s5-2expert-20260416.md",
+    "design_path": "",
+    "task_path": "",
+    "archive_path": "/Volumes/Coding/Hermes agent for mine/openspec/archive/dd-hermes-s5-2expert-20260416.md"
+  },
+  "team": {
+    "supervisor_min_count": 1,
+    "supervisors": [
+      "lead"
+    ],
+    "executors": [
+      "expert-a",
+      "expert-b"
+    ],
+    "skeptics": [
+      "expert-b"
+    ],
+    "product_anchors": [
+      "lead"
+    ],
+    "quality_anchors": [
+      "expert-b"
+    ],
+    "anchor_policy": {
+      "product_anchor_role": "supervisor",
+      "quality_anchor_role": "skeptic",
+      "constant_anchor_seats": true
+    },
+    "high_risk_mode": false,
+    "integration_pressure": false,
+    "scale_out_recommended": true,
+    "scale_out_triggers": [
+      "parallel_execution_slices",
+      "independent_skeptic_unavailable",
+      "skeptic_executor_overlap"
+    ],
+    "role_integrity": {
+      "independent_skeptic": false,
+      "degraded": true,
+      "role_conflicts": [
+        "executor_skeptic_overlap:expert-b"
+      ],
+      "role_overlap": {
+        "supervisor_executor_overlap": [],
+        "supervisor_skeptic_overlap": [],
+        "executor_skeptic_overlap": [
+          "expert-b"
+        ]
+      },
+      "degraded_ack_by": "lead",
+      "degraded_ack_at": "2026-04-17T09:01:17Z"
+    }
+  },
+  "updated_at": "2026-04-17T09:21:14Z",
+  "verdicts": {
+    "updated_at": "2026-04-17T09:21:14Z",
+    "task_policy": {
+      "status": "ready",
+      "ready": true,
+      "reasons": [],
+      "updated_at": "2026-04-17T09:21:14Z",
+      "task_class": "T1",
+      "task_class_bucket": "no-execution",
+      "quality_requirement": "degraded-allowed",
+      "quality_requirement_source": "task_class_default",
+      "manual_escalation_required": false,
+      "manual_escalation_reasons": []
+    },
+    "product_gate": {
+      "status": "ready",
+      "ready": true,
+      "reasons": [],
+      "updated_at": "2026-04-17T09:21:14Z",
+      "anchor": "lead",
+      "goal": "Preserve the paused two-expert experiment as archived bootstrap-and-dispatch evidence without pretending it delivered a product execution slice.",
+      "goal_status": "defined"
+    },
+    "quality_anchor": {
+      "status": "ready",
+      "ready": true,
+      "reasons": [],
+      "updated_at": "2026-04-17T09:21:14Z",
+      "anchor": "expert-b"
+    },
+    "quality_review": {
+      "status": "ready",
+      "ready": true,
+      "reasons": [],
+      "updated_at": "2026-04-17T09:21:14Z",
+      "anchor": "expert-b",
+      "review_status": "approved",
+      "last_review_at": "2026-04-17T09:01:17Z"
+    },
+    "degraded_ack": {
+      "status": "ready",
+      "ready": true,
+      "reasons": [],
+      "updated_at": "2026-04-17T09:21:14Z",
+      "required": true,
+      "ack_by": "lead",
+      "ack_at": "2026-04-17T09:01:17Z"
+    },
+    "quality_seat_execution": {
+      "status": "ready",
+      "ready": true,
+      "reasons": [],
+      "updated_at": "2026-04-17T09:21:14Z",
+      "mode": "degraded"
+    },
+    "quality_seat_completion": {
+      "status": "ready",
+      "ready": true,
+      "reasons": [],
+      "updated_at": "2026-04-17T09:21:14Z",
+      "mode": "degraded"
+    },
+    "execution_closeout": {
+      "status": "not-required",
+      "ready": true,
+      "reasons": [],
+      "updated_at": "2026-04-17T09:21:14Z",
+      "closeout_path": "",
+      "selected_by": "task_policy",
+      "candidate_count": 2,
+      "semantic_valid": true,
+      "ready_for_execution_slice_done": true,
+      "execution_commit": "",
+      "quality_review_status": "approved",
+      "verified_step_count": 0,
+      "verified_file_count": 0,
+      "quality_findings_count": 0
+    }
+  },
+  "product": {
+    "goal": "Preserve the paused two-expert experiment as archived bootstrap-and-dispatch evidence without pretending it delivered a product execution slice.",
+    "user_value": "Let a maintainer distinguish clearly between parallel bootstrap proof and mainline feature delivery when reading the archive.",
+    "non_goals": [
+      "Do not treat the experiment as an active mainline or product delivery task.",
+      "Do not change the endpoint/schema task scope through this archived experiment."
+    ],
+    "product_acceptance": [
+      "The archive preserves bootstrap, dispatch, and role-integrity evidence for the two-expert experiment.",
+      "The task stays explicitly separated from mainline feature delivery.",
+      "Readers can see that no execution slice was claimed."
+    ],
+    "drift_risk": "This task could drift into fake product progress if the experiment archive starts being presented as feature delivery.",
+    "task_class": "T1",
+    "quality_requirement": "degraded-allowed",
+    "task_class_rationale": "探索性实验验证任务；验证双 expert bootstrap/dispatch 能力，但不进入产品执行切片。",
+    "last_product_review_at": "2026-04-17T09:20:25Z",
+    "anchor": "lead",
+    "goal_status": "defined",
+    "goal_drift_flags": []
+  },
+  "quality": {
+    "review_status": "approved",
+    "review_examples": [
+      "Reviewed archived S5 experiment evidence: workflow bootstrap passed, dispatch originally materialized two executor worktrees, and archive truth now states that no execution slice was produced."
+    ],
+    "last_review_at": "2026-04-17T09:01:17Z",
+    "anchor": "expert-b",
+    "review_findings": []
+  }
+}

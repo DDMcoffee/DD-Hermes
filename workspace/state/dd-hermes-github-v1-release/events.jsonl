@@ -1,0 +1,2 @@
+{"timestamp":"2026-04-22T09:15:00-07:00","task_id":"dd-hermes-github-v1-release","event":"state_initialized_for_publish","status":"done","verification_passed":false}
+{"timestamp":"2026-04-22T09:24:00-07:00","task_id":"dd-hermes-github-v1-release","event":"publish_validation_passed","status":"done","verification_passed":true}
