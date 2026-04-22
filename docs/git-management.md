@@ -1,57 +1,59 @@
 # DD Hermes: Git Management
 
-DD Hermes 的多 agent 架构依赖 git 不是为了“版本控制一般论”，而是为了保证指挥线程和执行线程之间有干净的切面。
+DD Hermes depends on git not as generic version-control advice, but as the mechanism that keeps the control thread and execution threads separated cleanly.
 
 ## Why
 
-- 没有首个 baseline commit，`git worktree` 在真实仓库里无法启动。
-- 没有 worktree 生命周期协议，多个 Expert 很容易互相污染文件面。
-- 没有提交边界，handoff 很快会失去可审计性。
+- Without an initial baseline commit, `git worktree` cannot start in a real repository.
+- Without worktree lifecycle rules, multiple experts can easily contaminate each other's file surfaces.
+- Without clear commit boundaries, handoffs stop being auditable.
 
 ## Roles
 
 - Lead
-  - 维护 baseline commit
-  - 创建和回收 Expert worktree
-  - 最终集成和验收
+  - maintains the baseline commit
+  - creates and removes expert worktrees
+  - performs final integration and acceptance
 - Expert
-  - 只在自己的 worktree 内实现
-  - 回传 code + handoff + verification
-  - 不直接修改主工作区
+  - works only inside the assigned worktree
+  - returns code, handoff, and verification artifacts
+  - does not write directly into the main workspace
 
 ## Scripts
 
 - `scripts/git-status-report.sh`
-  - 报告 repo 是否有 HEAD、当前 branch、脏文件、worktree 列表、是否需要 bootstrap。
+  - report whether the repo has a HEAD, current branch, dirty files, worktree list, and whether bootstrap is needed
 - `scripts/git-bootstrap.sh`
-  - 在“有 `.git` 但还没有第一个 commit”的仓库里创建 managed baseline commit。
+  - create a managed baseline commit in a repo that has `.git` but no first commit yet
 - `scripts/git-snapshot.sh`
-  - 输出某个 worktree 的 `HEAD`、branch、upstream、ahead/behind、remote URL 和 dirty 状态。
+  - output `HEAD`, branch, upstream, ahead/behind status, remote URL, and dirty state for a worktree
 - `scripts/git-commit-task.sh`
-  - 在 execution worktree 内创建任务切片 commit，并把 commit 锚点写回 task state。
+  - create an execution-slice commit inside an execution worktree and write the commit anchor back into task state
 - `scripts/git-integrate-task.sh`
-  - 将 execution branch 合并回主工作区，形成 integration commit，并把集成后的 git 锚点回写到 task state。
+  - merge or integrate the execution branch back into the main workspace and write the integrated git anchor back into task state
 - `scripts/worktree-create.sh`
-  - 为某个 Expert 建立隔离 worktree。
+  - create an isolated worktree for an expert
 - `scripts/worktree-remove.sh`
-  - 回收 Expert worktree，并可选删除其 branch。
+  - remove an expert worktree and optionally delete its branch
 
 ## Invariants
 
-- `git worktree` 只能建立在已有 baseline commit 的仓库上。
-- 指挥线程不直接在 Expert worktree 写实现代码。
-- worktree 回收前至少应满足：
-  - handoff 已写
-  - verification 已写回 state
-  - dirty 状态已被审阅
+- `git worktree` only works after the repository has a baseline commit.
+- The control thread does not write implementation code inside an expert worktree.
+- Before a worktree is removed, at minimum:
+  - handoff is written
+  - verification is written back into state
+  - dirty state has been reviewed
 
 ## Commit Boundary
 
 - baseline commit
-  - 由 Lead 创建，目标是让 worktree 系统可用。
+  - created by Lead so the worktree system can function
 - execution commit
-  - 由 Expert 在自己 worktree 内创建，目标是提交一个可评审切片。
-  - 这个 commit 必须回写 `state.git.latest_commit` 一类的版本锚点。
+  - created by an Expert inside the assigned worktree
+  - represents one reviewable execution slice
+  - must write a git anchor such as `state.git.latest_commit` back into task state
 - integration commit
-  - 由 Lead 在主工作区合并或整理后创建，目标是把多个 execution slice 集成为一个可验收单元。
-  - 标准入口是 `scripts/git-integrate-task.sh`，不是手工 merge 约定。
+  - created by Lead in the main workspace after merge or consolidation
+  - represents a reviewable integrated unit
+  - the standard entrypoint is `scripts/git-integrate-task.sh`, not an informal manual merge convention

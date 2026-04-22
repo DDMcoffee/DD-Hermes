@@ -1,68 +1,70 @@
 # DD Hermes: Context / Runtime / State / Memory
 
-这四层必须分开建模，否则 agent 很快会把“当前任务控制面”“执行环境事实”和“长期知识”混成一团。
+These four layers must stay separate. Once an agent mixes task control state, execution facts, and long-term memory together, the workflow quickly becomes hard to recover, audit, or extend safely.
 
 ## Definitions
 
 - `runtime`
-  - 当前执行面事实快照。
-  - 例子：repo root、当前 worktree、git branch、hooks、可用 tests、shell、脏文件。
-  - 特征：瞬时、可重算、不能直接定义 policy。
+  - a snapshot of current execution facts
+  - examples: repo root, current worktree, git branch, available hooks, available tests, shell, dirty files
+  - properties: ephemeral, recomputable, not a source of policy
 - `state`
-  - 当前任务的短期控制面。
-  - 例子：当前模式、阻塞原因、最近一次 verification、最新 context packet、最近一次 runtime snapshot。
-  - 还应包含角色治理真相，例如 `team.role_integrity`、`independent_skeptic` 是否成立、是否需要扩容。
-  - 还应包含执行门与讨论门会直接消费的控制字段，例如 `discussion.*`、`lease.*`、`contract_path / handoff_paths / exploration_paths / openspec`。
-  - 还应显式落盘两个恒定锚点：
-    - `product`：产品目标、用户价值、非目标、漂移信号。
-      - 其中 `task_class / quality_requirement / task_class_rationale` 现在也是一等控制面字段。
-    - `quality`：质量锚点的审查状态、关键发现和参考示例。
-  - 落盘位置：`workspace/state/<task_id>/state.json` 和 `events.jsonl`
-  - 特征：可变、任务级、生命周期短于 memory。
+  - the short-term control plane for the current task
+  - examples: current mode, blockers, latest verification, latest context packet, latest runtime snapshot
+  - should also contain role-governance truth such as `team.role_integrity`, whether an `independent_skeptic` exists, and whether scale-out is needed
+  - should also contain the fields consumed directly by discussion gates and execution gates such as `discussion.*`, `lease.*`, `contract_path`, `handoff_paths`, `exploration_paths`, and `openspec`
+  - should persist the two constant anchors explicitly:
+    - `product`
+      - product goal, user value, non-goals, and drift signals
+      - `task_class`, `quality_requirement`, and `task_class_rationale` are first-class control-plane fields
+    - `quality`
+      - quality-anchor review state, key findings, and examples
+  - stored at `workspace/state/<task_id>/state.json` and `events.jsonl`
+  - properties: mutable, task-scoped, shorter-lived than memory
 - `context`
-  - 某次执行前装配出来的输入包。
-  - 来源：contract、handoff、exploration、OpenSpec、state、runtime、相关 memory。
-  - 落盘位置：`workspace/state/<task_id>/context.json`
-  - 特征：派生物、可丢弃、可重建。
+  - the assembled input packet for a specific execution pass
+  - sources: contract, handoff, exploration, OpenSpec, state, runtime, and relevant memory
+  - stored at `workspace/state/<task_id>/context.json`
+  - properties: derived, disposable, rebuildable
 - `memory`
-  - 跨会话保留的知识卡。
-  - 例子：用户偏好、世界约束、任务教训、自身失误模式。
-  - 落盘位置：`memory/{user,task,world,self}/` + `memory/journal/`
-  - 特征：治理优先、允许冲突保留、不能被短期 state 覆盖。
+  - cross-session knowledge cards
+  - examples: user preferences, world constraints, task lessons, self-error patterns
+  - stored at `memory/{user,task,world,self}/` and `memory/journal/`
+  - properties: governance-first, conflict-tolerant, not overwritten by short-term state
 
 ## Invariants
 
 - `runtime -> state`
-  - runtime 可以更新 state 的观测字段，例如最近 runtime snapshot 路径。
+  - runtime can update observational state fields such as the latest runtime snapshot path
 - `state -> context`
-  - state 决定当前任务该向执行线程暴露哪些控制信息。
-  - 角色降级不能只藏在 state 内；如果 `Skeptic` 不独立，context 也必须暴露该事实。
-  - 产品目标不能只藏在北极星文档里；如果 `product.goal` 缺失或开始漂移，context 和 gate 也必须暴露该事实。
+  - state determines which control information is exposed to the execution thread
+  - role degradation must not stay hidden inside state; if `Skeptic` is not independent, context must expose that fact too
+  - product goals must not stay hidden in a north-star note; if `product.goal` is missing or drifting, context and gates must expose it
 - `memory -> context`
-  - memory 通过检索进入 context，但不会被 context 自动改写。
+  - memory enters context through retrieval, but context does not automatically rewrite memory
 - `policy != memory mutation`
-  - policy 约束可以被 memory 引用，但不能通过 memory 写入流程被重写。
+  - policy may be referenced by memory, but policy must not be rewritten through the memory-write path
 - `context != truth`
-  - context 是某一时刻的装配结果，不是最终真相源。
+  - context is an assembled view at a moment in time, not the final source of truth
 
 ## Thread Model
 
-- 默认单线程
-  - 由当前线程统一负责规划、拆分、实现、复核、验收和 state 推进。
-  - `Lead / Explorer / Executor / Skeptic / Judge` 是逻辑角色，不再默认映射到不同聊天线程。
-  - `Product Anchor` 默认映射到 `Supervisor`，负责目标边界和用户价值。
-  - `Quality Anchor` 默认映射到 `Skeptic`，负责架构一致性、错误处理、性能、安全和证据缺口。
+- default: single thread
+  - one thread handles planning, decomposition, implementation, review, acceptance, and state progression
+  - `Lead`, `Explorer`, `Executor`, `Skeptic`, and `Judge` are logical roles, not separate chat threads by default
+  - `Product Anchor` maps to `Supervisor` by default and owns goal boundaries and user value
+  - `Quality Anchor` maps to `Skeptic` by default and owns architecture consistency, error handling, performance, safety, and evidence gaps
 - worktree
-  - 仍然保留为代码隔离手段，用来避免中间态污染主工作区。
-  - `.worktrees/` 代表实现隔离，不再代表外部聊天线程隔离。
-- 显式工件同步
-  - 多 agent 不是依赖聊天历史，而是依赖显式工件同步。
-  - 最小同步集合：`contract + state + context + handoff`
+  - still used as a code-isolation mechanism to keep intermediate implementation states out of the main workspace
+  - `.worktrees/` now represents implementation isolation, not external chat-thread isolation
+- explicit artifact sync
+  - multi-agent coordination depends on explicit artifacts, not chat memory
+  - minimum sync set: `contract + state + context + handoff`
 
 ## Lease / Pause / Resume
 
-- 长时任务不应该假设单个线程会一直在线。
-- `state.lease` 负责记录：
+- Long-running tasks should not assume the same thread will stay available forever.
+- `state.lease` records:
   - `goal`
   - `status`
   - `duration_hours`
@@ -73,31 +75,34 @@
   - `resume_after`
   - `resume_checkpoint`
   - `dispatch_cursor`
-- 当宿主报告 Codex 配额命中时，当前线程只需要把 `lease.status=paused`、`pause_reason=codex_quota`、`resume_after=<next window>` 写回 state。
-- 恢复时重新进入当前线程，读取 state、重建 context、继续推进实现，不需要依赖旧聊天上下文仍然完整存在。
+- When the host reports a Codex quota hit, the current thread only needs to write back:
+  - `lease.status=paused`
+  - `pause_reason=codex_quota`
+  - `resume_after=<next window>`
+- On resume, return to the current thread, read state, rebuild context, and continue implementation without depending on old chat context still being complete.
 
 ## Scripts
 
 - `scripts/runtime-report.sh`
-  - 生成执行面能力快照。
+  - generate an execution-surface capability snapshot
 - `scripts/state-init.sh`
-  - 为任务初始化短期状态。
+  - initialize short-term task state
 - `scripts/state-read.sh`
-  - 读取状态并返回派生摘要。
+  - read state and emit a derived summary
 - `scripts/state-update.sh`
-  - 更新短期状态并记录 state event。
+  - update short-term state and append a state event
 - `scripts/context-build.sh`
-  - 组装实现前要消费的 context packet。
+  - assemble the context packet consumed before execution
 - `scripts/memory-refresh-views.sh`
-  - 刷新长期知识视图。
+  - refresh long-term knowledge views
 
-## 最小继续开发读取
+## Minimum Read Set To Continue Development
 
-如果已经知道当前 mainline task id，继续开发时最少只需要看这些：
+If you already know the current mainline task id, the minimum files to continue safely are:
 
 1. `workspace/contracts/<task_id>.md`
 2. `workspace/state/<task_id>/state.json`
 3. `workspace/handoffs/<task_id>-lead-to-<expert>.md`
-4. `workspace/handoffs/<task_id>-expert-to-lead.md`（如果已存在）
+4. `workspace/handoffs/<task_id>-expert-to-lead.md` if it already exists
 5. `docs/coordination-endpoints.md`
 6. `docs/artifact-schemas.md`
