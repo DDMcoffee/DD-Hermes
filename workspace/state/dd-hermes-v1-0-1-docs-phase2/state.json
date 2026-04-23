@@ -1,0 +1,194 @@
+{
+  "task_id": "dd-hermes-v1-0-1-docs-phase2",
+  "status": "done",
+  "mode": "closeout",
+  "current_focus": "english-first protocol docs follow-up for v1.0.1",
+  "active_expert": "lead",
+  "blocked_reason": "",
+  "owner": "lead",
+  "experts": [
+    "lead"
+  ],
+  "discussion": {
+    "policy": "single-thread-execute"
+  },
+  "verification": {
+    "planned_steps": [
+      "bash tests/smoke.sh schema"
+    ],
+    "last_pass": true,
+    "last_run_at": "2026-04-22T11:16:00-07:00",
+    "verified_steps": [
+      "bash tests/smoke.sh schema"
+    ],
+    "verified_files": [
+      "docs/coordination-endpoints.md",
+      "docs/artifact-schemas.md",
+      "workspace/contracts/dd-hermes-v1-0-1-docs-phase2.md",
+      "workspace/state/dd-hermes-v1-0-1-docs-phase2/state.json",
+      "workspace/state/dd-hermes-v1-0-1-docs-phase2/events.jsonl"
+    ]
+  },
+  "runtime": {
+    "worktree": "/Users/davidm/.codex/worktrees/dd-hermes-v1.0.1-docs",
+    "branch": "codex/dd-hermes-v1.0.1-docs"
+  },
+  "lease": {
+    "status": "idle"
+  },
+  "git": {
+    "base_ref": "0649459fb28217e3a32a223089f870e60fceea23",
+    "latest_commit": ""
+  },
+  "memory": {
+    "reads": [
+      "/Users/davidm/.codex/memories/MEMORY.md"
+    ],
+    "writes": []
+  },
+  "contract_path": "workspace/contracts/dd-hermes-v1-0-1-docs-phase2.md",
+  "handoff_paths": [],
+  "exploration_paths": [],
+  "openspec": {
+    "status": "not-applicable"
+  },
+  "team": {
+    "supervisors": [
+      "lead"
+    ],
+    "executors": [
+      "lead"
+    ],
+    "skeptics": [],
+    "scale_out_recommended": false,
+    "scale_out_triggers": [],
+    "role_integrity": {
+      "independent_skeptic": false,
+      "degraded": false,
+      "degraded_ack_by": "",
+      "degraded_ack_at": "",
+      "role_conflicts": [],
+      "role_overlap": [
+        "lead acts as planner and executor for this S1 docs slice"
+      ]
+    }
+  },
+  "updated_at": "2026-04-22T11:16:00-07:00",
+  "product": {
+    "anchor": "lead",
+    "goal": "Continue v1.0.1 with English-first deep documentation for DD Hermes protocol references.",
+    "user_value": "Public maintainers can understand endpoint and artifact contracts without depending on Chinese-only internal notes.",
+    "task_class": "T1",
+    "quality_requirement": "degraded-allowed",
+    "task_class_rationale": "Documentation-only truth-clarification slice with no runtime behavior change.",
+    "non_goals": [
+      "Do not change script behavior.",
+      "Do not upload GitHub social preview through unsupported tooling.",
+      "Do not broaden into unrelated doc cleanup."
+    ],
+    "product_acceptance": [
+      "Two remaining deep docs are English-first.",
+      "The slice leaves minimal contract and state evidence.",
+      "Schema smoke passes after the doc updates."
+    ],
+    "drift_risk": "This slice would drift if it starts redesigning the control plane instead of clarifying the current one.",
+    "goal_status": "done",
+    "goal_drift_flags": [],
+    "last_product_review_at": "2026-04-22T11:16:00-07:00"
+  },
+  "quality": {
+    "anchor": "lead",
+    "review_status": "approved",
+    "review_findings": [
+      "coordination-endpoints now describes the executable endpoint surface in English-first form without changing endpoint truth.",
+      "artifact-schemas now describes validation requirements in English-first form while preserving no-execution closeout semantics."
+    ],
+    "review_examples": [
+      "Verified that endpoint names, script paths, and required field lists remain aligned with current docs.",
+      "Verified that T0/T1 execution_closeout semantics remain documented as not-required instead of blocked."
+    ],
+    "last_review_at": "2026-04-22T11:16:00-07:00"
+  },
+  "verdicts": {
+    "updated_at": "2026-04-22T11:16:00-07:00",
+    "task_policy": {
+      "status": "ready",
+      "ready": true,
+      "reasons": [
+        "S1 docs-only slice is bounded and does not require execution-lane orchestration."
+      ],
+      "updated_at": "2026-04-22T11:16:00-07:00"
+    },
+    "product_gate": {
+      "status": "ready",
+      "ready": true,
+      "reasons": [
+        "Goal, user value, non-goals, and acceptance remain explicit for this docs continuation."
+      ],
+      "updated_at": "2026-04-22T11:16:00-07:00"
+    },
+    "quality_anchor": {
+      "status": "ready",
+      "ready": true,
+      "reasons": [
+        "Quality review was performed inline for a low-risk single-thread docs slice."
+      ],
+      "updated_at": "2026-04-22T11:16:00-07:00"
+    },
+    "quality_review": {
+      "status": "ready",
+      "ready": true,
+      "reasons": [
+        "Doc truth and no-execution semantics were rechecked during rewrite."
+      ],
+      "updated_at": "2026-04-22T11:16:00-07:00"
+    },
+    "degraded_ack": {
+      "status": "not-required",
+      "ready": true,
+      "reasons": [
+        "No degraded role path is in use for this slice."
+      ],
+      "updated_at": "2026-04-22T11:16:00-07:00"
+    },
+    "quality_seat_execution": {
+      "status": "not-required",
+      "ready": true,
+      "reasons": [
+        "No independent execution lane is required for this T1 documentation slice."
+      ],
+      "updated_at": "2026-04-22T11:16:00-07:00"
+    },
+    "quality_seat_completion": {
+      "status": "ready",
+      "ready": true,
+      "reasons": [
+        "Completion quality was reviewed before closeout."
+      ],
+      "updated_at": "2026-04-22T11:16:00-07:00"
+    },
+    "skeptic_lane": {
+      "status": "not-required",
+      "ready": true,
+      "reasons": [
+        "Independent skeptic materialization is not required for this bounded T1 slice."
+      ],
+      "updated_at": "2026-04-22T11:16:00-07:00"
+    },
+    "execution_closeout": {
+      "status": "not-required",
+      "ready": true,
+      "reasons": [
+        "No execution slice commit is required for a no-execution T1 documentation task."
+      ],
+      "updated_at": "2026-04-22T11:16:00-07:00",
+      "closeout_path": "",
+      "selected_by": "lead",
+      "candidate_count": 0,
+      "semantic_valid": true,
+      "ready_for_execution_slice_done": true,
+      "execution_commit": "",
+      "quality_review_status": "approved"
+    }
+  }
+}

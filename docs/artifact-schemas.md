@@ -1,11 +1,11 @@
 # DD Hermes Artifact Schemas (v2)
 
-本文档定义执行线程必须可校验的工件字段，不依赖口头约定。
+This document defines the task artifacts that execution lanes must produce and that DD Hermes must be able to validate without relying on verbal agreement.
 
 ## 1) Sprint Contract
 
 - Path: `workspace/contracts/<task_id>.md`
-- Frontmatter required:
+- Required frontmatter fields:
   - `task_id`
   - `owner`
   - `experts`
@@ -13,7 +13,7 @@
   - `blocked_if`
   - `memory_reads`
   - `memory_writes`
-- Frontmatter additionally required when `schema_version: 2`:
+- Additional frontmatter required when `schema_version: 2`:
   - `schema_version`
   - `product_goal`
   - `user_value`
@@ -23,14 +23,14 @@
   - `non_goals`
   - `product_acceptance`
   - `drift_risk`
-- Sections required:
+- Required sections:
   - `## Context`
   - `## Scope`
   - `## Required Fields`
   - `## Acceptance`
   - `## Verification`
   - `## Open Questions`
-- Sections additionally required when `schema_version: 2`:
+- Additional section required when `schema_version: 2`:
   - `## Product Gate`
 
 ## 2) Handoff (Lead/Expert)
@@ -38,7 +38,7 @@
 - Paths:
   - `workspace/handoffs/<task_id>-lead-to-<expert>.md`
   - `workspace/handoffs/<task_id>-<expert>-to-lead.md`
-- Frontmatter required:
+- Required frontmatter fields:
   - `from`
   - `to`
   - `scope`
@@ -46,18 +46,18 @@
   - `decisions`
   - `risks`
   - `next_checks`
-- Frontmatter additionally required when `schema_version: 2`:
+- Additional frontmatter required when `schema_version: 2`:
   - `schema_version`
   - `product_rationale`
   - `goal_drift_risk`
   - `user_visible_outcome`
-- Sections required:
+- Required sections:
   - `## Context`
   - `## Required Fields`
   - `## Acceptance`
   - `## Verification`
   - `## Open Questions`
-- Sections additionally required when `schema_version: 2`:
+- Additional section required when `schema_version: 2`:
   - `## Product Check`
 
 ## 3) Task State
@@ -84,21 +84,22 @@
   - `openspec`
   - `team`
   - `updated_at`
-- Required top-level keys when `state_version >= 2`:
+- Additional top-level keys required when `state_version >= 2`:
   - `product`
   - `quality`
   - `verdicts`
-- 说明：
-  - `check-artifact-schemas` 证明结构完整。
-  - `thread-switch-gate` / `dispatch-create` / `quality-gate` 还会继续消费 `discussion`、`lease`、`product`、`quality` 与 closeout 语义，所以“schema pass”不等于“可以进入 execution 或可以宣称完成”。
-- Required team keys:
+- Notes:
+  - `check-artifact-schemas` proves structural completeness.
+  - `thread-switch-gate`, `dispatch.create`, and `quality-gate` continue to consume `discussion`, `lease`, `product`, `quality`, and execution-closeout semantics.
+  - A schema pass does not automatically mean a task may enter execution or claim completion.
+- Required `team` keys:
   - `supervisors`
   - `executors`
   - `skeptics`
   - `scale_out_recommended`
   - `scale_out_triggers`
   - `role_integrity`
-- Required team keys when `state_version >= 2`:
+- Additional `team` keys required when `state_version >= 2`:
   - `product_anchors`
   - `quality_anchors`
   - `anchor_policy`
@@ -139,14 +140,14 @@
   - `quality_seat_completion`
   - `skeptic_lane`
   - `execution_closeout`
-- 兼容说明：
-  - 旧 state 若还没回填 `skeptic_lane`，`state-read / context-build / check-artifact-schemas` 应现场派生该 verdict，而不是把历史 archive 全部打坏。
-- Required per-verdict keys:
+- Compatibility note:
+  - If an older state has not yet been backfilled with `skeptic_lane`, `state.read`, `context.build`, and `check-artifact-schemas` should derive that verdict at runtime instead of breaking historical archives.
+- Required fields for each verdict:
   - `status`
   - `ready`
   - `reasons`
   - `updated_at`
-- `execution_closeout` additionally carries:
+- Additional fields carried by `execution_closeout`:
   - `closeout_path`
   - `selected_by`
   - `candidate_count`
@@ -154,12 +155,12 @@
   - `ready_for_execution_slice_done`
   - `execution_commit`
   - `quality_review_status`
-  - `status` 允许 `ready` / `blocked` / `not-required`
+  - `status` may be `ready`, `blocked`, or `not-required`
 
 ## 4) Execution Closeout
 
 - Path: `workspace/closeouts/<task_id>-<expert>.md`
-- Frontmatter required:
+- Required frontmatter fields:
   - `task_id`
   - `from`
   - `to`
@@ -172,28 +173,28 @@
   - `verified_files`
   - `open_risks`
   - `next_actions`
-- Frontmatter additionally required when `schema_version: 2`:
+- Additional frontmatter required when `schema_version: 2`:
   - `schema_version`
   - `quality_review_status`
   - `quality_findings_summary`
 - Semantic completion requirements for `execution slice done`:
-  - `execution_commit` 不能为空，且应与 `state.git.latest_commit` 对齐
-  - `verified_steps` 不能为空，且不能停留在模板占位值
-  - `verified_files` 不能为空，且不能停留在模板占位值
-  - `quality_review_status` 必须是 `approved` 或 `degraded-approved`
-  - `quality_findings_summary` 必须是真实复核摘要，不是占位句
-- 若 `task_class_bucket == no-execution`（`T0/T1`）：
-  - `execution_closeout.status` 应为 `not-required`
-  - `execution_closeout.ready` 应为 `true`
-  - `ready_for_execution_slice_done` 应为 `true`
-  - 即使存在 bootstrap 占位 closeout 文件，也不应继续把 archive truth 判成 blocked
-- Sections required:
+  - `execution_commit` must not be empty and should match `state.git.latest_commit`
+  - `verified_steps` must not be empty and must not remain a template placeholder
+  - `verified_files` must not be empty and must not remain a template placeholder
+  - `quality_review_status` must be `approved` or `degraded-approved`
+  - `quality_findings_summary` must contain a real review summary instead of a placeholder sentence
+- For `task_class_bucket == no-execution` (`T0` and `T1`):
+  - `execution_closeout.status` should be `not-required`
+  - `execution_closeout.ready` should be `true`
+  - `ready_for_execution_slice_done` should be `true`
+  - Even if a bootstrap placeholder closeout file exists, archive truth should not remain blocked.
+- Required sections:
   - `## Context`
   - `## Required Fields`
   - `## Completion`
   - `## Verification`
   - `## Open Questions`
-- Sections additionally required when `schema_version: 2`:
+- Additional section required when `schema_version: 2`:
   - `## Quality Review`
 
 ## 5) State Events (`events.jsonl`)
@@ -201,20 +202,26 @@
 - Path: `workspace/state/<task_id>/events.jsonl`
 - Required fields per line:
   - `event_id`
-  - `source` — `"state"` for state events, distinguishing from `memory/journal/*.jsonl`
+  - `source` - `"state"` for state events, distinguishing them from `memory/journal/*.jsonl`
   - `task_id`
-  - `op` — `state_init`, `state_refresh`, `state_update`, `context_build`
+  - `op` - `state_init`, `state_refresh`, `state_update`, or `context_build`
   - `timestamp`
   - `actor`
 
-## 6) Context Summary (in `context.json`)
+## 6) Context Summary (`context.json`)
 
 - Generated by `context-build.sh` inside `context_path`.
-- `context-build.sh` 的 stdout 只返回 `context_path / runtime_path / state_path / memory_count / handoff_count / exploration_count`。
-- 真正给执行面消费的 `context_summary` 在生成出来的 `context.json` 内部。
-- Key fields in `context_summary`:
-  - `runtime_generated_at` — ISO timestamp of when the context was built
-  - `runtime_stale_warning` — non-empty string if previous runtime snapshot was >60 min old
+- Stdout from `context-build.sh` returns only:
+  - `context_path`
+  - `runtime_path`
+  - `state_path`
+  - `memory_count`
+  - `handoff_count`
+  - `exploration_count`
+- The execution-facing `context_summary` lives inside the generated `context.json`.
+- Key fields:
+  - `runtime_generated_at` - ISO timestamp showing when the context was built
+  - `runtime_stale_warning` - non-empty string if the previous runtime snapshot was older than 60 minutes
   - `task_class`, `task_class_bucket`, `task_class_rationale`
   - `quality_requirement`, `quality_requirement_source`, `quality_requirement_ready`, `quality_requirement_reasons`
   - `task_policy_status`
@@ -247,7 +254,7 @@
   - `closeout_path`, `closeout_reasons`
   - `blocked_reason`, `required_next_step`
 - Purpose:
-  - 区分“结构完整”与“真的可以宣称 execution slice done / task done”。
+  - Distinguish “the structure is complete” from “the task may honestly claim execution slice done or task done.”
 
 ## 8) Lease Check Output
 
@@ -262,11 +269,11 @@
 - Generated by `worktree-remove.sh`.
 - Required fields:
   - `removed_worktree`, `branch`, `deleted_branch`
-  - `pre_remove_warnings` — array of pre-remove validation warnings
+  - `pre_remove_warnings` - array of pre-remove validation warnings
 
 ## Validation Entry
 
-- `scripts/check-artifact-schemas.sh --task-id <task_id>` 是字段校验入口。
-- 该入口同时返回 `semantic_valid` 与 `ready_for_execution_slice_done`，用于区分“结构完整”与“真的可以宣称 execution slice done”。
-- 对 `T0/T1` 这类 `no-execution` 任务，`execution_closeout` 应显式返回 `not-required`，而不是伪造一个 blocked closeout。
-- `scripts/test-artifact-schemas.sh` 与 `tests/smoke.sh schema` 都应覆盖该入口。
+- `scripts/check-artifact-schemas.sh --task-id <task_id>` is the field-validation entrypoint.
+- The command also returns `semantic_valid` and `ready_for_execution_slice_done`, so DD Hermes can distinguish structural completeness from actual execution completion truth.
+- For `T0` and `T1` tasks in the `no-execution` bucket, `execution_closeout` should explicitly return `not-required` instead of faking a blocked closeout.
+- `scripts/test-artifact-schemas.sh` and `tests/smoke.sh schema` should both cover this validation surface.
